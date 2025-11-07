@@ -1,0 +1,492 @@
+body {
+    margin: 0;
+}
+
+.formBox {
+    background-color: white;
+    border-radius: 10px;
+    /*box-shadow: 10px 10px 10px black;*/
+    padding: 20px;
+    padding-bottom: 10px;
+    font-size: large;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+    margin: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    max-width: calc(100% - 60px);
+    max-height: calc(100% - 60px);
+    overflow: hidden;
+}
+
+.formBoxScrollContent {
+    overflow: scroll;
+    max-width: calc(100%);
+    max-height: calc(100vh - 70px);
+    margin-bottom: 20px;
+}
+
+.formTransitionAnimations {
+    transition: all 1s;
+}
+
+.FadeInAnimation {
+    animation: fadeIn 2s forwards;
+}
+
+.FadeOutAnimation {
+    animation: fadeOut 2s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+.puslatingEffectHalf {
+    animation: pulseFadeHalf 2s infinite;
+}
+
+@keyframes pulseFadeHalf {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.75;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.puslatingEffectFull {
+    animation: pulseFadeFull 2s infinite;
+}
+
+@keyframes pulseFadeFull {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.formBackground {
+    background: linear-gradient(to bottom right, #0099ff 0%, #000066 85%);
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+}
+
+.formCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.formHeader {
+    font-weight: 700;
+    font-size: larger;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.formButton {
+    text-align: center;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    border: none;
+    transition: 0.3s;
+}
+
+.centerHorizontaly {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.formOkColor {
+    background: #05AA6C;
+}
+
+.formWarnColor {
+    background: #e6ac00;
+}
+
+.formErrorColor {
+    background: #e60000;
+}
+
+.formInfoColor {
+    background: #0099ff
+}
+
+.formBlackColor {
+    background: black;
+    color: white;
+}
+
+.formButton:hover {
+    background-color: gray;
+}
+
+.formButton:disabled {
+    background-color: gray;
+}
+
+.inputFullScale {
+    width: 100%;
+}
+
+.imageAsText {
+    width: auto;
+    height: 1.5rem;
+    vertical-align: text-top;
+    margin-right: 0.25rem;
+}
+
+.formButtonBoxHolder {
+    display: flex;
+}
+
+.formButtonBox {
+    justify-content: right;
+    display: flex;
+    gap: 16px;
+    width: max-content;
+    display: inline;
+}
+
+.formJustifyRight {
+    justify-content: right;
+    margin-left: auto;
+}
+
+.formJustifyLeft {
+    justify-content: left;
+    margin-right: auto;
+}
+
+.formButtonBox:last-of-type {
+    display: block;
+}
+
+input[type="text"],
+input[type="url"] {
+    margin-bottom: 10px;
+}
+
+.formSwitch .labelBefore {
+    display: inline;
+    position: relative;
+    margin-right: 4px;
+}
+
+.formSwitch {
+    margin: 4px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.formSwitch .toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.formSwitch .toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.formSwitch .toggle .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.formSwitch .toggle .slider:before {
+    position: absolute;
+    content: "";
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    left: 4px;
+    bottom: 4.5px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.formSwitchChecked .slider:before {
+    transform: translateX(27px);
+}
+
+.formSwitch .labelAfter {
+    margin-left: 4px
+}
+
+/*.formSwitch {
+    position: relative;
+    display: inline;
+    width: 60px;
+    height: 34px;
+    margin: 4px;
+    margin-top: 5px;
+}
+
+.formSwitch input {
+    opacity: 0;
+    width: 0px;
+    height: 0px;
+}
+
+.formSwitch span {
+    position: absolute;
+    cursor: pointer;
+    width: 60px;
+    height: 34px;
+    display:inline-block;
+    top: -14px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.formSwitch span::before {
+    position: absolute;
+    content: "";
+    width: 26px;
+    height: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.formSwitchChecked input:checked,
+.formSwitchChecked span:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+.formSwitch span {
+    border-radius: 34px;
+}
+
+.formSwitch span:before {
+    border-radius: 50%;
+}*/
+
+.formSwitchOff {
+    background-color: #ccc;
+}
+
+.formTextInput {
+    border-radius: 4px;
+    border: 1px solid black;
+    /*transition: all 1s;*/
+    height: 34px;
+    margin: 4px;
+    /*display: inline-block;*/
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+/*.formTextInput holder {
+    display: flex;
+    flex-flow: row nowrap;
+}*/
+
+.formTextInput img {
+    height: 32px;
+    margin: 1px 0.5rem;
+    display: inline;
+}
+
+.formTextInput input {
+    border: none;
+    margin: 4px;
+    display: inline-block;
+    position: relative;
+    margin-left: 0px;
+    vertical-align: top;
+    width: 100%;
+}
+
+inputfield p {
+    margin-top: 8px;
+    margin-left: 4px;
+}
+
+inputfield {
+    display: inline-block;
+}
+
+.formTextInput input[type="color"] {
+    margin-bottom: 8px;
+    height: 26px
+}
+
+.formTextInput input:focus {
+    outline: none;
+}
+
+.formToastHolder {
+    gap: 4px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    flex-direction: column;
+    float: right;
+    display: flex;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.formToast {
+    margin-left: auto;
+    background-color: white;
+    border-radius: 4px;
+    padding: 4px;
+    cursor: pointer;
+    width: max-content;
+    pointer-events: all
+}
+
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(0px);
+    }
+}
+
+@keyframes slideOutToRight {
+    0% {
+        transform: translateX(0px);
+    }
+
+    100% {
+        transform: translateX(200%);
+    }
+}
+
+.formToast img {
+    height: 32px;
+    max-height: 32px;
+}
+
+.formToast .timeout {
+    width: 100%;
+    height: 4px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    animation: timeoutToast 10s 0.5s forwards;
+}
+
+@keyframes timeoutToast {
+    0% {
+        width: 100%;
+    }
+
+    100% {
+        width: 0%;
+    }
+}
+
+.formToast .content {
+    display: flex;
+    flex-direction: row;
+}
+
+.formToast .contentText {
+    margin-left: 10px;
+    padding-top: 0.25rem;
+}
+
+.formToast .formHeader {
+    margin-top: -16px;
+    margin-bottom: 0px;
+}
+
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0px);
+    }
+}
+
+@keyframes slideOutToLeft {
+    0% {
+        transform: translateX(0px);
+    }
+
+    100% {
+        transform: translateX(-200%);
+    }
+}
+
+p {
+    margin-top: 4px;
+    margin-left: 4px;
+    margin-bottom: 0px;
+    margin-right: 4px;
+}
+
+.formFlexRow {
+    /*Places items next to each other*/
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.formFlexColumn {
+    /*Places items under each other*/
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+formrow {
+    margin: 4px;
+}
+
+formrow p:first-child {
+    margin-top: 0px;
+}

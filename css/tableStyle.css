@@ -1,0 +1,38 @@
+td, th, table {
+    /*Join table borders*/
+    border-collapse: collapse;
+  }
+.styledTable {
+    border: solid black 3px;
+    white-space-collapse: preserve-spaces;
+  }
+.styledTableNoWrap td,th,table {
+  text-wrap-mode: nowrap;
+  white-space: nowrap;
+}
+.styledTable tr:first-child {
+    border-bottom: solid black 3px;
+  }
+.styledTable tr:hover {
+    background-color:lightgray;
+  }
+.styledTable .trHighlight {
+    background-color: rgb(255, 180, 0);
+  }
+.styledTable th {
+    background-color: rgb(0, 200, 0);
+    border-top: solid black 2px;
+    border-left: solid black 2px;
+    text-align: center;
+  }
+.styledTable th:last-child {
+    border-right: solid black 2px;
+    border-left: solid black 2px
+  }
+.styledTable td {
+    border: solid black 2px;
+  }
+
+.tableScrollHolder {
+  overflow: scroll; 
+}
