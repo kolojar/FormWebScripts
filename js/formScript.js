@@ -1,3 +1,4 @@
+//Do not forget to add formStyle.css and tableStyle.css
 /*
 Disables form and addes propried styles and animations
 */
@@ -19,17 +20,6 @@ function recursiveDisabler(object, disabled) {
         }
     }
 }
-/*
-Uses checkbox as disabler
-*/
-//export function DisableOnCheckbox(checkBox: HTMLInputElement, target: HTMLInputElement) {
-//    checkBox.addEventListener("change", function () {
-//        console.log("Change");
-//        
-//        target.disabled = !checkBox.checked
-//    })
-//    target.disabled = !checkBox.checked
-//}
 /*
 Sets wait status and message
 */
@@ -185,7 +175,7 @@ export function SetupTextInputs() {
         //Color random button
         if (element.getAttribute("inputType") == "color") {
             const randomImg = document.createElement("img");
-            randomImg.src = "/images/casino32.svg";
+            randomImg.src = "../images/casino32.svg";
             randomImg.style.cursor = "pointer";
             randomImg.onclick = function () {
                 input.value = GenerateRandomColor();
@@ -200,11 +190,11 @@ export function SetupTextInputs() {
 }
 function updatePasswordEye(passimg, element, passwordField) {
     if (element.getAttribute("showPass") == "true") {
-        passimg.src = "/images/visibility32.svg";
+        passimg.src = "/formWebScripts/images/visibility32.svg";
         passwordField.type = "text";
     }
     else {
-        passimg.src = "/images/visibilityoff32.svg";
+        passimg.src = "/formWebScripts/images/visibilityoff32.svg";
         passwordField.type = "password";
     }
 }
@@ -231,16 +221,16 @@ function SetupToasts() {
     document.getElementsByTagName("body")[0].appendChild(holder);
     //Preload images
     const imgOk = new Image();
-    imgOk.src = "/images/checkCircle32.svg";
+    imgOk.src = "/formWebScripts/images/checkCircle32.svg";
     toastImages.set("ok", imgOk);
     const imgInfo = new Image();
-    imgInfo.src = "/images/info32.svg";
+    imgInfo.src = "/formWebScripts/images/info32.svg";
     toastImages.set("info", imgInfo);
     const imgWarn = new Image();
-    imgWarn.src = "/images/warning32.svg";
+    imgWarn.src = "/formWebScripts/images/warning32.svg";
     toastImages.set("warn", imgWarn);
     const imgError = new Image();
-    imgError.src = "/images/report32.svg";
+    imgError.src = "/formWebScripts/images/report32.svg";
     toastImages.set("error", imgError);
     //const head = document.getElementsByTagName("head")[0] as HTMLHeadElement
     //head.appendChild(createPreloadLink("/images/info32.svg"))

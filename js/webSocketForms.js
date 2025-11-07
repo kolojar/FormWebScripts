@@ -1,5 +1,6 @@
 import { SendToast, SetWaitStatusForm } from "./formScript.js";
 import { WebSocketConnection, WebSocketConnectionMessageType } from "./serverComunication.js";
+//Do not forget to add formStyle.css and tableStyle.css
 /*
 Automatically connects to websocket and configures it with toasts and autoconnect
 */
