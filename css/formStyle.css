@@ -339,6 +339,13 @@ input[type="url"] {
     flex-flow: row nowrap;
 }
 
+@media (prefers-color-scheme: dark) {
+    .formTextInput {
+         border: 1px solid white;
+    }
+}
+
+
 /*.formTextInput holder {
     display: flex;
     flex-flow: row nowrap;
@@ -350,6 +357,12 @@ input[type="url"] {
     display: inline;
 }
 
+@media (prefers-color-scheme: dark) {
+    .formTextInput img {
+         filter: invert(1)
+    }
+}
+
 .formTextInput input {
     border: none;
     margin: 4px;
@@ -358,6 +371,12 @@ input[type="url"] {
     margin-left: 0px;
     vertical-align: top;
     width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+    .formTextInput input {
+         background-color: black;
+    }
 }
 
 inputfield p {
