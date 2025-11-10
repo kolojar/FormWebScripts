@@ -125,9 +125,9 @@ export class WebSocketConnection {
     }
 }
 /*
-Sends POST request to server with standart packing
+Sends POST request to server
 */
-export function SendPOSTToServer(url, command, params, responceFunc = null) {
+export function SendPOSTToServer(url, message, responceFunc = null) {
     console.log("Sending request...");
     //Create request
     const xhr = new XMLHttpRequest();
@@ -145,10 +145,13 @@ export function SendPOSTToServer(url, command, params, responceFunc = null) {
         }
         else {
             console.log(`Error: ${xhr.status}`);
+            if (responceFunc != null) {
+                responceFunc(null);
+            }
         }
     });
     //Send data
-    xhr.send(PackStandard(command, params));
+    xhr.send(message);
 }
 export function UnpackStandard(message) {
     const split = message.split("|");

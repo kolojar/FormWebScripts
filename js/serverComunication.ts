@@ -144,9 +144,9 @@ export class WebSocketConnection {
 export type XHRServerResponceFunc = (message: string) => void
 
 /*
-Sends POST request to server with standart packing
+Sends POST request to server
 */
-export function SendPOSTToServer(url: string, command: string, params: any, responceFunc: XHRServerResponceFunc = null) {
+export function SendPOSTToServer(url: string,message: string, responceFunc: XHRServerResponceFunc = null) {
     console.log("Sending request...");
 
     //Create request
@@ -165,11 +165,14 @@ export function SendPOSTToServer(url: string, command: string, params: any, resp
             }
         } else {
             console.log(`Error: ${xhr.status}`);
+             if (responceFunc != null) {
+                responceFunc(null)
+            }
         }
     });
     
     //Send data
-    xhr.send(PackStandard(command, params));
+    xhr.send(message);
 }
 
 export function UnpackStandard(message: string): [string, any] {
