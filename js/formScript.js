@@ -150,8 +150,14 @@ export function SetupTextInputs() {
         img.classList.add("formTooltipIcon");
         inputHolder.appendChild(img);
         //Input element
-        const input = document.createElement("input");
-        input.type = element.getAttribute("inputType");
+        let input = null;
+        if (element.getAttribute("inputType") == "textarea") {
+            input = document.createElement("textarea");
+        }
+        else {
+            input = document.createElement("input");
+            input.type = element.getAttribute("inputType");
+        }
         input.id = element.getAttribute("valueId");
         input.setAttribute("disableRecursiveDisable", "true");
         input.placeholder = element.getAttribute("placeholder");

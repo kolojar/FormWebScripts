@@ -163,8 +163,13 @@ export function SetupTextInputs() {
         inputHolder.appendChild(img)
 
         //Input element
-        const input = document.createElement("input") as HTMLInputElement
-        input.type = element.getAttribute("inputType")
+        let input = null
+        if ( element.getAttribute("inputType") == "textarea") {
+            input =  document.createElement("textarea") as HTMLTextAreaElement
+        } else {
+            input = document.createElement("input") as HTMLInputElement
+            input.type = element.getAttribute("inputType")
+        }
         input.id = element.getAttribute("valueId")
         input.setAttribute("disableRecursiveDisable", "true")
         input.placeholder = element.getAttribute("placeholder")

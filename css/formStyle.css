@@ -333,7 +333,7 @@ input[type="url"] {
     border-radius: 4px;
     border: 1px solid black;
     /*transition: all 1s;*/
-    height: 34px;
+    min-height: 34px;
     margin: 4px;
     /*display: inline-block;*/
     display: flex;
@@ -374,8 +374,28 @@ input[type="url"] {
     width: 100%;
 }
 
+
 @media (prefers-color-scheme: dark) {
     .formTextInput input {
+         background-color: black;
+          color: white;
+    }
+}
+
+
+.formTextInput textarea {
+    border: none;
+    margin: 4px;
+    display: inline-block;
+    margin-left: 0px;
+    vertical-align: top;
+    position: relative;
+    width: 100%;
+}
+
+
+@media (prefers-color-scheme: dark) {
+    .formTextInput textarea {
          background-color: black;
           color: white;
     }
