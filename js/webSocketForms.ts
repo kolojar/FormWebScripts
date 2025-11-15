@@ -4,15 +4,15 @@ import { ConnectToWebSocket, UnpackStandard, WebSocketConnection, WebSocketConne
 //Do not forget to add formStyle.css and tableStyle.css
 
 /*
-Automatically connects to websocket and configures it with toasts and autoconnect
+Automatically connects to websocket and configures it with toasts and autoconnect, type is URL parameter
 */
-export function SetupWebsocketWithToasts(type: string, newUrl = "/"): WebSocketConnection {
+export function SetupWebsocketWithToasts(type: string, newUrl = "/websocket"): WebSocketConnection {
     const ws = new WebSocketConnection(type, newUrl)
     ws.AddListener(listenerToWs)
     return ws
 }
 
-function listenerToWs(type: WebSocketConnectionMessageType, command: string, params: any) {
+function listenerToWs(type: WebSocketConnectionMessageType, data: string) {
     switch (type) {
         case WebSocketConnectionMessageType.Connecting: {
             SetWaitStatusForm(true, "Connecting to Web Socket...")
@@ -21,13 +21,13 @@ function listenerToWs(type: WebSocketConnectionMessageType, command: string, par
         case WebSocketConnectionMessageType.Open:
             //WebSocket opened
             SetWaitStatusForm(false, "")
-            if (Number(command) > 0) {
+            if (Number(data) > 0) {
                 SendToast("Web Socket", "Connection to client application established!", "ok")
             }
             break
         case WebSocketConnectionMessageType.Close:
             //WebSocket closed, reconnecting
-            if (command == "false") {
+            if (data == "false") {
                 SetWaitStatusForm(true, "Connection lost, reconnecting...")
                 SendToast("Web Socket", "Connection to client application closed!", "error")
             }

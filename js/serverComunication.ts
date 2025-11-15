@@ -6,23 +6,23 @@ export enum WebSocketConnectionMessageType {
     TotalClose,
     Connecting
 }
-export type WebSocketConnectionMessageFunc = (type: WebSocketConnectionMessageType, command: string, params: any) => void;
+export type WebSocketConnectionMessageFunc = (type: WebSocketConnectionMessageType, data: string) => void;
 
 /*
 Web Socket connection
 */
 export class WebSocketConnection {
     private type: string
-    private newUrl: string
+    private url: string
     ws: WebSocket
     messageFuncs: WebSocketConnectionMessageFunc[]
     private closing: boolean = false
     private connectionCouter = -1
     private isReconnecting: boolean =false
 
-    constructor(type: string, newUrl = "/") {
+    constructor(type: string, url = "/") {
         this.type = type
-        this.newUrl = newUrl
+        this.url = url
         this.messageFuncs = []
     }
 
@@ -51,28 +51,36 @@ export class WebSocketConnection {
         if (wsc.connectionCouter > 10) {
             //Could not connect to WebSocket
             this.messageFuncs.forEach(element => {
-                element(WebSocketConnectionMessageType.TotalClose, null, null)
+                element(WebSocketConnectionMessageType.TotalClose, null)
             });
             return
         }
 
         //Send message about connecting
         this.messageFuncs.forEach(element => {
-                element(WebSocketConnectionMessageType.Connecting, null, null)
+                element(WebSocketConnectionMessageType.Connecting, null)
             });
 
         //Try to connect
         try {
-            const webSocket = new WebSocket(this.newUrl + "websocket?" + encodeURIComponent("type") + "=" + encodeURIComponent(this.type))
+            const webSocket = new WebSocket(this.url + "?" + encodeURIComponent("type") + "=" + encodeURIComponent(this.type))
             this.isReconnecting = false
             
             //Add event on message (data)
             webSocket.addEventListener("message", function (event) {
-                const [command, params] = UnpackStandard(event.data)
-                console.log(command);
-                console.log(params);
+                //const [command, params] = UnpackStandard(event.data)
+                //console.log(command);
+                //console.log(params);
+                //wsc.messageFuncs.forEach(element => {
+                //    element(WebSocketConnectionMessageType.Message, command, params)
+                //});
+                console.log(event.data);
+                if (event.data == "INVALID_WEB_SOCKET_INSTANCE") {
+                    webSocket.onerror(new Event("invalid cookies"))
+                    return
+                }
                 wsc.messageFuncs.forEach(element => {
-                    element(WebSocketConnectionMessageType.Message, command, params)
+                    element(WebSocketConnectionMessageType.Message, event.data)
                 });
             });
            
@@ -80,7 +88,7 @@ export class WebSocketConnection {
             webSocket.onopen = function () {
                 console.log("Connected to WebSocket server");
                 wsc.messageFuncs.forEach(element => {
-                    element(WebSocketConnectionMessageType.Open, String(wsc.connectionCouter), null)
+                    element(WebSocketConnectionMessageType.Open, String(wsc.connectionCouter))
                 });
                 wsc.connectionCouter = 0
             };
@@ -90,7 +98,7 @@ export class WebSocketConnection {
                 console.error("WebSocket error: ", error);
                 if (!wsc.closing) {
                     wsc.messageFuncs.forEach(element => {
-                        element(WebSocketConnectionMessageType.Error, null, null)
+                        element(WebSocketConnectionMessageType.Error, null)
                     });
                 }
                 wsc.ws.close()
@@ -100,7 +108,7 @@ export class WebSocketConnection {
             webSocket.onclose = function () {
                 console.log("WebSocket connection closed");
                 wsc.messageFuncs.forEach(element => {
-                    element(WebSocketConnectionMessageType.Close, String(wsc.closing), null)
+                    element(WebSocketConnectionMessageType.Close, String(wsc.closing))
                 });
                 if (!wsc.closing && !wsc.isReconnecting) {
                     //Reconnect
@@ -176,7 +184,7 @@ export function SendPOSTToServer(url: string,message: string, responceFunc: XHRS
 }
 
 export function UnpackStandard(message: string): [string, any] {
-    const split = message.split("|")
+    const split = message.split("?")
     const command = split[0]
     const paramsUrl = new URLSearchParams(split[1])
     let paramsResult = {}
@@ -187,7 +195,7 @@ export function UnpackStandard(message: string): [string, any] {
 }
 
 export function PackStandard(command: string, params: any) {
-    return command + "|" + new URLSearchParams(params).toString()
+    return command + "?" + new URLSearchParams(params).toString()
 }
 
 export function ConnectToWebSocket(type: string, newUrl = "/"): WebSocket {

@@ -11,12 +11,12 @@ export var WebSocketConnectionMessageType;
 Web Socket connection
 */
 export class WebSocketConnection {
-    constructor(type, newUrl = "/") {
+    constructor(type, url = "/") {
         this.closing = false;
         this.connectionCouter = -1;
         this.isReconnecting = false;
         this.type = type;
-        this.newUrl = newUrl;
+        this.url = url;
         this.messageFuncs = [];
     }
     /*
@@ -42,32 +42,40 @@ export class WebSocketConnection {
         if (wsc.connectionCouter > 10) {
             //Could not connect to WebSocket
             this.messageFuncs.forEach(element => {
-                element(WebSocketConnectionMessageType.TotalClose, null, null);
+                element(WebSocketConnectionMessageType.TotalClose, null);
             });
             return;
         }
         //Send message about connecting
         this.messageFuncs.forEach(element => {
-            element(WebSocketConnectionMessageType.Connecting, null, null);
+            element(WebSocketConnectionMessageType.Connecting, null);
         });
         //Try to connect
         try {
-            const webSocket = new WebSocket(this.newUrl + "websocket?" + encodeURIComponent("type") + "=" + encodeURIComponent(this.type));
+            const webSocket = new WebSocket(this.url + "?" + encodeURIComponent("type") + "=" + encodeURIComponent(this.type));
             this.isReconnecting = false;
             //Add event on message (data)
             webSocket.addEventListener("message", function (event) {
-                const [command, params] = UnpackStandard(event.data);
-                console.log(command);
-                console.log(params);
+                //const [command, params] = UnpackStandard(event.data)
+                //console.log(command);
+                //console.log(params);
+                //wsc.messageFuncs.forEach(element => {
+                //    element(WebSocketConnectionMessageType.Message, command, params)
+                //});
+                console.log(event.data);
+                if (event.data == "INVALID_WEB_SOCKET_INSTANCE") {
+                    webSocket.onerror(new Event("invalid cookies"));
+                    return;
+                }
                 wsc.messageFuncs.forEach(element => {
-                    element(WebSocketConnectionMessageType.Message, command, params);
+                    element(WebSocketConnectionMessageType.Message, event.data);
                 });
             });
             //Add event on open
             webSocket.onopen = function () {
                 console.log("Connected to WebSocket server");
                 wsc.messageFuncs.forEach(element => {
-                    element(WebSocketConnectionMessageType.Open, String(wsc.connectionCouter), null);
+                    element(WebSocketConnectionMessageType.Open, String(wsc.connectionCouter));
                 });
                 wsc.connectionCouter = 0;
             };
@@ -76,7 +84,7 @@ export class WebSocketConnection {
                 console.error("WebSocket error: ", error);
                 if (!wsc.closing) {
                     wsc.messageFuncs.forEach(element => {
-                        element(WebSocketConnectionMessageType.Error, null, null);
+                        element(WebSocketConnectionMessageType.Error, null);
                     });
                 }
                 wsc.ws.close();
@@ -85,7 +93,7 @@ export class WebSocketConnection {
             webSocket.onclose = function () {
                 console.log("WebSocket connection closed");
                 wsc.messageFuncs.forEach(element => {
-                    element(WebSocketConnectionMessageType.Close, String(wsc.closing), null);
+                    element(WebSocketConnectionMessageType.Close, String(wsc.closing));
                 });
                 if (!wsc.closing && !wsc.isReconnecting) {
                     //Reconnect
@@ -154,7 +162,7 @@ export function SendPOSTToServer(url, message, responceFunc = null) {
     xhr.send(message);
 }
 export function UnpackStandard(message) {
-    const split = message.split("|");
+    const split = message.split("?");
     const command = split[0];
     const paramsUrl = new URLSearchParams(split[1]);
     let paramsResult = {};
@@ -164,7 +172,7 @@ export function UnpackStandard(message) {
     return [command, paramsResult];
 }
 export function PackStandard(command, params) {
-    return command + "|" + new URLSearchParams(params).toString();
+    return command + "?" + new URLSearchParams(params).toString();
 }
 export function ConnectToWebSocket(type, newUrl = "/") {
     try {

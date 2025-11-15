@@ -442,6 +442,13 @@ inputfield {
     pointer-events: all
 }
 
+
+@media (prefers-color-scheme: dark) {
+    .formToast {
+         color: black;
+    }
+}
+
 @keyframes slideInFromRight {
     0% {
         transform: translateX(100%);

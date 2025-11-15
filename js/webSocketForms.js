@@ -2,14 +2,14 @@ import { SendToast, SetWaitStatusForm } from "./formScript.js";
 import { WebSocketConnection, WebSocketConnectionMessageType } from "./serverComunication.js";
 //Do not forget to add formStyle.css and tableStyle.css
 /*
-Automatically connects to websocket and configures it with toasts and autoconnect
+Automatically connects to websocket and configures it with toasts and autoconnect, type is URL parameter
 */
-export function SetupWebsocketWithToasts(type, newUrl = "/") {
+export function SetupWebsocketWithToasts(type, newUrl = "/websocket") {
     const ws = new WebSocketConnection(type, newUrl);
     ws.AddListener(listenerToWs);
     return ws;
 }
-function listenerToWs(type, command, params) {
+function listenerToWs(type, data) {
     switch (type) {
         case WebSocketConnectionMessageType.Connecting: {
             SetWaitStatusForm(true, "Connecting to Web Socket...");
@@ -18,13 +18,13 @@ function listenerToWs(type, command, params) {
         case WebSocketConnectionMessageType.Open:
             //WebSocket opened
             SetWaitStatusForm(false, "");
-            if (Number(command) > 0) {
+            if (Number(data) > 0) {
                 SendToast("Web Socket", "Connection to client application established!", "ok");
             }
             break;
         case WebSocketConnectionMessageType.Close:
             //WebSocket closed, reconnecting
-            if (command == "false") {
+            if (data == "false") {
                 SetWaitStatusForm(true, "Connection lost, reconnecting...");
                 SendToast("Web Socket", "Connection to client application closed!", "error");
             }
