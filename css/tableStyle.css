@@ -6,6 +6,11 @@ td, th, table {
     border: solid black 3px;
     white-space-collapse: preserve-spaces;
   }
+  @media (prefers-color-scheme: dark) {
+    .styledTable {
+    border: solid white 3px;
+  }
+  }
 .styledTableNoWrap td,th,table {
   text-wrap-mode: nowrap;
   white-space: nowrap;
@@ -13,9 +18,17 @@ td, th, table {
 .styledTable tr:first-child {
     border-bottom: solid black 3px;
   }
-.styledTable tr:hover {
-    background-color:lightgray;
+  .styledTable tr:hover {
+      background-color:lightgray;
+    }
+@media (prefers-color-scheme: dark) {
+  .styledTable tr:first-child {
+    border-bottom: solid white 3px;
   }
+  .styledTable tr:hover {
+   color:black;
+  }
+}
 .styledTable .trHighlight {
     background-color: rgb(255, 180, 0);
   }
@@ -24,6 +37,7 @@ td, th, table {
     border-top: solid black 2px;
     border-left: solid black 2px;
     text-align: center;
+    font-weight: bold;
   }
 .styledTable th:last-child {
     border-right: solid black 2px;
@@ -32,6 +46,22 @@ td, th, table {
 .styledTable td {
     border: solid black 2px;
   }
+
+@media (prefers-color-scheme: dark) {
+  .styledTable th {
+    border-top: solid white 2px;
+    border-left: solid white 2px;
+    text-align: center;
+    color: black;
+  }
+.styledTable th:last-child {
+    border-right: solid white 2px;
+    border-left: solid white 2px
+  }
+.styledTable td {
+    border: solid white 2px;
+  }
+}
 
 .tableScrollHolder {
   overflow: scroll; 
