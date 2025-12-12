@@ -111,12 +111,18 @@ export class WebSocketConnection {
         }
     }
     /*
-    Sends data with standart do WebSocket
-    */
+       Sends data with standard to WebSocket
+       */
     SendData(command, params) {
+        this.Send(PackStandard(command, params));
+    }
+    /*
+    Sends data to WebSocket
+    */
+    Send(data) {
         if (this.ws != null && this.ws.readyState === 1) {
             //WebSocket OK -> Sending
-            this.ws.send(PackStandard(command, params));
+            this.ws.send(data);
         }
         else {
             //WebSocket not ready
@@ -127,7 +133,7 @@ export class WebSocketConnection {
             const wsc = this;
             //Wait for ready
             setTimeout(function () {
-                wsc.SendData(command, params);
+                wsc.Send(data);
             }, 500);
         }
     }
@@ -162,6 +168,9 @@ export function SendPOSTToServer(url, message, responceFunc = null) {
     xhr.send(message);
 }
 export function UnpackStandard(message) {
+    if (message == null) {
+        return [null, null];
+    }
     const split = message.split("?");
     const command = split[0];
     const paramsUrl = new URLSearchParams(split[1]);

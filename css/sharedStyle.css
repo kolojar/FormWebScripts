@@ -71,3 +71,7 @@ main {
   flex-direction: column;
   flex-wrap: nowrap;
 }
+
+.flexContainerRow{
+  flex-direction: row;
+}
