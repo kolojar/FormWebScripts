@@ -28,15 +28,16 @@ export function SetWaitStatusForm(wait, message) {
     for (let index = 0; index < forms.length; index++) {
         let form = forms[index];
         form.style.cursor = wait ? "wait" : "";
-        let status = document.getElementById("statusMessage");
-        status.innerHTML = wait ? message : "";
-        if (wait) {
-            status.classList.add("puslatingEffectFull");
-        }
-        else {
-            status.classList.remove("puslatingEffectFull");
-        }
         DisableForm(wait);
+    }
+    //Set status
+    let status = document.getElementById("statusMessage");
+    status.innerHTML = wait ? message : "";
+    if (wait) {
+        status.classList.add("puslatingEffectFull");
+    }
+    else {
+        status.classList.remove("puslatingEffectFull");
     }
 }
 /*

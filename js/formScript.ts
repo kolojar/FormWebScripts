@@ -31,14 +31,16 @@ export function SetWaitStatusForm(wait: boolean, message: string) {
     for (let index = 0; index < forms.length; index++) {
         let form = forms[index] as HTMLElement;
         form.style.cursor = wait ? "wait" : "";
-        let status = (document.getElementById("statusMessage") as HTMLElement);
-        status.innerHTML = wait ? message : "";
-        if (wait) {
-            status.classList.add("puslatingEffectFull")
-        } else {
-            status.classList.remove("puslatingEffectFull")
-        }
         DisableForm(wait)
+    }
+
+    //Set status
+    let status = (document.getElementById("statusMessage") as HTMLElement);
+    status.innerHTML = wait ? message : "";
+    if (wait) {
+        status.classList.add("puslatingEffectFull")
+    } else {
+        status.classList.remove("puslatingEffectFull")
     }
 }
 
@@ -164,8 +166,8 @@ export function SetupTextInputs() {
 
         //Input element
         let input = null
-        if ( element.getAttribute("inputType") == "textarea") {
-            input =  document.createElement("textarea") as HTMLTextAreaElement
+        if (element.getAttribute("inputType") == "textarea") {
+            input = document.createElement("textarea") as HTMLTextAreaElement
         } else {
             input = document.createElement("input") as HTMLInputElement
             input.type = element.getAttribute("inputType")
@@ -238,7 +240,7 @@ export function GenerateRandomColor(): string {
 //    return link
 //}
 
-const toastImages = new Map<string,HTMLImageElement>()
+const toastImages = new Map<string, HTMLImageElement>()
 function SetupToasts() {
     const holder = document.createElement("div")
     holder.classList.add("formToastHolder")
