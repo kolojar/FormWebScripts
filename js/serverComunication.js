@@ -6,18 +6,21 @@ export var WebSocketConnectionMessageType;
     WebSocketConnectionMessageType[WebSocketConnectionMessageType["Error"] = 3] = "Error";
     WebSocketConnectionMessageType[WebSocketConnectionMessageType["TotalClose"] = 4] = "TotalClose";
     WebSocketConnectionMessageType[WebSocketConnectionMessageType["Connecting"] = 5] = "Connecting";
+    WebSocketConnectionMessageType[WebSocketConnectionMessageType["InvalidWebSocketInstance"] = 6] = "InvalidWebSocketInstance";
 })(WebSocketConnectionMessageType || (WebSocketConnectionMessageType = {}));
 /*
 Web Socket connection
 */
 export class WebSocketConnection {
-    constructor(type, url = "/") {
+    constructor(type, url = "/", autorefreshOnInvalidInstance = true) {
         this.closing = false;
         this.connectionCouter = -1;
         this.isReconnecting = false;
+        this.autorefreshOnInvalidInstance = false;
         this.type = type;
         this.url = url;
         this.messageFuncs = [];
+        this.autorefreshOnInvalidInstance = autorefreshOnInvalidInstance;
     }
     /*
     Adds listener to this WebSocket
@@ -64,7 +67,15 @@ export class WebSocketConnection {
                 //});
                 console.log(event.data);
                 if (event.data == "INVALID_WEB_SOCKET_INSTANCE") {
+                    wsc.messageFuncs.forEach(element => {
+                        element(WebSocketConnectionMessageType.InvalidWebSocketInstance, event.data);
+                    });
+                    //From Webtools package
                     webSocket.onerror(new Event("invalid cookies"));
+                    if (wsc.autorefreshOnInvalidInstance) {
+                        alert("Instance expired. Site will refresh, all unsaved work will be lost.");
+                        window.location.reload();
+                    }
                     return;
                 }
                 wsc.messageFuncs.forEach(element => {

@@ -4,7 +4,8 @@ export enum WebSocketConnectionMessageType {
     Close,
     Error,
     TotalClose,
-    Connecting
+    Connecting,
+    InvalidWebSocketInstance
 }
 export type WebSocketConnectionMessageFunc = (type: WebSocketConnectionMessageType, data: string) => void;
 
@@ -18,12 +19,14 @@ export class WebSocketConnection {
     messageFuncs: WebSocketConnectionMessageFunc[]
     private closing: boolean = false
     private connectionCouter = -1
-    private isReconnecting: boolean =false
+    private isReconnecting: boolean = false
+    private autorefreshOnInvalidInstance: boolean = false
 
-    constructor(type: string, url = "/") {
+    constructor(type: string, url = "/",autorefreshOnInvalidInstance: boolean = true) {
         this.type = type
         this.url = url
         this.messageFuncs = []
+        this.autorefreshOnInvalidInstance = autorefreshOnInvalidInstance
     }
 
     /*
@@ -58,14 +61,14 @@ export class WebSocketConnection {
 
         //Send message about connecting
         this.messageFuncs.forEach(element => {
-                element(WebSocketConnectionMessageType.Connecting, null)
-            });
+            element(WebSocketConnectionMessageType.Connecting, null)
+        });
 
         //Try to connect
         try {
             const webSocket = new WebSocket(this.url + "?" + encodeURIComponent("type") + "=" + encodeURIComponent(this.type))
             this.isReconnecting = false
-            
+
             //Add event on message (data)
             webSocket.addEventListener("message", function (event) {
                 //const [command, params] = UnpackStandard(event.data)
@@ -76,14 +79,22 @@ export class WebSocketConnection {
                 //});
                 console.log(event.data);
                 if (event.data == "INVALID_WEB_SOCKET_INSTANCE") {
+                    wsc.messageFuncs.forEach(element => {
+                        element(WebSocketConnectionMessageType.InvalidWebSocketInstance, event.data)
+                    });
+                    //From Webtools package
                     webSocket.onerror(new Event("invalid cookies"))
+                    if (wsc.autorefreshOnInvalidInstance) {
+                        alert("Instance expired. Site will refresh, all unsaved work will be lost.")
+                        window.location.reload()
+                    }
                     return
                 }
                 wsc.messageFuncs.forEach(element => {
                     element(WebSocketConnectionMessageType.Message, event.data)
                 });
             });
-           
+
             //Add event on open
             webSocket.onopen = function () {
                 console.log("Connected to WebSocket server");
@@ -92,7 +103,7 @@ export class WebSocketConnection {
                 });
                 wsc.connectionCouter = 0
             };
-            
+
             //Add event on close
             webSocket.onerror = function (error) {
                 console.error("WebSocket error: ", error);
@@ -103,7 +114,7 @@ export class WebSocketConnection {
                 }
                 wsc.ws.close()
             };
-           
+
             //Add event on close
             webSocket.onclose = function () {
                 console.log("WebSocket connection closed");
@@ -118,7 +129,7 @@ export class WebSocketConnection {
                     }, 1000)
                 }
             };
-            
+
             //Set WebSocket
             this.ws = webSocket
         } catch {
@@ -126,9 +137,9 @@ export class WebSocketConnection {
         }
     }
 
- /*
-    Sends data with standard to WebSocket
-    */
+    /*
+       Sends data with standard to WebSocket
+       */
     SendData(command: string, params: any) {
         this.Send(PackStandard(command, params))
     }
@@ -147,7 +158,7 @@ export class WebSocketConnection {
                 return
             }
             const wsc = this
-            
+
             //Wait for ready
             setTimeout(function () {
                 wsc.Send(data)
@@ -161,37 +172,37 @@ export type XHRServerResponceFunc = (message: string) => void
 /*
 Sends POST request to server
 */
-export function SendPOSTToServer(url: string,message: string, responceFunc: XHRServerResponceFunc = null) {
+export function SendPOSTToServer(url: string, message: string, responceFunc: XHRServerResponceFunc = null) {
     console.log("Sending request...");
 
     //Create request
     const xhr = new XMLHttpRequest();
     xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
-    
+
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
         if (xhr.readyState == 4 && xhr.status == 201) {
             //console.log(JSON.parse(xhr.responseText));
             const responce = xhr.responseText
-             console.log(responce);
+            console.log(responce);
             if (responceFunc != null) {
                 responceFunc(responce)
             }
         } else {
             console.log(`Error: ${xhr.status}`);
-             if (responceFunc != null) {
+            if (responceFunc != null) {
                 responceFunc(null)
             }
         }
     });
-    
+
     //Send data
     xhr.send(message);
 }
 
 export function UnpackStandard(message: string): [string, any] {
-    if (message == null ){
+    if (message == null) {
         return [null, null]
     }
     const split = message.split("?")

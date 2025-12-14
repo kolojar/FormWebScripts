@@ -38,9 +38,13 @@ export function SetWaitStatusForm(wait: boolean, message: string) {
     let status = (document.getElementById("statusMessage") as HTMLElement);
     status.innerHTML = wait ? message : "";
     if (wait) {
-        status.classList.add("puslatingEffectFull")
+        if (!status.classList.contains("puslatingEffectFull")) {
+            status.classList.add("puslatingEffectFull")
+        }
     } else {
-        status.classList.remove("puslatingEffectFull")
+        if (status.classList.contains("puslatingEffectFull")) {
+            status.classList.remove("puslatingEffectFull")
+        }
     }
 }
 

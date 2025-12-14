@@ -34,10 +34,14 @@ export function SetWaitStatusForm(wait, message) {
     let status = document.getElementById("statusMessage");
     status.innerHTML = wait ? message : "";
     if (wait) {
-        status.classList.add("puslatingEffectFull");
+        if (!status.classList.contains("puslatingEffectFull")) {
+            status.classList.add("puslatingEffectFull");
+        }
     }
     else {
-        status.classList.remove("puslatingEffectFull");
+        if (status.classList.contains("puslatingEffectFull")) {
+            status.classList.remove("puslatingEffectFull");
+        }
     }
 }
 /*
