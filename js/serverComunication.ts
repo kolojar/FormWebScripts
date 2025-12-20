@@ -256,24 +256,3 @@ export function SendDataToWebSocket(websocket: WebSocket, command: string, param
         }, 500)
     }
 }
-
-export function HighlightRowsByID(table: HTMLTableElement, ids: string[]) {
-    //Clear old highlights
-    for (let index = 0; index < table.rows.length; index++) {
-        table.rows[index].classList.remove("trHighlight")
-    }
-
-    //Do not highlight any
-    if (ids == null) {
-        return;
-    }
-
-    //Highlight specified cells
-    for (let index = 0; index < table.rows.length; index++) {
-        const row = table.rows[index];
-        const value = row.cells[0].innerHTML
-        if (ids.indexOf(value) != -1) {
-            row.classList.add("trHighlight")
-        }
-    }
-}
