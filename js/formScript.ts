@@ -480,11 +480,12 @@ export class DialogButton {
  * Shows dialog
  * @param title Title of dialog 
  * @param content Content text of dialog
- * @param lockExecution Should lock execution thread like alert
  * @param buttons Buttons in dialog
+ * @param onCloseEvent Calls when dialog closes
+ * @param escapeCloseValue This value is returned in closeEvent if ESC key was
  * @returns If dialog was opened
  */
-export function ShowDialog(title: string, content: string, onCloseEvent: (clickedButtonID: number, clickedValue: any) => void, ...buttons: DialogButton[]): boolean {
+export function ShowDialog<T>(title: string, content: string,escapeCloseValue: T, onCloseEvent: (clickedButtonID: number, clickedValue: T) => void, ...buttons: DialogButton[]): boolean {
     //Checks
     if (buttons.length == 0) {
         return false
@@ -514,6 +515,22 @@ export function ShowDialog(title: string, content: string, onCloseEvent: (clicke
         buttonBoxRight.children.item(0).remove()
     }
 
+    //Close fix
+    function closeDialog() {
+        dialog.classList.add("is-hidden")
+        dialog.addEventListener("animationend", (event: AnimationEvent) => {
+            if (event.animationName == "fadeOut") {
+                dialog.classList.remove("is-hidden")
+                dialog.close()
+            }
+        })
+    }
+    dialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeDialog()
+        onCloseEvent(-1, escapeCloseValue)
+    });
+
     //Setup buttons
     for (let i = 0; i < buttons.length; i++) {
         const button = document.createElement("button")
@@ -531,13 +548,7 @@ export function ShowDialog(title: string, content: string, onCloseEvent: (clicke
         }
 
         button.onclick = () => {
-            dialog.classList.add("is-hidden")
-            dialog.addEventListener("animationend", (event: AnimationEvent) => {
-                if (event.animationName == "fadeOut") {
-                    dialog.classList.remove("is-hidden")
-                    dialog.close()
-                }
-            })
+            closeDialog()
             onCloseEvent(i, buttons[i].valueOnClick)
         }
 

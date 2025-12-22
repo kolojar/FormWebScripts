@@ -435,11 +435,12 @@ export class DialogButton {
  * Shows dialog
  * @param title Title of dialog
  * @param content Content text of dialog
- * @param lockExecution Should lock execution thread like alert
  * @param buttons Buttons in dialog
+ * @param onCloseEvent Calls when dialog closes
+ * @param escapeCloseValue This value is returned in closeEvent if ESC key was
  * @returns If dialog was opened
  */
-export function ShowDialog(title, content, onCloseEvent, ...buttons) {
+export function ShowDialog(title, content, escapeCloseValue, onCloseEvent, ...buttons) {
     //Checks
     if (buttons.length == 0) {
         return false;
@@ -465,6 +466,21 @@ export function ShowDialog(title, content, onCloseEvent, ...buttons) {
     while (buttonBoxRight.children.length > 0) {
         buttonBoxRight.children.item(0).remove();
     }
+    //Close fix
+    function closeDialog() {
+        dialog.classList.add("is-hidden");
+        dialog.addEventListener("animationend", (event) => {
+            if (event.animationName == "fadeOut") {
+                dialog.classList.remove("is-hidden");
+                dialog.close();
+            }
+        });
+    }
+    dialog.addEventListener('cancel', (event) => {
+        event.preventDefault();
+        closeDialog();
+        onCloseEvent(-1, escapeCloseValue);
+    });
     //Setup buttons
     for (let i = 0; i < buttons.length; i++) {
         const button = document.createElement("button");
@@ -485,13 +501,7 @@ export function ShowDialog(title, content, onCloseEvent, ...buttons) {
             button.classList.add("formBlackColor");
         }
         button.onclick = () => {
-            dialog.classList.add("is-hidden");
-            dialog.addEventListener("animationend", (event) => {
-                if (event.animationName == "fadeOut") {
-                    dialog.classList.remove("is-hidden");
-                    dialog.close();
-                }
-            });
+            closeDialog();
             onCloseEvent(i, buttons[i].valueOnClick);
         };
         if (buttons[i].location == "left") {
