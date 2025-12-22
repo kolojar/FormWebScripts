@@ -27,7 +27,7 @@ body {
 }
 
 .formBoxScrollContent {
-    overflow:auto;
+    overflow: auto;
     max-width: calc(100%);
     max-height: calc(100vh - 70px);
     margin-bottom: 20px;
@@ -172,6 +172,8 @@ body {
 
 .formButtonBoxHolder {
     display: flex;
+    gap: 4px;
+    margin-top: 8px;
 }
 
 .formButtonBox {
@@ -182,12 +184,12 @@ body {
     display: inline;
 }
 
-.formButtonBox > * {
+.formButtonBox>* {
     margin-bottom: 8px;
 }
 
 
-.formButtonBox > * > *{
+.formButtonBox>*>* {
     margin-bottom: 8px;
 }
 
@@ -342,7 +344,7 @@ input[type="url"] {
 
 @media (prefers-color-scheme: dark) {
     .formTextInput {
-         border: 1px solid white;
+        border: 1px solid white;
     }
 }
 
@@ -360,7 +362,7 @@ input[type="url"] {
 
 @media (prefers-color-scheme: dark) {
     .formTextInput img {
-         filter: invert(1)
+        filter: invert(1)
     }
 }
 
@@ -377,8 +379,8 @@ input[type="url"] {
 
 @media (prefers-color-scheme: dark) {
     .formTextInput input {
-         background-color: black;
-          color: white;
+        background-color: black;
+        color: white;
     }
 }
 
@@ -396,8 +398,8 @@ input[type="url"] {
 
 @media (prefers-color-scheme: dark) {
     .formTextInput textarea {
-         background-color: black;
-          color: white;
+        background-color: black;
+        color: white;
     }
 }
 
@@ -445,7 +447,7 @@ inputfield {
 
 @media (prefers-color-scheme: dark) {
     .formToast {
-         color: black;
+        color: black;
     }
 }
 
@@ -553,4 +555,26 @@ formrow {
 
 formrow p:first-child {
     margin-top: 0px;
+}
+
+#formDialog {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 10px 10px 10px black;
+    font-size: large;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+    overflow: hidden;
+    margin: 0;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+
+@media (prefers-color-scheme: dark) {
+    #formDialog {
+        background-color: black;
+        color: white;
+    }
 }

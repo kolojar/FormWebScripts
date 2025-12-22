@@ -383,8 +383,185 @@ export function SetupRows() {
         element.appendChild(holder);
     }
 }
+/**
+ * Allows using dialogs in forms
+ */
+export function SetupDialog() {
+    //Base dialog element
+    const dialog = document.createElement("dialog");
+    dialog.id = "formDialog";
+    //dialog.classList.add("formBox")
+    document.body.appendChild(dialog);
+    const holder = document.createElement("div");
+    //holder.classList.add("formBoxScrollContent")
+    MakeElementDraggable(dialog, holder);
+    dialog.appendChild(holder);
+    //Title
+    const title = document.createElement("p");
+    title.classList.add("formHeader");
+    holder.appendChild(title);
+    //Data
+    const data = document.createElement("p");
+    holder.appendChild(data);
+    //Button box holder
+    const buttonBoxHolder = document.createElement("div");
+    buttonBoxHolder.classList.add("formButtonBoxHolder");
+    holder.appendChild(buttonBoxHolder);
+    //Button box left
+    const buttonBoxLeft = document.createElement("div");
+    buttonBoxLeft.classList.add("formButtonBox", "formJustifyLeft");
+    buttonBoxHolder.appendChild(buttonBoxLeft);
+    //Button box center
+    const buttonBoxCenter = document.createElement("div");
+    buttonBoxCenter.classList.add("formButtonBox", "formCenter");
+    buttonBoxHolder.appendChild(buttonBoxCenter);
+    //Button box right
+    const buttonBoxRight = document.createElement("div");
+    buttonBoxRight.classList.add("formButtonBox", "formJustifyRight");
+    buttonBoxHolder.appendChild(buttonBoxRight);
+}
+/**
+ * Class for button in dialog
+ */
+export class DialogButton {
+    constructor(location, color, text, valueOnClick) {
+        this.location = location;
+        this.color = color;
+        this.valueOnClick = valueOnClick;
+        this.text = text;
+    }
+}
+/**
+ * Shows dialog
+ * @param title Title of dialog
+ * @param content Content text of dialog
+ * @param lockExecution Should lock execution thread like alert
+ * @param buttons Buttons in dialog
+ * @returns If dialog was opened
+ */
+export function ShowDialog(title, content, onCloseEvent, ...buttons) {
+    //Checks
+    if (buttons.length == 0) {
+        return false;
+    }
+    const dialog = document.getElementById("formDialog");
+    if (dialog.open) {
+        return false;
+    }
+    //Set text values
+    dialog.children.item(0).children.item(0).innerText = title;
+    dialog.children.item(0).children.item(1).innerText = content;
+    //Get button boxes
+    const buttonBoxLeft = dialog.children.item(0).children.item(2).children.item(0);
+    const buttonBoxCenter = dialog.children.item(0).children.item(2).children.item(1);
+    const buttonBoxRight = dialog.children.item(0).children.item(2).children.item(2);
+    //Clear button boxes
+    while (buttonBoxLeft.children.length > 0) {
+        buttonBoxLeft.children.item(0).remove();
+    }
+    while (buttonBoxCenter.children.length > 0) {
+        buttonBoxCenter.children.item(0).remove();
+    }
+    while (buttonBoxRight.children.length > 0) {
+        buttonBoxRight.children.item(0).remove();
+    }
+    //Setup buttons
+    for (let i = 0; i < buttons.length; i++) {
+        const button = document.createElement("button");
+        button.classList.add("formButton");
+        if (buttons[i].color == "ok") {
+            button.classList.add("formOkColor");
+        }
+        else if (buttons[i].color == "warn") {
+            button.classList.add("formWarnColor");
+        }
+        else if (buttons[i].color == "info") {
+            button.classList.add("formInfoColor");
+        }
+        else if (buttons[i].color == "error") {
+            button.classList.add("formErrorColor");
+        }
+        else if (buttons[i].color == "black") {
+            button.classList.add("formBlackColor");
+        }
+        button.onclick = () => {
+            dialog.close();
+            onCloseEvent(i, buttons[i].valueOnClick);
+        };
+        if (buttons[i].location == "left") {
+            buttonBoxLeft.appendChild(button);
+        }
+        else if (buttons[i].location == "center") {
+            buttonBoxCenter.appendChild(button);
+        }
+        else if (buttons[i].location == "right") {
+            buttonBoxRight.appendChild(button);
+        }
+        button.innerText = buttons[i].text;
+    }
+    //Show dialog
+    dialog.showModal();
+}
+/**
+ * Makes HTML element dragable
+ * @param movedElement Moved element
+ * @param dragElement Element that acts as dragger (topbar of window, ...)
+ */
+export function MakeElementDraggable(movedElement, dragElement = null) {
+    if (dragElement == null) {
+        dragElement = movedElement;
+    }
+    dragElement.addEventListener("mousedown", (event) => {
+        if (movedElement.getAttribute("formIsDragged") == "true") {
+            return;
+        }
+        //Start drag
+        movedElement.setAttribute("formIsDragged", "true");
+        movedElement.setAttribute("formDragLastCursor", dragElement.style.cursor);
+        dragElement.style.cursor = "move";
+        movedElement.setAttribute("formDragLastX", event.clientX.toString());
+        movedElement.setAttribute("formDragLastY", event.clientY.toString());
+    });
+    function dragEnd(event) {
+        //End drag
+        movedElement.removeAttribute("formIsDragged");
+        dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor");
+        movedElement.removeAttribute("formDragLastCursor");
+        movedElement.removeAttribute("formDragLastX");
+        movedElement.removeAttribute("formDragLastY");
+    }
+    movedElement.addEventListener("mouseup", (event) => {
+        dragEnd(event);
+    });
+    if (dragElement != movedElement) {
+        dragElement.addEventListener("mouseup", (event) => {
+            dragEnd(event);
+        });
+    }
+    function drag(event) {
+        //Drag
+        if (movedElement.getAttribute("formIsDragged") != "true") {
+            return;
+        }
+        let posX = Number(movedElement.getAttribute("formDragLastX")) - event.clientX;
+        let posY = Number(movedElement.getAttribute("formDragLastY")) - event.clientY;
+        movedElement.setAttribute("formDragLastX", event.clientX.toString());
+        movedElement.setAttribute("formDragLastY", event.clientY.toString());
+        movedElement.style.left = (movedElement.offsetLeft - posX) + "px";
+        movedElement.style.top = (movedElement.offsetTop - posY) + "px";
+    }
+    movedElement.addEventListener("mousemove", (event) => {
+        drag(event);
+    });
+    if (dragElement != movedElement) {
+        dragElement.addEventListener("mousemove", (event) => {
+            drag(event);
+        });
+    }
+}
 SetupRows();
 SetupTextInputs();
 SetupToggles();
 SetupToasts();
+SetupDialog();
 //# sourceMappingURL=formScript.js.map
