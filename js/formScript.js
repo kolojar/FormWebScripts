@@ -485,7 +485,13 @@ export function ShowDialog(title, content, onCloseEvent, ...buttons) {
             button.classList.add("formBlackColor");
         }
         button.onclick = () => {
-            dialog.close();
+            dialog.classList.add("is-hidden");
+            dialog.addEventListener("animationend", (event) => {
+                if (event.animationName == "fadeOut") {
+                    dialog.classList.remove("is-hidden");
+                    dialog.close();
+                }
+            });
             onCloseEvent(i, buttons[i].valueOnClick);
         };
         if (buttons[i].location == "left") {
@@ -522,7 +528,7 @@ export function MakeElementDraggable(movedElement, dragElement = null) {
         movedElement.setAttribute("formDragLastX", event.clientX.toString());
         movedElement.setAttribute("formDragLastY", event.clientY.toString());
     });
-    function dragEnd(event) {
+    function dragEnd() {
         //End drag
         movedElement.removeAttribute("formIsDragged");
         dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor");
@@ -530,12 +536,12 @@ export function MakeElementDraggable(movedElement, dragElement = null) {
         movedElement.removeAttribute("formDragLastX");
         movedElement.removeAttribute("formDragLastY");
     }
-    movedElement.addEventListener("mouseup", (event) => {
-        dragEnd(event);
+    movedElement.addEventListener("mouseup", () => {
+        dragEnd();
     });
     if (dragElement != movedElement) {
-        dragElement.addEventListener("mouseup", (event) => {
-            dragEnd(event);
+        dragElement.addEventListener("mouseup", () => {
+            dragEnd();
         });
     }
     function drag(event) {

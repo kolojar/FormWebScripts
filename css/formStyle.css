@@ -558,12 +558,12 @@ formrow p:first-child {
 }
 
 #formDialog {
+    opacity: 0;
+    animation: fadeIn 0.25s forwards;
     background-color: white;
     border-radius: 10px;
     box-shadow: 10px 10px 10px black;
     font-size: large;
-    opacity: 0;
-    animation: fadeIn 2s forwards;
     overflow: hidden;
     margin: 0;
     left: 50%;
@@ -571,6 +571,21 @@ formrow p:first-child {
     transform: translateX(-50%) translateY(-50%);
 }
 
+#formDialog::backdrop {
+    opacity: 0;
+    animation: fadeIn 0.25s forwards;
+}
+
+#formDialog.is-hidden {
+    pointer-events: none;
+    opacity: 1;
+    animation: fadeOut 0.25s forwards;
+}
+
+#formDialog.is-hidden::backdrop {
+    opacity: 1;
+    animation: fadeOut 0.25s forwards;
+}
 
 @media (prefers-color-scheme: dark) {
     #formDialog {

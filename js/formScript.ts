@@ -531,7 +531,13 @@ export function ShowDialog(title: string, content: string, onCloseEvent: (clicke
         }
 
         button.onclick = () => {
-            dialog.close()
+            dialog.classList.add("is-hidden")
+            dialog.addEventListener("animationend", (event: AnimationEvent) => {
+                if (event.animationName == "fadeOut") {
+                    dialog.classList.remove("is-hidden")
+                    dialog.close()
+                }
+            })
             onCloseEvent(i, buttons[i].valueOnClick)
         }
 
