@@ -557,9 +557,7 @@ formrow p:first-child {
     margin-top: 0px;
 }
 
-#formDialog {
-    opacity: 0;
-    animation: fadeIn 0.25s forwards;
+.formDialog {
     background-color: white;
     border-radius: 10px;
     box-shadow: 10px 10px 10px black;
@@ -571,25 +569,52 @@ formrow p:first-child {
     transform: translateX(-50%) translateY(-50%);
 }
 
-#formDialog::backdrop {
+.formDialogFadeIn {
     opacity: 0;
     animation: fadeIn 0.25s forwards;
 }
 
-#formDialog.is-hidden {
+.formDialogFadeIn::backdrop {
+    opacity: 0;
+    animation: fadeIn 0.25s forwards;
+}
+
+.formDialog.is-hidden {
     pointer-events: none;
     opacity: 1;
     animation: fadeOut 0.25s forwards;
 }
 
-#formDialog.is-hidden::backdrop {
+.formDialog.is-hidden::backdrop {
     opacity: 1;
     animation: fadeOut 0.25s forwards;
 }
 
 @media (prefers-color-scheme: dark) {
-    #formDialog {
+    .formDialog {
         background-color: black;
         color: white;
     }
+}
+
+.formButtonMakeInline {
+    width: auto;
+    height: 1.5rem;
+    vertical-align: text-top;
+    margin-right: 0.25rem;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 0;
+}
+
+.formButtonBoxTable {
+    padding: 4px;
+}
+
+.formButtonBoxTable>* {
+    margin-right: 4px;
+}
+
+.formButtonBoxTable> :last-child {
+    margin-right: 0px;
 }

@@ -51,25 +51,30 @@ input[type="checkbox"]:disabled {
   cursor: not-allowed;
 }
 
+
 header {
   flex-shrink: 0;
+  margin-bottom: 4px;
 }
 
 footer {
+  margin-top: 4px;
   flex-shrink: 0;
 }
 
 main {
   flex: 1;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .pageHolder {
-  width: 100vw;
-  height: 100vh;
+  max-width: 100dvw;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .flexContainerRow{

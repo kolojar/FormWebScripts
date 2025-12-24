@@ -1,39 +1,55 @@
 //Do not forget to add formStyle.css and tableStyle.css
+import { GeneratePassword } from "./sharedScripts.js";
 /*
-Disables form and addes propried styles and animations
+Disables form and adds propried styles and animations
 */
-export function DisableForm(disabled) {
+export function DisableForms(disabled) {
     const forms = document.getElementsByClassName("formBox");
     for (let index = 0; index < forms.length; index++) {
-        recursiveDisabler(forms[index], disabled);
+        RecursiveDisabler(forms.item(index), disabled);
     }
 }
-function recursiveDisabler(object, disabled) {
-    for (let index = 0; index < object.children.length; index++) {
-        const element = object.children[index];
-        recursiveDisabler(element, disabled);
+/*
+Disables element and all subelements without attribute disableRecursiveDisable
+ */
+export function RecursiveDisabler(target, disabled) {
+    for (let index = 0; index < target.children.length; index++) {
+        const element = target.children[index];
+        RecursiveDisabler(element, disabled);
     }
-    if (!object.hasAttribute("disableRecursiveDisable")) {
-        object.setAttribute("disabled", String(disabled));
+    if (!target.hasAttribute("disableRecursiveDisable")) {
+        target.setAttribute("disabled", String(disabled));
         if (!disabled) {
-            object.removeAttribute("disabled");
+            target.removeAttribute("disabled");
         }
     }
 }
 /*
 Sets wait status and message
 */
-export function SetWaitStatusForm(wait, message) {
+export function SetWaitStatusForms(wait, message) {
     const forms = document.getElementsByClassName("formBox");
     for (let index = 0; index < forms.length; index++) {
         let form = forms[index];
         form.style.cursor = wait ? "wait" : "";
-        DisableForm(wait);
     }
-    //Set status
+    DisableForms(wait);
+    SetStatusMessageForms(wait, wait ? message : "", 0);
+}
+/**
+* Sets status message to all forms
+*/
+export function SetStatusMessageForms(blink, message, cleanAfterMs = 0) {
+    //Set message
+    const messageID = GeneratePassword(8, true, true);
     let status = document.getElementById("statusMessage");
-    status.innerHTML = wait ? message : "";
-    if (wait) {
+    if (status == null) {
+        return;
+    }
+    status.setAttribute("messageID", messageID);
+    status.innerText = message;
+    //Set blinking
+    if (blink) {
         if (!status.classList.contains("puslatingEffectFull")) {
             status.classList.add("puslatingEffectFull");
         }
@@ -42,6 +58,15 @@ export function SetWaitStatusForm(wait, message) {
         if (status.classList.contains("puslatingEffectFull")) {
             status.classList.remove("puslatingEffectFull");
         }
+    }
+    //Clean if needed
+    if (cleanAfterMs > 0) {
+        setTimeout(() => {
+            if (status.getAttribute("messageID") == messageID) {
+                status.innerText = "";
+                status.removeAttribute("messageID");
+            }
+        }, cleanAfterMs);
     }
 }
 /*
@@ -132,72 +157,74 @@ Setups text inputs
 export function SetupTextInputs() {
     const elements = document.getElementsByTagName("inputfield");
     for (let i = 0; i < elements.length; i++) {
-        //Prepare inputs -> CSS + subelements
-        const element = elements[i];
-        const inputHolder = document.createElement("div");
-        inputHolder.classList.add("formTextInput");
-        element.appendChild(inputHolder);
-        //const holder = document.createElement("holder") as HTMLElement
-        //inputHolder.appendChild(holder);
-        //inputHolder.style.width = element.style.width
-        //Add label
-        //if (element.hasAttribute("label")) {
-        //    const label = document.createElement("p")
-        //    label.innerHTML = element.getAttribute("label")
-        //    if (element.hasAttribute("isFirst")) {
-        //        label.style.marginTop = "0px"
-        //    }
-        //    element.insertBefore(label, inputHolder)
-        //}
-        //Img element
-        const img = document.createElement("img");
-        img.src = element.getAttribute("icon");
-        img.classList.add("formTooltipIcon");
-        inputHolder.appendChild(img);
-        //Input element
-        let input = null;
-        if (element.getAttribute("inputType") == "textarea") {
-            input = document.createElement("textarea");
-        }
-        else {
-            input = document.createElement("input");
-            input.type = element.getAttribute("inputType");
-        }
-        input.id = element.getAttribute("valueId");
-        input.setAttribute("disableRecursiveDisable", "true");
-        input.placeholder = element.getAttribute("placeholder");
-        input.tabIndex = element.tabIndex;
-        element.tabIndex = -1;
-        inputHolder.appendChild(input);
-        //Password img element
-        if (element.getAttribute("inputType") == "password") {
-            const passimg = document.createElement("img");
-            if (element.getAttribute("showPass") == null) {
-                element.setAttribute("showPass", "false");
-            }
-            updatePasswordEye(passimg, element, input);
-            passimg.style.cursor = "pointer";
-            passimg.addEventListener("click", function () {
-                element.setAttribute("showPass", String(!(element.getAttribute("showPass") == "true")));
-                updatePasswordEye(passimg, element, input);
-            });
-            inputHolder.appendChild(passimg);
-        }
-        //Color random button
-        if (element.getAttribute("inputType") == "color") {
-            const randomImg = document.createElement("img");
-            randomImg.src = "../images/casino32.svg";
-            randomImg.style.cursor = "pointer";
-            randomImg.onclick = function () {
-                input.value = GenerateRandomColor();
-            };
-            inputHolder.appendChild(randomImg);
-        }
-        //Click event
-        element.addEventListener("click", function () {
-            input.focus();
-        });
+        SetupTextInput(elements[i]);
     }
+}
+export function SetupTextInput(element) {
+    //Prepare inputs -> CSS + subelements
+    const inputHolder = document.createElement("div");
+    inputHolder.classList.add("formTextInput");
+    element.appendChild(inputHolder);
+    //const holder = document.createElement("holder") as HTMLElement
+    //inputHolder.appendChild(holder);
+    //inputHolder.style.width = element.style.width
+    //Add label
+    //if (element.hasAttribute("label")) {
+    //    const label = document.createElement("p")
+    //    label.innerHTML = element.getAttribute("label")
+    //    if (element.hasAttribute("isFirst")) {
+    //        label.style.marginTop = "0px"
+    //    }
+    //    element.insertBefore(label, inputHolder)
+    //}
+    //Img element
+    const img = document.createElement("img");
+    img.src = element.getAttribute("icon");
+    img.classList.add("formTooltipIcon");
+    inputHolder.appendChild(img);
+    //Input element
+    let input = null;
+    if (element.getAttribute("inputType") == "textarea") {
+        input = document.createElement("textarea");
+    }
+    else {
+        input = document.createElement("input");
+        input.type = element.getAttribute("inputType");
+    }
+    input.id = element.getAttribute("valueId");
+    input.setAttribute("disableRecursiveDisable", "true");
+    input.placeholder = element.getAttribute("placeholder");
+    input.tabIndex = element.tabIndex;
+    element.tabIndex = -1;
+    inputHolder.appendChild(input);
+    //Password img element
+    if (element.getAttribute("inputType") == "password") {
+        const passimg = document.createElement("img");
+        if (element.getAttribute("showPass") == null) {
+            element.setAttribute("showPass", "false");
+        }
+        updatePasswordEye(passimg, element, input);
+        passimg.style.cursor = "pointer";
+        passimg.addEventListener("click", function () {
+            element.setAttribute("showPass", String(!(element.getAttribute("showPass") == "true")));
+            updatePasswordEye(passimg, element, input);
+        });
+        inputHolder.appendChild(passimg);
+    }
+    //Color random button
+    if (element.getAttribute("inputType") == "color") {
+        const randomImg = document.createElement("img");
+        randomImg.src = "../images/casino32.svg";
+        randomImg.style.cursor = "pointer";
+        randomImg.onclick = function () {
+            input.value = GenerateRandomColor();
+        };
+        inputHolder.appendChild(randomImg);
+    }
+    //Click event
+    element.addEventListener("click", function () {
+        input.focus();
+    });
 }
 function updatePasswordEye(passimg, element, passwordField) {
     if (element.getAttribute("showPass") == "true") {
@@ -384,141 +411,6 @@ export function SetupRows() {
     }
 }
 /**
- * Allows using dialogs in forms
- */
-export function SetupDialog() {
-    //Base dialog element
-    const dialog = document.createElement("dialog");
-    dialog.id = "formDialog";
-    //dialog.classList.add("formBox")
-    document.body.appendChild(dialog);
-    const holder = document.createElement("div");
-    //holder.classList.add("formBoxScrollContent")
-    MakeElementDraggable(dialog, holder);
-    dialog.appendChild(holder);
-    //Title
-    const title = document.createElement("p");
-    title.classList.add("formHeader");
-    holder.appendChild(title);
-    //Data
-    const data = document.createElement("p");
-    holder.appendChild(data);
-    //Button box holder
-    const buttonBoxHolder = document.createElement("div");
-    buttonBoxHolder.classList.add("formButtonBoxHolder");
-    holder.appendChild(buttonBoxHolder);
-    //Button box left
-    const buttonBoxLeft = document.createElement("div");
-    buttonBoxLeft.classList.add("formButtonBox", "formJustifyLeft");
-    buttonBoxHolder.appendChild(buttonBoxLeft);
-    //Button box center
-    const buttonBoxCenter = document.createElement("div");
-    buttonBoxCenter.classList.add("formButtonBox", "formCenter");
-    buttonBoxHolder.appendChild(buttonBoxCenter);
-    //Button box right
-    const buttonBoxRight = document.createElement("div");
-    buttonBoxRight.classList.add("formButtonBox", "formJustifyRight");
-    buttonBoxHolder.appendChild(buttonBoxRight);
-}
-/**
- * Class for button in dialog
- */
-export class DialogButton {
-    constructor(location, color, text, valueOnClick) {
-        this.location = location;
-        this.color = color;
-        this.valueOnClick = valueOnClick;
-        this.text = text;
-    }
-}
-/**
- * Shows dialog
- * @param title Title of dialog
- * @param content Content text of dialog
- * @param buttons Buttons in dialog
- * @param onCloseEvent Calls when dialog closes
- * @param escapeCloseValue This value is returned in closeEvent if ESC key was
- * @returns If dialog was opened
- */
-export function ShowDialog(title, content, escapeCloseValue, onCloseEvent, ...buttons) {
-    //Checks
-    if (buttons.length == 0) {
-        return false;
-    }
-    const dialog = document.getElementById("formDialog");
-    if (dialog.open) {
-        return false;
-    }
-    //Set text values
-    dialog.children.item(0).children.item(0).innerText = title;
-    dialog.children.item(0).children.item(1).innerText = content;
-    //Get button boxes
-    const buttonBoxLeft = dialog.children.item(0).children.item(2).children.item(0);
-    const buttonBoxCenter = dialog.children.item(0).children.item(2).children.item(1);
-    const buttonBoxRight = dialog.children.item(0).children.item(2).children.item(2);
-    //Clear button boxes
-    while (buttonBoxLeft.children.length > 0) {
-        buttonBoxLeft.children.item(0).remove();
-    }
-    while (buttonBoxCenter.children.length > 0) {
-        buttonBoxCenter.children.item(0).remove();
-    }
-    while (buttonBoxRight.children.length > 0) {
-        buttonBoxRight.children.item(0).remove();
-    }
-    //Close fix
-    function closeDialog() {
-        dialog.classList.add("is-hidden");
-        dialog.addEventListener("animationend", (event) => {
-            if (event.animationName == "fadeOut") {
-                dialog.classList.remove("is-hidden");
-                dialog.close();
-            }
-        });
-    }
-    dialog.addEventListener('cancel', (event) => {
-        event.preventDefault();
-        closeDialog();
-        onCloseEvent(-1, escapeCloseValue);
-    });
-    //Setup buttons
-    for (let i = 0; i < buttons.length; i++) {
-        const button = document.createElement("button");
-        button.classList.add("formButton");
-        if (buttons[i].color == "ok") {
-            button.classList.add("formOkColor");
-        }
-        else if (buttons[i].color == "warn") {
-            button.classList.add("formWarnColor");
-        }
-        else if (buttons[i].color == "info") {
-            button.classList.add("formInfoColor");
-        }
-        else if (buttons[i].color == "error") {
-            button.classList.add("formErrorColor");
-        }
-        else if (buttons[i].color == "black") {
-            button.classList.add("formBlackColor");
-        }
-        button.onclick = () => {
-            closeDialog();
-            onCloseEvent(i, buttons[i].valueOnClick);
-        };
-        if (buttons[i].location == "left") {
-            buttonBoxLeft.appendChild(button);
-        }
-        else if (buttons[i].location == "center") {
-            buttonBoxCenter.appendChild(button);
-        }
-        else if (buttons[i].location == "right") {
-            buttonBoxRight.appendChild(button);
-        }
-        button.innerText = buttons[i].text;
-    }
-    //Show dialog
-    dialog.showModal();
-}
-/**
  * Makes HTML element dragable
  * @param movedElement Moved element
  * @param dragElement Element that acts as dragger (topbar of window, ...)
@@ -579,5 +471,4 @@ SetupRows();
 SetupTextInputs();
 SetupToggles();
 SetupToasts();
-SetupDialog();
 //# sourceMappingURL=formScript.js.map
