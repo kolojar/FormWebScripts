@@ -17,9 +17,9 @@ export class FormDialogButton {
     }
 }
 /**
- * Dialog class for creating dialog
+ * Dialog template class for creating dialog
  */
-export class FormDialog {
+export class FormDialogTemplate {
     /**
      * Creates new dialog, do not modify any properties of element
      * @param title Title of dialog
@@ -40,10 +40,31 @@ export class FormDialog {
         this.blockOpenOver = blockOpenOver;
         this.openOverOthers = openOverOthers;
         this.style = style;
+        this.createdDialogs = [];
+    }
+    CloseChildrenDialogs() {
+        for (let dialog of this.createdDialogs) {
+            dialog.CloseDialog();
+        }
+    }
+}
+/**
+ * Dialog class for creating dialog
+ */
+export class FormDialog {
+    /**
+     * Creates new dialog, do not modify any properties of element
+     * @param template Template of dialog
+     */
+    constructor(template) {
+        this.template = template;
         this.element = document.createElement("dialog");
+        this.template.createdDialogs.push(this);
     }
     CloseDialog() {
         this.element.dispatchEvent(new Event("force-cancel"));
+        this.closed = true;
+        this.template.createdDialogs = this.template.createdDialogs.filter(item => item != this);
     }
 }
 /**
@@ -58,30 +79,47 @@ export class FormDialogManager {
         dialogHolder.id = "formDialogHolder";
         document.body.appendChild(dialogHolder);
     }
+    ShowTemplate(template) {
+        const dialog = new FormDialog(template);
+        if (this.ShowDialog(dialog)) {
+            return dialog;
+        }
+        else {
+            return null;
+        }
+    }
     ShowDialog(dialog) {
         //Check if dialog is valid
-        if (dialog == null) {
+        if (dialog == null || dialog.template == null) {
             return false;
         }
-        if ((dialog.buttons == null || dialog.buttons.length == 0) && dialog.style != FormDialogStyle.Wait) {
+        if (dialog.closed) {
+            return false;
+        }
+        if ((dialog.template.buttons == null || dialog.template.buttons.length == 0) && dialog.template.style != FormDialogStyle.Wait) {
             return false;
         }
         //Sort out invalid openings
         if (this.blockedOpenOver) {
             this.dialogs.push(dialog);
             console.log("Dialog waiting - blocked open over");
-            return;
+            return true;
         }
-        if (this.opened.length > 0 && !dialog.openOverOthers) {
+        if (this.opened.length > 0 && !dialog.template.openOverOthers) {
             this.dialogs.push(dialog);
             console.log("Dialog waiting - other opened");
-            return;
+            return true;
         }
+        //Set properties
+        if (dialog.template.blockOpenOver) {
+            this.blockedOpenOver = true;
+        }
+        this.opened.push(dialog);
         //Create dialog
         document.getElementById("formDialogHolder").appendChild(dialog.element);
         dialog.element.classList.add("formDialog");
         dialog.element.classList.add("formDialogFadeIn");
-        if (dialog.style == FormDialogStyle.Wait) {
+        if (dialog.template.style == FormDialogStyle.Wait) {
             dialog.element.style.cursor = "wait";
         }
         const holder = document.createElement("div");
@@ -90,19 +128,19 @@ export class FormDialogManager {
         //Title
         const title = document.createElement("p");
         title.classList.add("formHeader");
-        title.innerText = dialog.title;
+        title.innerText = dialog.template.title;
         holder.appendChild(title);
-        if (dialog.style == FormDialogStyle.Entry) {
+        if (dialog.template.style == FormDialogStyle.Entry) {
             alert("TODO ENTRY STYLE!");
             console.error("TODO ENTRY STYLE!");
             return;
         }
         //Data
         const data = document.createElement("p");
-        if (dialog.style == FormDialogStyle.Wait) {
+        if (dialog.template.style == FormDialogStyle.Wait) {
             data.classList.add("puslatingEffectFull");
         }
-        data.innerText = dialog.content;
+        data.innerText = dialog.template.content;
         holder.appendChild(data);
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
@@ -129,7 +167,7 @@ export class FormDialogManager {
                     dialog.element.classList.remove("is-hidden");
                     dialog.element.close();
                     dialog.element.remove();
-                    if (dialog.blockOpenOver) {
+                    if (dialog.template.blockOpenOver) {
                         manager.blockedOpenOver = false;
                     }
                     manager.opened = manager.opened.filter(item => item != dialog);
@@ -147,69 +185,65 @@ export class FormDialogManager {
         //ESC key press
         dialog.element.addEventListener('cancel', (event) => {
             event.preventDefault();
-            if (dialog.style == FormDialogStyle.Wait) {
+            if (dialog.template.style == FormDialogStyle.Wait) {
                 dialog.element.classList.remove("formDialogFadeIn");
                 dialog.element.close();
                 dialog.element.showModal();
                 return;
             }
             closeDialog();
-            if (dialog.onCloseEvent != null) {
-                dialog.onCloseEvent(-1, dialog.escapeCloseValue);
+            if (dialog.template.onCloseEvent != null) {
+                dialog.template.onCloseEvent(-1, dialog.template.escapeCloseValue);
             }
         });
         //Close using close function
         dialog.element.addEventListener('force-cancel', (event) => {
             event.preventDefault();
             closeDialog();
-            if (dialog.onCloseEvent != null) {
-                dialog.onCloseEvent(-2, dialog.escapeCloseValue);
+            if (dialog.template.onCloseEvent != null) {
+                dialog.template.onCloseEvent(-2, dialog.template.escapeCloseValue);
             }
         });
         //Setup buttons
-        if (dialog.buttons != null) {
-            for (let i = 0; i < dialog.buttons.length; i++) {
+        if (dialog.template.buttons != null) {
+            for (let i = 0; i < dialog.template.buttons.length; i++) {
                 const button = document.createElement("button");
                 button.classList.add("formButton");
-                if (dialog.buttons[i].color == "ok") {
+                if (dialog.template.buttons[i].color == "ok") {
                     button.classList.add("formOkColor");
                 }
-                else if (dialog.buttons[i].color == "warn") {
+                else if (dialog.template.buttons[i].color == "warn") {
                     button.classList.add("formWarnColor");
                 }
-                else if (dialog.buttons[i].color == "info") {
+                else if (dialog.template.buttons[i].color == "info") {
                     button.classList.add("formInfoColor");
                 }
-                else if (dialog.buttons[i].color == "error") {
+                else if (dialog.template.buttons[i].color == "error") {
                     button.classList.add("formErrorColor");
                 }
-                else if (dialog.buttons[i].color == "black") {
+                else if (dialog.template.buttons[i].color == "black") {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = () => {
                     closeDialog();
-                    if (dialog.onCloseEvent != null) {
-                        dialog.onCloseEvent(i, dialog.buttons[i].valueOnClick);
+                    if (dialog.template.onCloseEvent != null) {
+                        dialog.template.onCloseEvent(i, dialog.template.buttons[i].valueOnClick);
                     }
                 };
-                if (dialog.buttons[i].location == "left") {
+                if (dialog.template.buttons[i].location == "left") {
                     buttonBoxLeft.appendChild(button);
                 }
-                else if (dialog.buttons[i].location == "center") {
+                else if (dialog.template.buttons[i].location == "center") {
                     buttonBoxCenter.appendChild(button);
                 }
-                else if (dialog.buttons[i].location == "right") {
+                else if (dialog.template.buttons[i].location == "right") {
                     buttonBoxRight.appendChild(button);
                 }
-                button.innerText = dialog.buttons[i].text;
+                button.innerText = dialog.template.buttons[i].text;
             }
         }
         //Open dialog
         dialog.element.showModal();
-        if (dialog.blockOpenOver) {
-            this.blockedOpenOver = true;
-        }
-        this.opened.push(dialog);
         return true;
     }
     CloseTopDialog() {

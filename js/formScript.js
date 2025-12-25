@@ -225,6 +225,15 @@ export function SetupTextInput(element) {
     element.addEventListener("click", function () {
         input.focus();
     });
+    //Enter event
+    if (element.hasAttribute("onEnterPressClickElement")) {
+        element.addEventListener("keydown", (ev) => {
+            if (ev.key != "Enter") {
+                return;
+            }
+            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"));
+        });
+    }
 }
 function updatePasswordEye(passimg, element, passwordField) {
     if (element.getAttribute("showPass") == "true") {

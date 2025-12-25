@@ -244,6 +244,14 @@ export function SetupTextInput(element: HTMLElement) {
     element.addEventListener("click", function () {
         input.focus()
     })
+
+    //Enter event
+    if (element.hasAttribute("onEnterPressClickElement")) {
+        element.addEventListener("keydown",(ev: KeyboardEvent) => {
+            if (ev.key != "Enter") {return}
+            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"))
+        })
+    }
 }
 
 function updatePasswordEye(passimg: HTMLImageElement, element: HTMLElement, passwordField: HTMLInputElement) {

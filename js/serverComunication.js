@@ -21,6 +21,10 @@ export class WebSocketConnection {
         this.url = url;
         this.messageFuncs = [];
         this.autorefreshOnInvalidInstance = autorefreshOnInvalidInstance;
+        this.UserParams = {};
+    }
+    IsAlive() {
+        return this.ws.readyState == this.ws.OPEN;
     }
     /*
     Adds listener to this WebSocket
@@ -92,7 +96,6 @@ export class WebSocketConnection {
             };
             //Add event on close
             webSocket.onerror = function (error) {
-                console.error("WebSocket error: ", error);
                 if (!wsc.closing) {
                     wsc.messageFuncs.forEach(element => {
                         element(WebSocketConnectionMessageType.Error, null);
