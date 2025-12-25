@@ -1,0 +1,13 @@
+{
+    "websockets.INVALID_WEB_SOCKET_INSTANCE": "Instance vypršela. Stránka se obnoví, všechna neuložená data budou ztracena.",
+    "wsForms.connecting": "Připojování k Web Socketu...",
+    "wsForms.reconnecting": "Připojování k Web Socketu...",
+    "wsForms.connected": "Spojení navázáno!",
+    "wsForms.disconnectedReconnecting": "Spojení přerušeno, připojování...",
+    "wsForms.disconnected": "Spojení přerušeno!",
+    "wsForms.disconnectedRefresh": "Spojení přerušeno! Chcete obnovit stránku?",
+    "wsForms.btnYes": "Ano",
+    "wsForms.btnNo": "Ne",
+    "wsForms.connectionLost": "Spojení přerušeno!",
+    "wsForms.couldNotConnect": "Připojení k Web Socketu se nezdařilo! Prosím, obnovte stránku."
+}

@@ -1,0 +1,13 @@
+{
+    "websockets.INVALID_WEB_SOCKET_INSTANCE": "Instance expired. Site will refresh, all unsaved work will be lost.",
+    "wsForms.connecting": "Connecting to Web Socket...",
+    "wsForms.reconnecting": "Reconnecting to Web Socket...",
+    "wsForms.connected": "Connection to client application established!",
+    "wsForms.disconnectedReconnecting": "Connection lost, reconnecting...",
+    "wsForms.disconnected": "Connection to client application closed!",
+    "wsForms.disconnectedRefresh": "Connection lost! Do you want to reload the page?",
+    "wsForms.btnYes": "Yes",
+    "wsForms.btnNo": "No",
+    "wsForms.connectionLost": "Connection lost!",
+    "wsForms.couldNotConnect": "Could not reconnect to Web Socket! Please reload the page."
+}

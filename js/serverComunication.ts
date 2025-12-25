@@ -1,3 +1,5 @@
+import { LanguageManager } from "./languageManager.js";
+
 export enum WebSocketConnectionMessageType {
     Message,
     Open,
@@ -22,13 +24,15 @@ export class WebSocketConnection {
     private isReconnecting: boolean = false
     private autorefreshOnInvalidInstance: boolean = false
     public UserParams: any
+    private languageManager: LanguageManager
 
-    constructor(type: string, url = "/",autorefreshOnInvalidInstance: boolean = true) {
+    constructor(type: string, url = "/", languageManager: LanguageManager, autorefreshOnInvalidInstance: boolean = true) {
         this.type = type
         this.url = url
         this.messageFuncs = []
         this.autorefreshOnInvalidInstance = autorefreshOnInvalidInstance
         this.UserParams = {}
+        this.languageManager = languageManager
     }
 
     IsAlive(): boolean {
@@ -91,7 +95,7 @@ export class WebSocketConnection {
                     //From Webtools package
                     webSocket.onerror(new Event("invalid cookies"))
                     if (wsc.autorefreshOnInvalidInstance) {
-                        alert("Instance expired. Site will refresh, all unsaved work will be lost.")
+                        alert(wsc.languageManager.Translate("websockets.INVALID_WEB_SOCKET_INSTANCE", "Instance expired. Site will refresh, all unsaved work will be lost."))
                         window.location.reload()
                     }
                     return

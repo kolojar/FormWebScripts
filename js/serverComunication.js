@@ -12,7 +12,7 @@ export var WebSocketConnectionMessageType;
 Web Socket connection
 */
 export class WebSocketConnection {
-    constructor(type, url = "/", autorefreshOnInvalidInstance = true) {
+    constructor(type, url = "/", languageManager, autorefreshOnInvalidInstance = true) {
         this.closing = false;
         this.connectionCouter = -1;
         this.isReconnecting = false;
@@ -22,6 +22,7 @@ export class WebSocketConnection {
         this.messageFuncs = [];
         this.autorefreshOnInvalidInstance = autorefreshOnInvalidInstance;
         this.UserParams = {};
+        this.languageManager = languageManager;
     }
     IsAlive() {
         return this.ws.readyState == this.ws.OPEN;
@@ -77,7 +78,7 @@ export class WebSocketConnection {
                     //From Webtools package
                     webSocket.onerror(new Event("invalid cookies"));
                     if (wsc.autorefreshOnInvalidInstance) {
-                        alert("Instance expired. Site will refresh, all unsaved work will be lost.");
+                        alert(wsc.languageManager.Translate("websockets.INVALID_WEB_SOCKET_INSTANCE", "Instance expired. Site will refresh, all unsaved work will be lost."));
                         window.location.reload();
                     }
                     return;
