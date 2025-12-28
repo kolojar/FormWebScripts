@@ -114,6 +114,9 @@ export class FormDialogManager {
         document.body.appendChild(dialogHolder);
     }
     ShowTemplate(template) {
+        if (template == null) {
+            return null;
+        }
         const dialog = new FormDialog(template);
         if (this.ShowDialog(dialog)) {
             return dialog;

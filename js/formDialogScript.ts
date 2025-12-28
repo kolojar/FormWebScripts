@@ -140,6 +140,9 @@ export class FormDialogManager {
     }
 
     ShowTemplate<T>(template: FormDialogTemplate<T>): FormDialog<T> {
+        if (template == null) {
+            return null
+        }
         const dialog = new FormDialog(template)
         if (this.ShowDialog(dialog)) {
             return dialog

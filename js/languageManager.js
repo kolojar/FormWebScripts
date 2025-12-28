@@ -9,6 +9,21 @@ export class LanguageManager {
         }
         return text;
     }
+    async AsyncTranslate(key, fallbackText) {
+        return new Promise(resolve => {
+            if (this.languageData == null) {
+                setTimeout(() => {
+                    resolve(this.AsyncTranslate(key, fallbackText));
+                }, 100);
+                return;
+            }
+            const text = this.languageData[key];
+            if (text == null) {
+                resolve(fallbackText);
+            }
+            resolve(text);
+        });
+    }
     /**
      * Translates all elements with attributes: data-i18n - innerText
      */
@@ -23,7 +38,7 @@ export class LanguageManager {
     constructor(localesFolderPath, fallbackLanguage = null, forceSetFallbackLanguage = false) {
         //Set language
         this.localesFolderPath = localesFolderPath;
-        const lang = sessionStorage.getItem("formLanguage");
+        const lang = localStorage.getItem("formLanguage");
         let setLang = async () => {
             if (forceSetFallbackLanguage == true) {
                 if (!await this.ChangeLanguage(fallbackLanguage, true)) {
@@ -70,7 +85,7 @@ export class LanguageManager {
             return false;
         }
         this.language = language;
-        sessionStorage.setItem("formLanguage", language);
+        localStorage.setItem("formLanguage", language);
         this.TranslateElements();
         if (!silent) {
             alert("Language changed, it is recomended do reload the site.");

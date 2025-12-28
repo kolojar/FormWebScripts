@@ -13,7 +13,10 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
     const ws = new WebSocketConnection(type, newUrl, languageManager)
     if (dialogManager != null) {
         ws.UserParams.connectingDialog = new FormDialogTemplate("Web Socket", languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."), false, null, null, FormDialogStyle.Wait, true, true)
-        ws.UserParams.reconnectingDialog = new FormDialogTemplate("Web Socket", languageManager.Translate("wsForms.reconnecting", "Reconnecting to Web Socket..."), false, null, null, FormDialogStyle.Wait, true, true)
+        let func = async () => {
+        ws.UserParams.reconnectingDialog = new FormDialogTemplate("Web Socket", await languageManager.AsyncTranslate("wsForms.reconnecting", "Reconnecting to Web Socket..."), false, null, null, FormDialogStyle.Wait, true, true)
+        }
+        func()
     }
     const listenerToWs = (type: WebSocketConnectionMessageType, data: string) => {
         switch (type) {
@@ -28,7 +31,9 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                 //WebSocket opened
                 if (dialogManager != null) {
                     ws.UserParams.connectingDialog.CloseChildrenDialogs()
+                    if ( ws.UserParams.reconnectingDialog != null) {
                     ws.UserParams.reconnectingDialog.CloseChildrenDialogs()
+                    }
                 }
                 SetWaitStatusForms(false, "")
                 if (Number(data) > 0) {
@@ -49,7 +54,9 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                 //WebSocket closed
                 if (dialogManager != null) {
                     ws.UserParams.connectingDialog.CloseChildrenDialogs()
+                    if ( ws.UserParams.reconnectingDialog != null) {
                     ws.UserParams.reconnectingDialog.CloseChildrenDialogs()
+                    }
                     dialogManager.ShowTemplate(new FormDialogTemplate("Web Socket", languageManager.Translate("wsForms.disconnectedRefresh", "Connection lost! Do you want to reload the page?"), false, (id: null, value: boolean) => { if (value) { window.location.reload() } }, [new FormDialogButton("left", "error", languageManager.Translate("wsForms.btnNo", "No"), false), new FormDialogButton("right", "ok", languageManager.Translate("wsForms.btnYes", "Yes"), true)], FormDialogStyle.Normal, true, true))
                 }
                 SetWaitStatusForms(true, languageManager.Translate("wsForms.connectionLost", "Connection lost!"))
