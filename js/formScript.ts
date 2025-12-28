@@ -174,7 +174,7 @@ export function SetupTextInputs() {
     }
 }
 
-export function SetupTextInput(element: HTMLElement) {
+export function SetupTextInput(element: HTMLElement): HTMLInputElement {
     //Prepare inputs -> CSS + subelements
     const inputHolder = document.createElement("div") as HTMLElement
     inputHolder.classList.add("formTextInput")
@@ -232,7 +232,7 @@ export function SetupTextInput(element: HTMLElement) {
     //Color random button
     if (element.getAttribute("inputType") == "color") {
         const randomImg = document.createElement("img") as HTMLImageElement
-        randomImg.src = "../images/casino32.svg"
+        randomImg.src = "/formWebScripts/images/casino32.svg"
         randomImg.style.cursor = "pointer"
         randomImg.onclick = function () {
             input.value = GenerateRandomColor()
@@ -252,6 +252,7 @@ export function SetupTextInput(element: HTMLElement) {
             document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"))
         })
     }
+    return input
 }
 
 function updatePasswordEye(passimg: HTMLImageElement, element: HTMLElement, passwordField: HTMLInputElement) {

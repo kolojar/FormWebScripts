@@ -214,7 +214,7 @@ export function SetupTextInput(element) {
     //Color random button
     if (element.getAttribute("inputType") == "color") {
         const randomImg = document.createElement("img");
-        randomImg.src = "../images/casino32.svg";
+        randomImg.src = "/formWebScripts/images/casino32.svg";
         randomImg.style.cursor = "pointer";
         randomImg.onclick = function () {
             input.value = GenerateRandomColor();
@@ -234,6 +234,7 @@ export function SetupTextInput(element) {
             document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"));
         });
     }
+    return input;
 }
 function updatePasswordEye(passimg, element, passwordField) {
     if (element.getAttribute("showPass") == "true") {

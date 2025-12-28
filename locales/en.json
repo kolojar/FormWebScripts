@@ -6,8 +6,10 @@
     "wsForms.disconnectedReconnecting": "Connection lost, reconnecting...",
     "wsForms.disconnected": "Connection to client application closed!",
     "wsForms.disconnectedRefresh": "Connection lost! Do you want to reload the page?",
-    "wsForms.btnYes": "Yes",
-    "wsForms.btnNo": "No",
     "wsForms.connectionLost": "Connection lost!",
-    "wsForms.couldNotConnect": "Could not reconnect to Web Socket! Please reload the page."
+    "wsForms.couldNotConnect": "Could not reconnect to Web Socket! Please reload the page.",
+    "dialog.btnYes": "Yes",
+    "dialog.btnNo": "No",
+    "dialog.btnOK": "OK",
+    "dialog.btnCancel": "Cancel"
 }

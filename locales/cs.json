@@ -6,8 +6,10 @@
     "wsForms.disconnectedReconnecting": "Spojení přerušeno, připojování...",
     "wsForms.disconnected": "Spojení přerušeno!",
     "wsForms.disconnectedRefresh": "Spojení přerušeno! Chcete obnovit stránku?",
-    "wsForms.btnYes": "Ano",
-    "wsForms.btnNo": "Ne",
     "wsForms.connectionLost": "Spojení přerušeno!",
-    "wsForms.couldNotConnect": "Připojení k Web Socketu se nezdařilo! Prosím, obnovte stránku."
+    "wsForms.couldNotConnect": "Připojení k Web Socketu se nezdařilo! Prosím, obnovte stránku.",
+    "dialog.btnYes": "Ano",
+    "dialog.btnNo": "Ne",
+    "dialog.btnOK": "OK",
+    "dialog.btnCancel": "Zrušit"
 }

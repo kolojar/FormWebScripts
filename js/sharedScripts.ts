@@ -30,3 +30,12 @@ export function GeneratePassword(lenght: number, includeUppercase: boolean, incl
     }
     return password
 }
+
+export class KeyValuePair<K, V> {
+    public key: K
+    public value: V
+    constructor(key: K, value: V) {
+        this.key = key
+        this.value = value
+    }
+}

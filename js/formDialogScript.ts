@@ -1,9 +1,12 @@
-import { MakeElementDraggable } from "./formScript.js"
+import { MakeElementDraggable, SetupTextInput } from "./formScript.js"
+import { LanguageManager } from "./languageManager.js"
+import { KeyValuePair } from "./sharedScripts.js"
 
 export enum FormDialogStyle {
     Normal = 0,
     Wait = 1,
-    Entry = 2
+    Entry = 2,
+    Select = 3
 }
 
 /**
@@ -35,6 +38,9 @@ export class FormDialogTemplate<T> {
     readonly blockOpenOver: boolean
     readonly openOverOthers: boolean
     readonly style: FormDialogStyle
+    placeholder: string
+    entryType: string
+    selectValues: KeyValuePair<string, T>[]
     createdDialogs: FormDialog<T>[]
 
     /**
@@ -57,6 +63,9 @@ export class FormDialogTemplate<T> {
         this.blockOpenOver = blockOpenOver
         this.openOverOthers = openOverOthers
         this.style = style
+        this.placeholder = ""
+        this.entryType = "text"
+        this.selectValues = []
         this.createdDialogs = []
     }
 
@@ -73,6 +82,8 @@ export class FormDialogTemplate<T> {
 export class FormDialog<T> {
     readonly template: FormDialogTemplate<T>
     readonly element: HTMLDialogElement
+    readonly entryElement: HTMLInputElement
+    readonly inputfield: HTMLElement
     closed: boolean
 
     /**
@@ -82,6 +93,22 @@ export class FormDialog<T> {
     constructor(template: FormDialogTemplate<T>) {
         this.template = template
         this.element = document.createElement("dialog")
+        if (template.style == FormDialogStyle.Entry) {
+            //Setup entry
+            this.inputfield = document.createElement("inputfield")
+            this.inputfield.setAttribute("placeholder", template.placeholder)
+            this.inputfield.style.width = "500px"
+            this.inputfield.setAttribute("inputType", this.template.entryType)
+            let image = ""
+            switch (this.template.entryType.toLowerCase()) {
+                case "text": { image = "textfields32.svg"; break }
+                case "color": { image = "palette32.svg"; break }
+                case "password": { image = "key32.svg"; break }
+                default: { image = "textfields32.svg"; break }
+            }
+            this.inputfield.setAttribute("icon", "/formWebScripts/images/" + image)
+            this.entryElement = SetupTextInput(this.inputfield)
+        }
         this.template.createdDialogs.push(this)
     }
 
@@ -100,10 +127,12 @@ export class FormDialogManager {
     dialogs: FormDialog<any>[]
     blockedOpenOver: boolean
     opened: FormDialog<any>[]
+    private readonly languageManager: LanguageManager
     constructor() {
         this.dialogs = []
         this.opened = []
         this.blockedOpenOver = false
+        this.languageManager = new LanguageManager("/formWebScripts/locales", null, false)
 
         const dialogHolder = document.createElement("div")
         dialogHolder.id = "formDialogHolder"
@@ -163,12 +192,6 @@ export class FormDialogManager {
         title.innerText = dialog.template.title
         holder.appendChild(title)
 
-        if (dialog.template.style == FormDialogStyle.Entry) {
-            alert("TODO ENTRY STYLE!")
-            console.error("TODO ENTRY STYLE!");
-            return
-        }
-
         //Data
         const data = document.createElement("p")
         if (dialog.template.style == FormDialogStyle.Wait) {
@@ -176,6 +199,11 @@ export class FormDialogManager {
         }
         data.innerText = dialog.template.content
         holder.appendChild(data)
+
+        //Entry
+        if (dialog.template.style == FormDialogStyle.Entry) {
+            holder.appendChild(dialog.inputfield)
+        }
 
         //Button box holder
         const buttonBoxHolder = document.createElement("div")
@@ -288,5 +316,77 @@ export class FormDialogManager {
         if (this.opened.length > 0) {
             this.opened[this.opened.length - 1].CloseDialog()
         }
+    }
+
+    ShowPrompt<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, entryType: string = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
+        let dialog: FormDialog<T>
+        const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
+            if (!onCloseEvent != null) {
+                if (btn == 1) {
+                    onCloseEvent(dialog.entryElement.value as unknown as T)
+                    return
+                }
+                onCloseEvent(value)
+            }
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+        new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)],
+            FormDialogStyle.Entry, openOverOthers, blockedOpenOver)
+        template.entryType = entryType
+        template.placeholder = placeholder
+        dialog = this.ShowTemplate(template)
+        return dialog;
+    }
+
+    ShowAlert(title: string, content: string, onCloseEvent: () => void, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<any> {
+        return this.ShowTemplate(new FormDialogTemplate(title, content, null, (a, _b) => {
+            if (onCloseEvent != null) {
+                onCloseEvent()
+            }
+        }, [new FormDialogButton("center", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver))
+    }
+
+    ShowConfirm(title: string, content: string, onCloseEvent: (value: boolean) => void, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
+        return this.ShowTemplate(new FormDialogTemplate(title, content, false, (_, value) => {
+            if (!onCloseEvent != null) {
+                onCloseEvent(value)
+            }
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false),
+        new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver))
+    }
+
+    ShowSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, selectValues: KeyValuePair<string, T>[], openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
+        let dialog: FormDialog<T>
+        const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
+            if (!onCloseEvent != null) {
+                if (btn == 1) {
+                    onCloseEvent(dialog.entryElement.value as unknown as T)
+                    return
+                }
+                onCloseEvent(value)
+            }
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+        new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)],
+            FormDialogStyle.Select, openOverOthers, blockedOpenOver)
+        template.selectValues = selectValues
+        dialog = this.ShowTemplate(template)
+        return dialog;
+    }
+
+    OpenPromt<T>(title: string, content: string, cancelValue: T, entryType: string = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+        return new Promise(resolve => {
+            this.ShowPrompt(title, content, cancelValue, (value: T) => { resolve(value) }, entryType, placeholder, openOverOthers, blockedOpenOver)
+        })
+    }
+
+    OpenAlert(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<any> {
+        return new Promise(resolve => {
+            this.ShowAlert(title, content, () => { resolve(null) }, openOverOthers, blockedOpenOver)
+        })
+    }
+
+    OpenConfirm(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
+        return new Promise(resolve => {
+            this.ShowConfirm(title, content, (value: boolean) => { resolve(value) }, openOverOthers, blockedOpenOver)
+        })
     }
 }
