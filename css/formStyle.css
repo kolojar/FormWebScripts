@@ -177,15 +177,19 @@ body {
 }
 
 .formButtonBox {
-    justify-content: right;
     display: flex;
-    gap: 16px;
+    justify-content: right;
     width: max-content;
     display: inline;
 }
 
 .formButtonBox>* {
+    margin-right: 8px;
     margin-bottom: 8px;
+}
+
+.formButtonBox>:last-child {
+    margin-right: 0px;
 }
 
 
@@ -567,6 +571,7 @@ formrow p:first-child {
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
+    white-space: nowrap;
 }
 
 .formDialogFadeIn {
@@ -617,4 +622,11 @@ formrow p:first-child {
 
 .formButtonBoxTable> :last-child {
     margin-right: 0px;
+}
+
+.formProgress {
+    height: 32px;
+    max-height: 32px;
+    pointer-events: none;
+    width: 100%;
 }

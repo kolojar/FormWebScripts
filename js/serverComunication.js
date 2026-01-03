@@ -182,6 +182,14 @@ export function SendPOSTToServer(url, message, responceFunc = null) {
     //Send data
     xhr.send(message);
 }
+/*
+Sends POST request to server async
+*/
+export async function SendPOSTToServerAsync(url, message) {
+    return new Promise(resolve => {
+        SendPOSTToServer(url, message, (responce) => { resolve(responce); });
+    });
+}
 export function UnpackStandard(message) {
     if (message == null) {
         return [null, null];

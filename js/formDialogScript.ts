@@ -6,7 +6,8 @@ export enum FormDialogStyle {
     Normal = 0,
     Wait = 1,
     Entry = 2,
-    Select = 3
+    Select = 3,
+    Progress = 4
 }
 
 /**
@@ -42,6 +43,7 @@ export class FormDialogTemplate<T> {
     entryType: string
     selectValues: KeyValuePair<string, T>[]
     createdDialogs: FormDialog<T>[]
+    progressLines: number
 
     /**
      * Creates new dialog, do not modify any properties of element
@@ -67,8 +69,9 @@ export class FormDialogTemplate<T> {
         this.entryType = "text"
         this.selectValues = []
         this.createdDialogs = []
+        this.progressLines = 0
     }
-
+    
     CloseChildrenDialogs() {
         for (let dialog of this.createdDialogs) {
             dialog.CloseDialog()
@@ -84,6 +87,8 @@ export class FormDialog<T> {
     readonly element: HTMLDialogElement
     readonly entryElement: HTMLInputElement
     readonly inputfield: HTMLElement
+    readonly progressLines: HTMLDivElement[]
+    readonly progressLabels: HTMLSpanElement[]
     closed: boolean
 
     /**
@@ -93,6 +98,7 @@ export class FormDialog<T> {
     constructor(template: FormDialogTemplate<T>) {
         this.template = template
         this.element = document.createElement("dialog")
+        this.progressLines= []
         if (template.style == FormDialogStyle.Entry) {
             //Setup entry
             this.inputfield = document.createElement("inputfield")
@@ -109,7 +115,35 @@ export class FormDialog<T> {
             this.inputfield.setAttribute("icon", "/formWebScripts/images/" + image)
             this.entryElement = SetupTextInput(this.inputfield)
         }
+        if (template.style == FormDialogStyle.Progress) {
+            //Setup progress
+            for (let i = 0; i < template.progressLines; i++) {
+                const line = document.createElement("div")
+                const text = document.createElement("p")
+                text.style.textAlign = "center"
+                line.appendChild(text)
+                const progress = document.createElement("progress")
+                progress.classList.add("formProgress")
+                line.appendChild(progress)
+                this.progressLines.push(line)
+            }
+        }
         this.template.createdDialogs.push(this)
+    }
+
+    SetProgress(id: number, value: number, max: number = 100) {
+        if (id >= this.progressLines.length) {
+            return
+        }
+        const element = this.progressLines[id].children.item(1) as HTMLProgressElement
+        element.max = max
+        element.value = value
+    }
+    SetMessage(id: number, message: string) {
+        if (id >= this.progressLines.length) {
+            return
+        }
+        (this.progressLines[id].children.item(0) as HTMLParagraphElement).innerText = message
     }
 
     CloseDialog() {
@@ -118,7 +152,6 @@ export class FormDialog<T> {
         this.template.createdDialogs = this.template.createdDialogs.filter(item => item != this)
     }
 }
-
 
 /**
  * Class for managing dialogs
@@ -197,7 +230,7 @@ export class FormDialogManager {
 
         //Data
         const data = document.createElement("p")
-        if (dialog.template.style == FormDialogStyle.Wait) {
+        if (dialog.template.style == FormDialogStyle.Wait || dialog.template.style == FormDialogStyle.Progress) {
             data.classList.add("puslatingEffectFull")
         }
         data.innerText = dialog.template.content
@@ -206,6 +239,13 @@ export class FormDialogManager {
         //Entry
         if (dialog.template.style == FormDialogStyle.Entry) {
             holder.appendChild(dialog.inputfield)
+        }
+
+         //Progress
+        if (dialog.template.style == FormDialogStyle.Progress) {
+            for (let i = 0; i < dialog.progressLines.length; i++) {
+                holder.appendChild(dialog.progressLines[i])
+            }
         }
 
         //Button box holder
@@ -371,6 +411,22 @@ export class FormDialogManager {
         new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)],
             FormDialogStyle.Select, openOverOthers, blockedOpenOver)
         template.selectValues = selectValues
+        dialog = this.ShowTemplate(template)
+        return dialog;
+    }
+
+    ShowProgress(title: string, content: string, onCancelEvent: () => void, progressLines: number, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
+        let dialog: FormDialog<boolean>
+        const template = new FormDialogTemplate(title, content, false, (btn, value) => {
+            if (onCancelEvent != null) {
+                if (btn != -2) {
+                    onCancelEvent()
+                    return
+                }
+            }
+        }, [new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false)],
+            FormDialogStyle.Progress, openOverOthers, blockedOpenOver)
+        template.progressLines = progressLines;
         dialog = this.ShowTemplate(template)
         return dialog;
     }

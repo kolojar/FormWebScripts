@@ -6,6 +6,7 @@ export var FormDialogStyle;
     FormDialogStyle[FormDialogStyle["Wait"] = 1] = "Wait";
     FormDialogStyle[FormDialogStyle["Entry"] = 2] = "Entry";
     FormDialogStyle[FormDialogStyle["Select"] = 3] = "Select";
+    FormDialogStyle[FormDialogStyle["Progress"] = 4] = "Progress";
 })(FormDialogStyle || (FormDialogStyle = {}));
 /**
  * Class for button in dialog
@@ -46,6 +47,7 @@ export class FormDialogTemplate {
         this.entryType = "text";
         this.selectValues = [];
         this.createdDialogs = [];
+        this.progressLines = 0;
     }
     CloseChildrenDialogs() {
         for (let dialog of this.createdDialogs) {
@@ -64,6 +66,7 @@ export class FormDialog {
     constructor(template) {
         this.template = template;
         this.element = document.createElement("dialog");
+        this.progressLines = [];
         if (template.style == FormDialogStyle.Entry) {
             //Setup entry
             this.inputfield = document.createElement("inputfield");
@@ -92,7 +95,34 @@ export class FormDialog {
             this.inputfield.setAttribute("icon", "/formWebScripts/images/" + image);
             this.entryElement = SetupTextInput(this.inputfield);
         }
+        if (template.style == FormDialogStyle.Progress) {
+            //Setup progress
+            for (let i = 0; i < template.progressLines; i++) {
+                const line = document.createElement("div");
+                const text = document.createElement("p");
+                text.style.textAlign = "center";
+                line.appendChild(text);
+                const progress = document.createElement("progress");
+                progress.classList.add("formProgress");
+                line.appendChild(progress);
+                this.progressLines.push(line);
+            }
+        }
         this.template.createdDialogs.push(this);
+    }
+    SetProgress(id, value, max = 100) {
+        if (id >= this.progressLines.length) {
+            return;
+        }
+        const element = this.progressLines[id].children.item(1);
+        element.max = max;
+        element.value = value;
+    }
+    SetMessage(id, message) {
+        if (id >= this.progressLines.length) {
+            return;
+        }
+        this.progressLines[id].children.item(0).innerText = message;
     }
     CloseDialog() {
         this.element.dispatchEvent(new Event("force-cancel"));
@@ -169,7 +199,7 @@ export class FormDialogManager {
         holder.appendChild(title);
         //Data
         const data = document.createElement("p");
-        if (dialog.template.style == FormDialogStyle.Wait) {
+        if (dialog.template.style == FormDialogStyle.Wait || dialog.template.style == FormDialogStyle.Progress) {
             data.classList.add("puslatingEffectFull");
         }
         data.innerText = dialog.template.content;
@@ -177,6 +207,12 @@ export class FormDialogManager {
         //Entry
         if (dialog.template.style == FormDialogStyle.Entry) {
             holder.appendChild(dialog.inputfield);
+        }
+        //Progress
+        if (dialog.template.style == FormDialogStyle.Progress) {
+            for (let i = 0; i < dialog.progressLines.length; i++) {
+                holder.appendChild(dialog.progressLines[i]);
+            }
         }
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
@@ -332,6 +368,20 @@ export class FormDialogManager {
         }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
             new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Select, openOverOthers, blockedOpenOver);
         template.selectValues = selectValues;
+        dialog = this.ShowTemplate(template);
+        return dialog;
+    }
+    ShowProgress(title, content, onCancelEvent, progressLines, openOverOthers = true, blockedOpenOver = true) {
+        let dialog;
+        const template = new FormDialogTemplate(title, content, false, (btn, value) => {
+            if (onCancelEvent != null) {
+                if (btn != -2) {
+                    onCancelEvent();
+                    return;
+                }
+            }
+        }, [new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false)], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
+        template.progressLines = progressLines;
         dialog = this.ShowTemplate(template);
         return dialog;
     }

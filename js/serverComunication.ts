@@ -210,6 +210,15 @@ export function SendPOSTToServer(url: string, message: string, responceFunc: XHR
     xhr.send(message);
 }
 
+/*
+Sends POST request to server async
+*/
+export async function SendPOSTToServerAsync(url: string, message: string): Promise<string> { 
+    return new Promise<string>(resolve => {
+        SendPOSTToServer(url,message,(responce) => {resolve(responce)})
+    })
+}
+
 export function UnpackStandard(message: string): [string, any] {
     if (message == null) {
         return [null, null]

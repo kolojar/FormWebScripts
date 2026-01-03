@@ -39,3 +39,32 @@ export class KeyValuePair<K, V> {
         this.value = value
     }
 }
+
+export function FormatFileSize(fileSizeBytes: number): string {
+  // Approximate to the closest prefixed unit
+  const units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+  const exponent = Math.min(
+    Math.floor(Math.log(fileSizeBytes) / Math.log(1024)),
+    units.length - 1,
+  );
+  const approx = fileSizeBytes / 1024 ** exponent;
+  return exponent === 0 ? `${fileSizeBytes} bytes` : `${approx.toFixed(3)} ${units[exponent]}`;
+}
+
+export function DisableDragAndDrop(element: HTMLElement) {
+    element.addEventListener("dragenter", (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "none"
+    })
+    element.addEventListener("dragover", (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "none"
+    })
+    element.addEventListener("drop", (ev) => {
+        //ev.dataTransfer.dropEffect = "copy"
+        ev.stopPropagation();
+        ev.preventDefault();
+    })
+}
