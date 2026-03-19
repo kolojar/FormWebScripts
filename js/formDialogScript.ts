@@ -431,7 +431,7 @@ export class FormDialogManager {
         return dialog;
     }
 
-    OpenPromt<T>(title: string, content: string, cancelValue: T, entryType: string = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    OpenPrompt<T>(title: string, content: string, cancelValue: T, entryType: string = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
         return new Promise(resolve => {
             this.ShowPrompt(title, content, cancelValue, (value: T) => { resolve(value) }, entryType, placeholder, openOverOthers, blockedOpenOver)
         })
