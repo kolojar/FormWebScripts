@@ -88,6 +88,27 @@
  - Generate random color: `GenerateRandomColor`
  - Send toasts: `SendToast`
  - Makes element draggable: `MakeElementDraggable`
+ 
+# SharedStyle.css
+ - Import: sharedStyle.css
+ - Applies some basic styling to elements
+ 
+## Elements
+### Header Element
+ - Tag name: header
+ - Keeps all child elements on top
+
+### Main Element
+ - Tag name: main
+ - Site data goes here
+
+### Footer Element
+ - Tag name: footer
+ - Keeps all child elements on bottom
+
+# TableStyle.css
+ - Import: tableStyle.css
+ - Applies some basic styling to tables
 
 # TODO:
 - Fix DIALOG on edges - condensed text

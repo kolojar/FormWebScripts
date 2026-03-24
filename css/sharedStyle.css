@@ -20,7 +20,6 @@ html {
   --height: calc(100% - 20px);
 }
 
-
 html {
   --posX: 2px;
   --posY: 2px;
@@ -50,7 +49,6 @@ input[type="checkbox"] {
 input[type="checkbox"]:disabled {
   cursor: not-allowed;
 }
-
 
 header {
   flex-shrink: 0;
