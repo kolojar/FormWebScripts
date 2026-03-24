@@ -122,6 +122,7 @@ body {
     font-size: 16px;
     border: none;
     transition: 0.3s;
+    cursor: pointer;
 }
 
 .centerHorizontaly {
