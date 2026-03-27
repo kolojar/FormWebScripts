@@ -7,7 +7,7 @@ td, th, table {
     white-space-collapse: preserve-spaces;
   }
   @media (prefers-color-scheme: dark) {
-    .styledTable {
+    .styledTableAuto {
     border: solid white 3px;
   }
   }
@@ -22,10 +22,10 @@ td, th, table {
       background-color:lightgray;
     }
 @media (prefers-color-scheme: dark) {
-  .styledTable tr:first-child {
+  .styledTableAuto tr:first-child {
     border-bottom: solid white 3px;
   }
-  .styledTable tr:hover {
+  .styledTableAuto tr:hover {
    color:black;
   }
 }
@@ -48,17 +48,17 @@ td, th, table {
   }
 
 @media (prefers-color-scheme: dark) {
-  .styledTable th {
+  .styledTableAuto th {
     border-top: solid white 2px;
     border-left: solid white 2px;
     text-align: center;
     color: black;
   }
-.styledTable th:last-child {
+.styledTableAuto th:last-child {
     border-right: solid white 2px;
     border-left: solid white 2px
   }
-.styledTable td {
+.styledTableAuto td {
     border: solid white 2px;
   }
 }
