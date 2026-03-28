@@ -108,6 +108,17 @@ export class FormDialog {
                 this.progressLines.push(line);
             }
         }
+        if (template.style == FormDialogStyle.Select) {
+            //Setup select
+            this.selectElement = document.createElement("select");
+            for (let i = 0; i < template.selectValues.length; i++) {
+                const value = template.selectValues[i];
+                const optionElement = document.createElement("option");
+                optionElement.value = i.toString();
+                optionElement.innerText = value.key;
+                this.selectElement.options.add(optionElement);
+            }
+        }
         this.template.createdDialogs.push(this);
     }
     SetProgress(id, value, max = 100) {
@@ -213,6 +224,10 @@ export class FormDialogManager {
             for (let i = 0; i < dialog.progressLines.length; i++) {
                 holder.appendChild(dialog.progressLines[i]);
             }
+        }
+        //Select
+        if (dialog.template.style == FormDialogStyle.Select) {
+            holder.appendChild(dialog.selectElement);
         }
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
@@ -360,7 +375,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.entryElement.value);
+                    onCloseEvent(dialog.template.selectValues[parseInt(dialog.selectElement.value)].GetValue());
                     return;
                 }
                 onCloseEvent(value);
@@ -398,6 +413,11 @@ export class FormDialogManager {
     OpenConfirm(title, content, openOverOthers = true, blockedOpenOver = true) {
         return new Promise(resolve => {
             this.ShowConfirm(title, content, (value) => { resolve(value); }, openOverOthers, blockedOpenOver);
+        });
+    }
+    OpenSelect(title, content, cancelValue, selectValues, openOverOthers = true, blockedOpenOver = true) {
+        return new Promise(resolve => {
+            this.ShowSelect(title, content, cancelValue, (value) => { resolve(value); }, selectValues, openOverOthers, blockedOpenOver);
         });
     }
 }

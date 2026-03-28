@@ -32,6 +32,9 @@ export class KeyValuePair {
         this.key = key;
         this.value = value;
     }
+    GetValue() {
+        return this.value;
+    }
 }
 export function FormatFileSize(fileSizeBytes) {
     // Approximate to the closest prefixed unit

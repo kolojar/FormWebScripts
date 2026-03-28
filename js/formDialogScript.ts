@@ -71,7 +71,7 @@ export class FormDialogTemplate<T> {
         this.createdDialogs = []
         this.progressLines = 0
     }
-    
+
     CloseChildrenDialogs() {
         for (let dialog of this.createdDialogs) {
             dialog.CloseDialog()
@@ -89,6 +89,7 @@ export class FormDialog<T> {
     readonly inputfield: HTMLElement
     readonly progressLines: HTMLDivElement[]
     readonly progressLabels: HTMLSpanElement[]
+    readonly selectElement: HTMLSelectElement
     closed: boolean
 
     /**
@@ -98,7 +99,7 @@ export class FormDialog<T> {
     constructor(template: FormDialogTemplate<T>) {
         this.template = template
         this.element = document.createElement("dialog")
-        this.progressLines= []
+        this.progressLines = []
         if (template.style == FormDialogStyle.Entry) {
             //Setup entry
             this.inputfield = document.createElement("inputfield")
@@ -126,6 +127,17 @@ export class FormDialog<T> {
                 progress.classList.add("formProgress")
                 line.appendChild(progress)
                 this.progressLines.push(line)
+            }
+        }
+        if (template.style == FormDialogStyle.Select) {
+            //Setup select
+            this.selectElement = document.createElement("select")
+            for (let i = 0; i < template.selectValues.length; i++) {
+                const value = template.selectValues[i]
+                const optionElement = document.createElement("option")
+                optionElement.value = i.toString()
+                optionElement.innerText = value.key
+                this.selectElement.options.add(optionElement)
             }
         }
         this.template.createdDialogs.push(this)
@@ -241,11 +253,16 @@ export class FormDialogManager {
             holder.appendChild(dialog.inputfield)
         }
 
-         //Progress
+        //Progress
         if (dialog.template.style == FormDialogStyle.Progress) {
             for (let i = 0; i < dialog.progressLines.length; i++) {
                 holder.appendChild(dialog.progressLines[i])
             }
+        }
+
+        //Select
+        if (dialog.template.style == FormDialogStyle.Select) {
+            holder.appendChild(dialog.selectElement)
         }
 
         //Button box holder
@@ -402,7 +419,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.entryElement.value as unknown as T)
+                    onCloseEvent(dialog.template.selectValues[parseInt(dialog.selectElement.value)].GetValue())
                     return
                 }
                 onCloseEvent(value)
@@ -446,6 +463,12 @@ export class FormDialogManager {
     OpenConfirm(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
         return new Promise(resolve => {
             this.ShowConfirm(title, content, (value: boolean) => { resolve(value) }, openOverOthers, blockedOpenOver)
+        })
+    }
+
+    OpenSelect<T>(title: string, content: string, cancelValue: T, selectValues: KeyValuePair<string, T>[], openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+        return new Promise(resolve => {
+            this.ShowSelect(title, content, cancelValue, (value: T) => { resolve(value) }, selectValues, openOverOthers, blockedOpenOver)
         })
     }
 }

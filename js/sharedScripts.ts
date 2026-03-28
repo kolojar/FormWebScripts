@@ -38,6 +38,9 @@ export class KeyValuePair<K, V> {
         this.key = key
         this.value = value
     }
+    public GetValue(): V {
+        return this.value
+    }
 }
 
 export function FormatFileSize(fileSizeBytes: number): string {
