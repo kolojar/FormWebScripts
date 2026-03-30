@@ -187,15 +187,6 @@ export function SetupTextInput(element) {
     if (element.getAttribute("inputType") == "textarea") {
         input = document.createElement("textarea");
     }
-    else if (element.getAttribute("inputType") == "select") {
-        const select = document.createElement("select");
-        for (const option of element.children) {
-            if (option.tagName == "OPTION") {
-                select.options.add(option);
-            }
-        }
-        input = select;
-    }
     else {
         input = document.createElement("input");
         input.type = element.getAttribute("inputType");
@@ -230,6 +221,69 @@ export function SetupTextInput(element) {
         };
         inputHolder.appendChild(randomImg);
     }
+    //Click event
+    element.addEventListener("click", function () {
+        input.focus();
+    });
+    //Enter event
+    if (element.hasAttribute("onEnterPressClickElement")) {
+        element.addEventListener("keydown", (ev) => {
+            if (ev.key != "Enter") {
+                return;
+            }
+            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"));
+        });
+    }
+    return input;
+}
+/*
+Setups select inputs
+*/
+export function SetupSelectInputs() {
+    const elements = document.getElementsByTagName("inputselect");
+    for (let i = 0; i < elements.length; i++) {
+        SetupSelectInput(elements[i]);
+    }
+}
+export function SetupSelectInput(element) {
+    //Prepare inputs -> CSS + subelements
+    const inputHolder = document.createElement("div");
+    inputHolder.classList.add("formTextInput");
+    element.appendChild(inputHolder);
+    //const holder = document.createElement("holder") as HTMLElement
+    //inputHolder.appendChild(holder);
+    //inputHolder.style.width = element.style.width
+    //Add label
+    //if (element.hasAttribute("label")) {
+    //    const label = document.createElement("p")
+    //    label.innerHTML = element.getAttribute("label")
+    //    if (element.hasAttribute("isFirst")) {
+    //        label.style.marginTop = "0px"
+    //    }
+    //    element.insertBefore(label, inputHolder)
+    //}
+    //Img element
+    const img = document.createElement("img");
+    img.src = element.getAttribute("icon");
+    img.classList.add("formTooltipIcon");
+    inputHolder.appendChild(img);
+    //Input element
+    let input = document.createElement("select");
+    input.id = element.getAttribute("valueId");
+    input.setAttribute("disableRecursiveDisable", "true");
+    input.tabIndex = element.tabIndex;
+    let i = 0;
+    while (i < element.children.length) {
+        const option = element.children.item(i);
+        if (option.tagName == "OPTION") {
+            input.options.add(option);
+        }
+        else {
+            i++;
+        }
+    }
+    element.tabIndex = -1;
+    inputHolder.appendChild(input);
     //Click event
     element.addEventListener("click", function () {
         input.focus();

@@ -255,7 +255,18 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
     return input
 }
 
-export function SetupTextInput(element: HTMLElement): HTMLInputElement {
+
+/*
+Setups select inputs
+*/
+export function SetupSelectInputs() {
+    const elements = document.getElementsByTagName("inputselect")
+    for (let i = 0; i < elements.length; i++) {
+        SetupSelectInput(elements[i] as HTMLElement)
+    }
+}
+
+export function SetupSelectInput(element: HTMLElement): HTMLSelectElement {
     //Prepare inputs -> CSS + subelements
     const inputHolder = document.createElement("div") as HTMLElement
     inputHolder.classList.add("formTextInput")
@@ -281,45 +292,21 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
     inputHolder.appendChild(img)
 
     //Input element
-    let input = null
-    if (element.getAttribute("inputType") == "textarea") {
-        input = document.createElement("textarea") as HTMLTextAreaElement
-    } else {
-        input = document.createElement("input") as HTMLInputElement
-        input.type = element.getAttribute("inputType")
-    }
+    let input = document.createElement("select")
     input.id = element.getAttribute("valueId")
     input.setAttribute("disableRecursiveDisable", "true")
-    input.placeholder = element.getAttribute("placeholder")
     input.tabIndex = element.tabIndex
+    let i = 0;
+    while(i < element.children.length) {
+        const option = element.children.item(i)
+        if (option.tagName == "OPTION") {
+            input.options.add(option as HTMLOptionElement)
+        } else {
+            i++
+        }
+    }
     element.tabIndex = -1
     inputHolder.appendChild(input)
-
-    //Password img element
-    if (element.getAttribute("inputType") == "password") {
-        const passimg = document.createElement("img") as HTMLImageElement
-        if (element.getAttribute("showPass") == null) {
-            element.setAttribute("showPass", "false")
-        }
-        updatePasswordEye(passimg, element, input)
-        passimg.style.cursor = "pointer"
-        passimg.addEventListener("click", function () {
-            element.setAttribute("showPass", String(!(element.getAttribute("showPass") == "true")))
-            updatePasswordEye(passimg, element, input)
-        })
-        inputHolder.appendChild(passimg)
-    }
-
-    //Color random button
-    if (element.getAttribute("inputType") == "color") {
-        const randomImg = document.createElement("img") as HTMLImageElement
-        randomImg.src = "/formWebScripts/images/casino32.svg"
-        randomImg.style.cursor = "pointer"
-        randomImg.onclick = function () {
-            input.value = GenerateRandomColor()
-        }
-        inputHolder.appendChild(randomImg)
-    }
 
     //Click event
     element.addEventListener("click", function () {

@@ -1,4 +1,4 @@
-import { MakeElementDraggable, SetupTextInput } from "./formScript.js"
+import { MakeElementDraggable, SetupSelectInput, SetupTextInput } from "./formScript.js"
 import { LanguageManager } from "./languageManager.js"
 import { KeyValuePair } from "./sharedScripts.js"
 
@@ -89,6 +89,7 @@ export class FormDialog<T> {
     readonly inputfield: HTMLElement
     readonly progressLines: HTMLDivElement[]
     readonly progressLabels: HTMLSpanElement[]
+    readonly selectfield: HTMLElement
     readonly selectElement: HTMLSelectElement
     closed: boolean
 
@@ -131,14 +132,16 @@ export class FormDialog<T> {
         }
         if (template.style == FormDialogStyle.Select) {
             //Setup select
-            this.selectElement = document.createElement("select")
+            this.selectfield = document.createElement("selectfield")
             for (let i = 0; i < template.selectValues.length; i++) {
                 const value = template.selectValues[i]
                 const optionElement = document.createElement("option")
                 optionElement.value = i.toString()
                 optionElement.innerText = value.key
-                this.selectElement.options.add(optionElement)
+                this.selectfield.appendChild(optionElement)
             }
+            this.selectfield.setAttribute("icon", "/formWebScripts/images/textfields32.svg")
+            this.selectElement = SetupSelectInput(this.selectfield)
         }
         this.template.createdDialogs.push(this)
     }
@@ -262,7 +265,7 @@ export class FormDialogManager {
 
         //Select
         if (dialog.template.style == FormDialogStyle.Select) {
-            holder.appendChild(dialog.selectElement)
+            holder.appendChild(dialog.selectfield)
         }
 
         //Button box holder

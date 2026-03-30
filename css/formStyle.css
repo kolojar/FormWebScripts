@@ -371,7 +371,7 @@ input[type="url"] {
     }
 }
 
-.formTextInput input {
+.formTextInput input, .formTextInput select {
     border: none;
     margin: 4px;
     display: inline-block;
@@ -383,7 +383,7 @@ input[type="url"] {
 
 
 @media (prefers-color-scheme: dark) {
-    .formTextInput input {
+    .formTextInput input, .formTextInput select {
         background-color: black;
         color: white;
     }
