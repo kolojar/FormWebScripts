@@ -194,10 +194,12 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
     //}
 
     //Img element
+    if( element.hasAttribute("icon")) {
     const img = document.createElement("img") as HTMLImageElement
     img.src = element.getAttribute("icon")
     img.classList.add("formTooltipIcon")
     inputHolder.appendChild(img)
+    }
 
     //Input element
     let input = null
@@ -286,10 +288,12 @@ export function SetupSelectInput(element: HTMLElement): HTMLSelectElement {
     //}
 
     //Img element
+    if( element.hasAttribute("icon")) {
     const img = document.createElement("img") as HTMLImageElement
     img.src = element.getAttribute("icon")
     img.classList.add("formTooltipIcon")
     inputHolder.appendChild(img)
+    }
 
     //Input element
     let input = document.createElement("select")

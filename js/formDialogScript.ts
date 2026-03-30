@@ -140,7 +140,7 @@ export class FormDialog<T> {
                 optionElement.innerText = value.key
                 this.selectfield.appendChild(optionElement)
             }
-            this.selectfield.setAttribute("icon", "/formWebScripts/images/textfields32.svg")
+            this.selectfield.removeAttribute("icon")
             this.selectElement = SetupSelectInput(this.selectfield)
         }
         this.template.createdDialogs.push(this)

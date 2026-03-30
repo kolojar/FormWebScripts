@@ -178,10 +178,12 @@ export function SetupTextInput(element) {
     //    element.insertBefore(label, inputHolder)
     //}
     //Img element
-    const img = document.createElement("img");
-    img.src = element.getAttribute("icon");
-    img.classList.add("formTooltipIcon");
-    inputHolder.appendChild(img);
+    if (element.hasAttribute("icon")) {
+        const img = document.createElement("img");
+        img.src = element.getAttribute("icon");
+        img.classList.add("formTooltipIcon");
+        inputHolder.appendChild(img);
+    }
     //Input element
     let input = null;
     if (element.getAttribute("inputType") == "textarea") {
@@ -263,10 +265,12 @@ export function SetupSelectInput(element) {
     //    element.insertBefore(label, inputHolder)
     //}
     //Img element
-    const img = document.createElement("img");
-    img.src = element.getAttribute("icon");
-    img.classList.add("formTooltipIcon");
-    inputHolder.appendChild(img);
+    if (element.hasAttribute("icon")) {
+        const img = document.createElement("img");
+        img.src = element.getAttribute("icon");
+        img.classList.add("formTooltipIcon");
+        inputHolder.appendChild(img);
+    }
     //Input element
     let input = document.createElement("select");
     input.id = element.getAttribute("valueId");
