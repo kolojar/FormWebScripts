@@ -20,6 +20,12 @@
  - Automatic password eye for password
  - Automatic random color generator for color input
  - Manual setup using function: `SetupTextInput`
+ 
+## Styled Selects
+ - Tag name: `inputfield`
+ - Attribute `icon`: Icon path for image before field 
+ - Attribute `valueId`: Id for value element
+ - Manual setup using function: `SetupSelectInput`
 
 ## Styled Toggles
  - Tag name: `toggle`
