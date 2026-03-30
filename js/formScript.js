@@ -187,6 +187,15 @@ export function SetupTextInput(element) {
     if (element.getAttribute("inputType") == "textarea") {
         input = document.createElement("textarea");
     }
+    else if (element.getAttribute("inputType") == "select") {
+        const select = document.createElement("select");
+        for (const option of element.children) {
+            if (option.tagName == "OPTION") {
+                select.options.add(option);
+            }
+        }
+        input = select;
+    }
     else {
         input = document.createElement("input");
         input.type = element.getAttribute("inputType");

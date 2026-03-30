@@ -67,7 +67,11 @@ export class FormDialog {
         this.template = template;
         this.element = document.createElement("dialog");
         this.progressLines = [];
-        if (template.style == FormDialogStyle.Entry) {
+        if (template.style == FormDialogStyle.Select) {
+            //Setup select
+            this.template.entryType = "select";
+        }
+        if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
             this.inputfield = document.createElement("inputfield");
             this.inputfield.setAttribute("placeholder", template.placeholder);
@@ -93,6 +97,16 @@ export class FormDialog {
                 }
             }
             this.inputfield.setAttribute("icon", "/formWebScripts/images/" + image);
+            if (template.style == FormDialogStyle.Select) {
+                //Setup select
+                for (let i = 0; i < template.selectValues.length; i++) {
+                    const value = template.selectValues[i];
+                    const optionElement = document.createElement("option");
+                    optionElement.value = i.toString();
+                    optionElement.innerText = value.key;
+                    this.inputfield.appendChild(optionElement);
+                }
+            }
             this.entryElement = SetupTextInput(this.inputfield);
         }
         if (template.style == FormDialogStyle.Progress) {
@@ -106,17 +120,6 @@ export class FormDialog {
                 progress.classList.add("formProgress");
                 line.appendChild(progress);
                 this.progressLines.push(line);
-            }
-        }
-        if (template.style == FormDialogStyle.Select) {
-            //Setup select
-            this.selectElement = document.createElement("select");
-            for (let i = 0; i < template.selectValues.length; i++) {
-                const value = template.selectValues[i];
-                const optionElement = document.createElement("option");
-                optionElement.value = i.toString();
-                optionElement.innerText = value.key;
-                this.selectElement.options.add(optionElement);
             }
         }
         this.template.createdDialogs.push(this);
@@ -224,10 +227,6 @@ export class FormDialogManager {
             for (let i = 0; i < dialog.progressLines.length; i++) {
                 holder.appendChild(dialog.progressLines[i]);
             }
-        }
-        //Select
-        if (dialog.template.style == FormDialogStyle.Select) {
-            holder.appendChild(dialog.selectElement);
         }
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
@@ -375,7 +374,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.template.selectValues[parseInt(dialog.selectElement.value)].GetValue());
+                    onCloseEvent(dialog.template.selectValues[parseInt(dialog.entryElement.value)].GetValue());
                     return;
                 }
                 onCloseEvent(value);
