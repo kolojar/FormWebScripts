@@ -194,6 +194,7 @@ export function SetupTextInput(element) {
         input.type = element.getAttribute("inputType");
     }
     input.id = element.getAttribute("valueId");
+    input.value = element.getAttribute("initialValue");
     input.setAttribute("disableRecursiveDisable", "true");
     input.placeholder = element.getAttribute("placeholder");
     input.tabIndex = element.tabIndex;
@@ -223,6 +224,17 @@ export function SetupTextInput(element) {
         };
         inputHolder.appendChild(randomImg);
     }
+    //Focus event
+    element.addEventListener("focusin", function () {
+        if (!inputHolder.classList.contains("formTextInputFocus")) {
+            inputHolder.classList.add("formTextInputFocus");
+        }
+    });
+    element.addEventListener("focusout", function () {
+        if (inputHolder.classList.contains("formTextInputFocus")) {
+            inputHolder.classList.remove("formTextInputFocus");
+        }
+    });
     //Click event
     element.addEventListener("click", function () {
         input.focus();

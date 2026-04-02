@@ -17,6 +17,7 @@
    + Other input types as default input element
  - Attribute `valueId`: Id for value element
  - Attribute `placeholder`: Placeholder for input
+ - Attribute initialValue: Initial value of field
  - Automatic password eye for password
  - Automatic random color generator for color input
  - Manual setup using function: `SetupTextInput`
@@ -89,6 +90,7 @@
  - Warn color: `formWarnColor`
  - Info color: `formInfoColor`
  - Ok color: `formOkColor`
+ - For borders use formXXXBorderColor (replace XXX with color variant)
  
 # Functions
  - Generate random color: `GenerateRandomColor`

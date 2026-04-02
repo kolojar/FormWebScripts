@@ -131,27 +131,6 @@ body {
     margin-right: auto;
 }
 
-.formOkColor {
-    background: #05AA6C;
-}
-
-.formWarnColor {
-    background: #e6ac00;
-}
-
-.formErrorColor {
-    background: #e60000;
-}
-
-.formInfoColor {
-    background: #0099ff
-}
-
-.formBlackColor {
-    background: black;
-    color: white;
-}
-
 .formButton:hover {
     background-color: gray;
 }
@@ -345,11 +324,20 @@ input[type="url"] {
     /*display: inline-block;*/
     display: flex;
     flex-flow: row nowrap;
+    transition: border-color 0.5s ease;
+}
+
+.formTextInputFocus {
+    border-color: #333;
 }
 
 @media (prefers-color-scheme: dark) {
     .formTextInput {
         border: 1px solid white;
+    }
+
+    .formTextInputFocus {
+        border-color: #ccc;
     }
 }
 
@@ -371,7 +359,8 @@ input[type="url"] {
     }
 }
 
-.formTextInput input, .formTextInput select {
+.formTextInput input,
+.formTextInput select {
     border: none;
     margin: 4px;
     display: inline-block;
@@ -383,7 +372,9 @@ input[type="url"] {
 
 
 @media (prefers-color-scheme: dark) {
-    .formTextInput input, .formTextInput select {
+
+    .formTextInput input,
+    .formTextInput select {
         background-color: black;
         color: white;
     }
@@ -630,4 +621,41 @@ formrow p:first-child {
     max-height: 32px;
     pointer-events: none;
     width: 100%;
+}
+
+.formOkColor {
+    background: #05AA6C;
+}
+
+.formWarnColor {
+    background: #e6ac00;
+}
+
+.formErrorColor {
+    background: #e60000;
+}
+
+.formInfoColor {
+    background: #0099ff;
+}
+
+.formBlackColor {
+    background: black;
+    color: white;
+}
+
+.formOkBorderColor {
+    border-color: #05AA6C;
+}
+
+.formWarnBorderColor {
+    border-color: #e6ac00;
+}
+
+.formErrorBorderColor {
+    border-color: #e60000;
+}
+
+.formInfoBorderColor {
+    border-color: #0099ff;
 }

@@ -20,6 +20,16 @@ html {
   --height: calc(100% - 20px);
 }
 
+@media (prefers-color-scheme: dark) {
+    html {
+      background-color: black;
+      color: white;
+    }
+    a  {
+      color: cornflowerblue;
+    }
+}
+
 html {
   --posX: 2px;
   --posY: 2px;

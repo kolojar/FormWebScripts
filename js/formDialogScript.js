@@ -296,6 +296,9 @@ export class FormDialogManager {
         //Setup buttons
         if (dialog.template.buttons != null) {
             for (let i = 0; i < dialog.template.buttons.length; i++) {
+                if (dialog.template.buttons[i] == null) {
+                    continue;
+                }
                 const button = document.createElement("button");
                 button.classList.add("formButton");
                 if (dialog.template.buttons[i].color == "ok") {
@@ -388,7 +391,7 @@ export class FormDialogManager {
         dialog = this.ShowTemplate(template);
         return dialog;
     }
-    ShowProgress(title, content, onCancelEvent, progressLines, openOverOthers = true, blockedOpenOver = true) {
+    ShowProgress(title, content, onCancelEvent, progressLines, allowCancel = true, openOverOthers = true, blockedOpenOver = true) {
         let dialog;
         const template = new FormDialogTemplate(title, content, false, (btn, value) => {
             if (onCancelEvent != null) {
@@ -397,7 +400,7 @@ export class FormDialogManager {
                     return;
                 }
             }
-        }, [new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false)], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
+        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false) : null], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
         template.progressLines = progressLines;
         dialog = this.ShowTemplate(template);
         return dialog;

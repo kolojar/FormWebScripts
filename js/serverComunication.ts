@@ -176,12 +176,12 @@ export class WebSocketConnection {
     }
 }
 
-export type XHRServerResponceFunc = (message: string) => void
+export type XHRServerResponceFunc = (ok: boolean, message: string) => void
 
 /*
 Sends POST request to server
 */
-export function SendPOSTToServer(url: string, message: string, responceFunc: XHRServerResponceFunc = null) {
+export function SendPOSTMessageToServer(url: string, message: string, responceFunc: XHRServerResponceFunc = null) {
     console.log("Sending request...");
 
     //Create request
@@ -196,12 +196,12 @@ export function SendPOSTToServer(url: string, message: string, responceFunc: XHR
             const responce = xhr.responseText
             console.log(responce);
             if (responceFunc != null) {
-                responceFunc(responce)
+                responceFunc(true,responce)
             }
         } else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(null)
+                responceFunc(false,null)
             }
         }
     });
@@ -211,11 +211,52 @@ export function SendPOSTToServer(url: string, message: string, responceFunc: XHR
 }
 
 /*
+Sends POST request to server
+*/
+export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: XHRServerResponceFunc = null) {
+    console.log("Sending request...");
+
+    //Create request
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
+
+    //Get responce (lots of time none)
+    xhr.addEventListener("load", () => {
+        if (xhr.readyState == 4 && xhr.status == 201) {
+            //console.log(JSON.parse(xhr.responseText));
+            const responce = xhr.responseText
+            console.log(responce);
+            if (responceFunc != null) {
+                responceFunc(true,responce)
+            }
+        } else {
+            console.log(`Error: ${xhr.status}`);
+            if (responceFunc != null) {
+                responceFunc(false,null)
+            }
+        }
+    });
+
+    //Send data
+    xhr.send(data);
+}
+
+/*
 Sends POST request to server async
 */
-export async function SendPOSTToServerAsync(url: string, message: string): Promise<string> { 
-    return new Promise<string>(resolve => {
-        SendPOSTToServer(url,message,(responce) => {resolve(responce)})
+export async function SendPOSTMessageToServerAsync(url: string, message: string): Promise<[boolean,string]> { 
+    return new Promise<[boolean,string]>(resolve => {
+        SendPOSTMessageToServer(url,message,(ok,responce) => {resolve([ok,responce])})
+    })
+}
+
+/*
+Sends POST request to server async
+*/
+export async function SendPOSTDataToServerAsync(url: string, data: FormData): Promise<[boolean,string]> { 
+    return new Promise<[boolean,string]>(resolve => {
+        SendPOSTDataToServer(url,data,(ok,responce) => {resolve([ok,responce])})
     })
 }
 
