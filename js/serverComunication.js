@@ -99,7 +99,7 @@ export class WebSocketConnection {
             webSocket.onerror = function (error) {
                 if (!wsc.closing) {
                     wsc.messageFuncs.forEach(element => {
-                        element(WebSocketConnectionMessageType.Error, null);
+                        element(WebSocketConnectionMessageType.Error, "");
                     });
                 }
                 wsc.ws.close();
@@ -156,7 +156,7 @@ export class WebSocketConnection {
 /*
 Sends POST request to server
 */
-export function SendPOSTMessageToServer(url, message, responceFunc = null) {
+export function SendPOSTMessageToServer(url, message, responceFunc) {
     console.log("Sending request...");
     //Create request
     const xhr = new XMLHttpRequest();
@@ -175,7 +175,7 @@ export function SendPOSTMessageToServer(url, message, responceFunc = null) {
         else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(false, null);
+                responceFunc(false, "");
             }
         }
     });
@@ -185,7 +185,7 @@ export function SendPOSTMessageToServer(url, message, responceFunc = null) {
 /*
 Sends POST request to server
 */
-export function SendPOSTDataToServer(url, data, responceFunc = null) {
+export function SendPOSTDataToServer(url, data, responceFunc) {
     console.log("Sending request...");
     //Create request
     const xhr = new XMLHttpRequest();
@@ -204,7 +204,7 @@ export function SendPOSTDataToServer(url, data, responceFunc = null) {
         else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(false, null);
+                responceFunc(false, "");
             }
         }
     });
@@ -229,7 +229,7 @@ export async function SendPOSTDataToServerAsync(url, data) {
 }
 export function UnpackStandard(message) {
     if (message == null) {
-        return [null, null];
+        return ["", null];
     }
     const split = message.split("?");
     const command = split[0];

@@ -4,6 +4,7 @@
 - Icons from: https://fonts.google.com/icons?icon.size=32&icon.color=%23000000
 
 # Import
+ - For VSCode support add in `.vscode/settings` this line: `"html.customData": ["./custom-elements.json"]` with correct path
  - CSS: `formStyle.css`
  - JS: `formScript.js`
 

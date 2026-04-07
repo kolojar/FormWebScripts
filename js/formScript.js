@@ -1,14 +1,6 @@
 //Do not forget to add formStyle.css and tableStyle.css
 import { GeneratePassword } from "./sharedScripts.js";
-/*
-Disables form and adds propried styles and animations
-*/
-export function DisableForms(disabled) {
-    const forms = document.getElementsByClassName("formBox");
-    for (let index = 0; index < forms.length; index++) {
-        RecursiveDisabler(forms.item(index), disabled);
-    }
-}
+import "./formScript";
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
  */
@@ -25,129 +17,193 @@ export function RecursiveDisabler(target, disabled) {
     }
 }
 /*
-Sets wait status and message
+HTMLFormBoxElement element defition
 */
-export function SetWaitStatusForms(wait, message) {
-    const forms = document.getElementsByClassName("formBox");
-    for (let index = 0; index < forms.length; index++) {
-        let form = forms[index];
-        form.style.cursor = wait ? "wait" : "";
+export class HTMLFormBoxElement extends HTMLDivElement {
+    constructor() {
+        super();
+        this.messageID = "";
     }
-    DisableForms(wait);
-    SetStatusMessageForms(wait, wait ? message : "", 0);
+    /**
+     * Disables form box
+     */
+    Disable() {
+        RecursiveDisabler(this, true);
+    }
+    /**
+     * Enables form box
+     */
+    Enable() {
+        RecursiveDisabler(this, false);
+    }
+    /**
+     * Sets Status message to form box
+     * @param blink Should status message blink
+     * @param message Message
+     * @param cleanAfterMs Clean after timeout
+     */
+    SetStatusMessage(blink, message, cleanAfterMs = 0) {
+        //Set message
+        const messageID = GeneratePassword(8, true, true);
+        this.messageID = messageID;
+        this.querySelectorAll("form-status-message").forEach(element => {
+            let status = element; //TODO: FIX
+            status.innerText = message;
+            //Set blinking
+            if (blink) {
+                if (!status.classList.contains("puslatingEffectFull")) {
+                    status.classList.add("puslatingEffectFull");
+                }
+            }
+            else {
+                if (status.classList.contains("puslatingEffectFull")) {
+                    status.classList.remove("puslatingEffectFull");
+                }
+            }
+            //Clean if needed
+            if (cleanAfterMs > 0) {
+                setTimeout(() => {
+                    if (this.messageID == messageID) {
+                        status.innerText = "";
+                        this.messageID = "";
+                    }
+                }, cleanAfterMs);
+            }
+        });
+    }
+    /**
+     * Sets waiting status to form box + disables it
+     * @param message Message
+     */
+    SetWaitStatusMessage(message) {
+        this.Disable();
+        this.style.cursor = "wait";
+        this.SetStatusMessage(true, message, 0);
+    }
+    /**
+     * Removes waiting status from form box + enables it
+     */
+    RemoveWaitStatusMessage() {
+        this.SetStatusMessage(false, "", 0);
+        this.style.cursor = "";
+        this.Enable();
+    }
 }
 /**
-* Sets status message to all forms
+ * Sets wait status to all forms in document
+ * @param message Message
+ */
+export function SetWaitStatusForms(message) {
+    document.querySelectorAll("form-box").forEach(form => {
+        form.SetWaitStatusMessage(message);
+    });
+}
+/**
+ * Removes wait status from wall forms in document
+ */
+export function RemoveWaitStatusForms() {
+    document.querySelectorAll("form-box").forEach(form => {
+        form.RemoveWaitStatusMessage();
+    });
+}
+/*
+HTMLFormBoxStatusMessageElement element defition
 */
-export function SetStatusMessageForms(blink, message, cleanAfterMs = 0) {
-    //Set message
-    const messageID = GeneratePassword(8, true, true);
-    let status = document.getElementById("statusMessage");
-    if (status == null) {
-        return;
-    }
-    status.setAttribute("messageID", messageID);
-    status.innerText = message;
-    //Set blinking
-    if (blink) {
-        if (!status.classList.contains("puslatingEffectFull")) {
-            status.classList.add("puslatingEffectFull");
-        }
-    }
-    else {
-        if (status.classList.contains("puslatingEffectFull")) {
-            status.classList.remove("puslatingEffectFull");
-        }
-    }
-    //Clean if needed
-    if (cleanAfterMs > 0) {
-        setTimeout(() => {
-            if (status.getAttribute("messageID") == messageID) {
-                status.innerText = "";
-                status.removeAttribute("messageID");
-            }
-        }, cleanAfterMs);
+export class HTMLFormBoxStatusMessageElement extends HTMLParagraphElement {
+    constructor() {
+        super();
     }
 }
 /*
-Setups switches (toggles)
+HTMLFormToggleElement element defition
 */
-export function SetupToggles() {
-    const elements = document.getElementsByTagName("toggle");
-    for (let i = 0; i < elements.length; i++) {
-        //Prepare toggles -> CSS + subelements
-        const element = elements[i];
-        element.classList.add("formSwitch");
-        //Label before
-        const labelBefore = document.createElement("label");
-        if (element.hasAttribute("labelBefore")) {
-            labelBefore.classList.add("labelBefore");
-            labelBefore.innerHTML = element.getAttribute("labelBefore");
-        }
-        element.appendChild(labelBefore);
-        //Holder label
-        const holder = document.createElement("label");
-        holder.classList.add("toggle");
-        element.appendChild(holder);
-        //Input element
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.id = element.getAttribute("valueId");
-        holder.appendChild(input);
-        //Span slider
-        const span = document.createElement("span");
-        span.classList.add("slider");
-        holder.appendChild(span);
-        switchChange(element, span, input);
-        //Label after
-        if (element.hasAttribute("labelAfter")) {
-            const labelAfter = document.createElement("span");
-            labelAfter.classList.add("labelAfter");
-            labelAfter.innerHTML = element.getAttribute("labelAfter");
-            holder.appendChild(labelAfter);
-        }
-        //Click event
-        element.addEventListener("click", function () {
-            //console.log("Click");
-            input.checked = !input.checked;
-            input.dispatchEvent(new Event("change"));
-            switchChange(element, span, input);
+export class HTMLFormToggleElement extends HTMLDivElement {
+    constructor() {
+        super();
+        this.checked = false;
+        //Create elements
+        this.labelBefore = document.createElement("label");
+        this.holder = document.createElement("label");
+        this.input = document.createElement("input");
+        this.slider = document.createElement("span");
+        this.labelAfter = document.createElement("label");
+        //Add classes
+        this.classList.add("formSwitch");
+        this.labelAfter.classList.add("labelBefore");
+        this.holder.classList.add("toggle");
+        this.slider.classList.add("slider");
+        this.labelAfter.classList.add("labelAfter");
+        //Move children
+        this.appendChild(this.labelBefore);
+        this.appendChild(this.holder);
+        this.holder.appendChild(this.input);
+        this.holder.appendChild(this.slider);
+        this.holder.appendChild(this.labelAfter);
+        //Setup basic events
+        this.addEventListener("click", () => {
+            this.input.checked = !this.input.checked;
+            this.input.dispatchEvent(new Event("change"));
+            this.updateSwitch();
         });
-        //On key down
-        element.addEventListener("keydown", function (ev) {
+        this.addEventListener("keydown", (ev) => {
             if (ev.code === "Space") {
                 //console.log("Click");
-                input.checked = !input.checked;
-                input.dispatchEvent(new Event("change"));
-                switchChange(element, span, input);
+                this.input.checked = !this.input.checked;
+                this.input.dispatchEvent(new Event("change"));
+                this.updateSwitch();
             }
         });
     }
-}
-function switchChange(element, span, input) {
-    const enables = document.getElementById(element.getAttribute("enables"));
-    let onColorClass = element.getAttribute("onColorClass");
-    let offColorClass = element.getAttribute("offColorClass");
-    const holder = element.children[1];
-    if (input.checked) {
-        span.classList.add(onColorClass);
-        span.classList.remove(offColorClass);
-        holder.classList.add("formSwitchChecked");
+    connectedCallback() {
+        this.labelBefore.innerText = this.getAttribute("labelBefore");
+        this.labelAfter.innerText = this.getAttribute("labelAfter");
+        this.checked = this.getAttribute("checked") == "true";
+        this.updateSwitch();
     }
-    else {
-        span.classList.remove(onColorClass);
-        span.classList.add(offColorClass);
-        holder.classList.remove("formSwitchChecked");
-    }
-    //console.log(enables);
-    if (enables != null) {
-        if (!input.checked) {
-            enables.setAttribute("disabled", "");
-            //console.log("Disabled");
+    updateSwitch() {
+        //Switch color and do the animation
+        let onColorClass = this.getAttribute("onColorClass");
+        let offColorClass = this.getAttribute("offColorClass");
+        if (this.input.checked) {
+            this.slider.classList.add(onColorClass);
+            this.slider.classList.remove(offColorClass);
+            this.holder.classList.add("formSwitchChecked");
         }
         else {
-            enables.removeAttribute("disabled");
-            //console.log("Enable");
+            this.slider.classList.remove(onColorClass);
+            this.slider.classList.add(offColorClass);
+            this.holder.classList.remove("formSwitchChecked");
+        }
+        //Handle enables target document
+        if (this.hasAttribute("enables")) {
+            const enables = document.getElementById(this.getAttribute("enables"));
+            if (enables != null) {
+                if (!this.input.checked) {
+                    enables.setAttribute("disabled", "");
+                    //console.log("Disabled");
+                }
+                else {
+                    enables.removeAttribute("disabled");
+                    //console.log("Enable");
+                }
+            }
+        }
+        //Update this element
+        this.checked = this.input.checked;
+    }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue == newValue) {
+            return;
+        }
+        if (name == "value") {
+            this.checked = newValue == "true";
+            this.updateSwitch();
+        }
+        else if (name == "labelBefore") {
+            this.labelBefore.innerText = newValue;
+        }
+        else if (name == "labelAfter") {
+            this.labelAfter.innerText = newValue;
         }
     }
 }
@@ -242,10 +298,11 @@ export function SetupTextInput(element) {
     //Enter event
     if (element.hasAttribute("onEnterPressClickElement")) {
         element.addEventListener("keydown", (ev) => {
+            var _a;
             if (ev.key != "Enter") {
                 return;
             }
-            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"));
+            (_a = document.getElementById(element.getAttribute("onEnterPressClickElement"))) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
         });
     }
     return input;
@@ -284,15 +341,19 @@ export function SetupSelectInput(element) {
         inputHolder.appendChild(img);
     }
     //Input element
-    let input = document.createElement("select");
+    let input = document.createElement("input");
+    input.type = "text";
     input.id = element.getAttribute("valueId");
     input.setAttribute("disableRecursiveDisable", "true");
     input.tabIndex = element.tabIndex;
+    //Input options element
+    let optionHolder = document.createElement("div");
+    optionHolder.id = element.getAttribute("optionHolderId");
     let i = 0;
     while (i < element.children.length) {
         const option = element.children.item(i);
-        if (option.tagName == "OPTION") {
-            input.options.add(option);
+        if ((option === null || option === void 0 ? void 0 : option.tagName) == "OPTION") {
+            //input.options.add(option as HTMLOptionElement)
         }
         else {
             i++;
@@ -307,13 +368,14 @@ export function SetupSelectInput(element) {
     //Enter event
     if (element.hasAttribute("onEnterPressClickElement")) {
         element.addEventListener("keydown", (ev) => {
+            var _a;
             if (ev.key != "Enter") {
                 return;
             }
-            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"));
+            (_a = document.getElementById(element.getAttribute("onEnterPressClickElement"))) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
         });
     }
-    return input;
+    return document.createElement("select");
 }
 function updatePasswordEye(passimg, element, passwordField) {
     if (element.getAttribute("showPass") == "true") {
@@ -367,6 +429,7 @@ function SetupToasts() {
 }
 let toastCounter = 0;
 export function SendToast(title, message, type) {
+    var _a;
     toastCounter++;
     let toastId = toastCounter;
     //Get target color
@@ -444,7 +507,7 @@ export function SendToast(title, message, type) {
         console.error("Undefined icon!");
     }
     else {
-        img.src = toastImages.get(type).src;
+        img.src = (_a = toastImages.get(type)) === null || _a === void 0 ? void 0 : _a.src;
     }
     imgHolder.appendChild(img);
     //Text holder
@@ -458,15 +521,6 @@ export function SendToast(title, message, type) {
     toast.style.animation = "slideInFromRight 0.5s ease-out forwards";
     colorDiv.remove();
     return toastId;
-}
-export function SwitchToggle(toggle, value) {
-    const holder = toggle.children[1];
-    const input = holder.children[0];
-    const span = holder.children[1];
-    input.checked = value;
-    input.dispatchEvent(new Event("change"));
-    //console.log("Switch",toggle,value,input,span);
-    switchChange(toggle, span, input);
 }
 /*
 Setups rows of form
@@ -504,7 +558,7 @@ export function SetupRows() {
  * @param movedElement Moved element
  * @param dragElement Element that acts as dragger (topbar of window, ...)
  */
-export function MakeElementDraggable(movedElement, dragElement = null) {
+export function MakeElementDraggable(movedElement, dragElement) {
     if (dragElement == null) {
         dragElement = movedElement;
     }
@@ -522,7 +576,9 @@ export function MakeElementDraggable(movedElement, dragElement = null) {
     function dragEnd() {
         //End drag
         movedElement.removeAttribute("formIsDragged");
-        dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor");
+        if (dragElement != null) {
+            dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor");
+        }
         movedElement.removeAttribute("formDragLastCursor");
         movedElement.removeAttribute("formDragLastX");
         movedElement.removeAttribute("formDragLastY");
@@ -558,6 +614,6 @@ export function MakeElementDraggable(movedElement, dragElement = null) {
 }
 SetupRows();
 SetupTextInputs();
-SetupToggles();
+//SetupToggles()
 SetupToasts();
 //# sourceMappingURL=formScript.js.map

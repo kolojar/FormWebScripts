@@ -1,5 +1,5 @@
 import { FormDialog, FormDialogButton, FormDialogManager, FormDialogStyle, FormDialogTemplate } from "./formDialogScript.js"
-import { SendToast, SetWaitStatusForms } from "./formScript.js"
+import { RemoveWaitStatusForms, SendToast, SetWaitStatusForms } from "./formScript.js"
 import { LanguageManager } from "./languageManager.js"
 import { ConnectToWebSocket, UnpackStandard, WebSocketConnection, WebSocketConnectionMessageType } from "./serverComunication.js"
 
@@ -8,7 +8,7 @@ import { ConnectToWebSocket, UnpackStandard, WebSocketConnection, WebSocketConne
 /*
 Automatically connects to websocket and configures it with toasts and autoconnect, type is URL parameter
 */
-export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialogManager = null, newUrl = "/websocket",): WebSocketConnection {
+export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialogManager | null = null, newUrl = "/websocket",): WebSocketConnection {
     const languageManager = new LanguageManager("/formWebScripts/locales",null,false)
     const ws = new WebSocketConnection(type, newUrl, languageManager)
     if (dialogManager != null) {
@@ -24,7 +24,7 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                 if (dialogManager != null) {
                     dialogManager.ShowTemplate(ws.UserParams.connectingDialog)
                 }
-                SetWaitStatusForms(true, languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."))
+                SetWaitStatusForms(languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."))
                 break
             }
             case WebSocketConnectionMessageType.Open:
@@ -35,7 +35,7 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                     ws.UserParams.reconnectingDialog.CloseChildrenDialogs()
                     }
                 }
-                SetWaitStatusForms(false, "")
+                RemoveWaitStatusForms()
                 if (Number(data) > 0) {
                     SendToast("Web Socket", languageManager.Translate("wsForms.connected", "Connection to client application established!"), "ok")
                 }
@@ -46,7 +46,7 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                     if (dialogManager != null) {
                         dialogManager.ShowTemplate(ws.UserParams.reconnectingDialog)
                     }
-                    SetWaitStatusForms(true, languageManager.Translate("wsForms.disconnectedReconnecting", "Connection lost, reconnecting..."))
+                    SetWaitStatusForms(languageManager.Translate("wsForms.disconnectedReconnecting", "Connection lost, reconnecting..."))
                     SendToast("Web Socket", languageManager.Translate("wsForms.disconnected", "Connection to client application closed!"), "error")
                 }
                 break
@@ -59,7 +59,7 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                     }
                     dialogManager.ShowTemplate(new FormDialogTemplate("Web Socket", languageManager.Translate("wsForms.disconnectedRefresh", "Connection lost! Do you want to reload the page?"), false, (id: null, value: boolean) => { if (value) { window.location.reload() } }, [new FormDialogButton("left", "error", languageManager.Translate("wsForms.btnNo", "No"), false), new FormDialogButton("right", "ok", languageManager.Translate("wsForms.btnYes", "Yes"), true)], FormDialogStyle.Normal, true, true))
                 }
-                SetWaitStatusForms(true, languageManager.Translate("wsForms.connectionLost", "Connection lost!"))
+                SetWaitStatusForms(languageManager.Translate("wsForms.connectionLost", "Connection lost!"))
                 SendToast("Web Socket", languageManager.Translate("wsForms.couldNotConnect", "Could not reconnect to Web Socket! Please reload the page."), "error")
                 break
             default:

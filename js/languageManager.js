@@ -29,13 +29,13 @@ export class LanguageManager {
      */
     TranslateElements() {
         document.querySelectorAll("[data-i18n]").forEach(element => {
-            let translation = this.Translate(element.getAttribute("data-i18n"), null);
+            let translation = this.Translate(element.getAttribute("data-i18n"), "");
             if (translation != null) {
                 element.innerText = translation;
             }
         });
     }
-    constructor(localesFolderPath, fallbackLanguage = null, forceSetFallbackLanguage = false) {
+    constructor(localesFolderPath, fallbackLanguage = "", forceSetFallbackLanguage = false) {
         //Set language
         this.localesFolderPath = localesFolderPath;
         const lang = localStorage.getItem("formLanguage");

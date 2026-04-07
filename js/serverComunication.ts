@@ -118,7 +118,7 @@ export class WebSocketConnection {
             webSocket.onerror = function (error) {
                 if (!wsc.closing) {
                     wsc.messageFuncs.forEach(element => {
-                        element(WebSocketConnectionMessageType.Error, null)
+                        element(WebSocketConnectionMessageType.Error, "")
                     });
                 }
                 wsc.ws.close()
@@ -181,7 +181,7 @@ export type XHRServerResponceFunc = (ok: boolean, message: string) => void
 /*
 Sends POST request to server
 */
-export function SendPOSTMessageToServer(url: string, message: string, responceFunc: XHRServerResponceFunc = null) {
+export function SendPOSTMessageToServer(url: string, message: string, responceFunc: XHRServerResponceFunc | null) {
     console.log("Sending request...");
 
     //Create request
@@ -201,7 +201,7 @@ export function SendPOSTMessageToServer(url: string, message: string, responceFu
         } else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(false,null)
+                responceFunc(false,"")
             }
         }
     });
@@ -213,7 +213,7 @@ export function SendPOSTMessageToServer(url: string, message: string, responceFu
 /*
 Sends POST request to server
 */
-export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: XHRServerResponceFunc = null) {
+export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: XHRServerResponceFunc | null) {
     console.log("Sending request...");
 
     //Create request
@@ -233,7 +233,7 @@ export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: 
         } else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(false,null)
+                responceFunc(false,"")
             }
         }
     });
@@ -262,7 +262,7 @@ export async function SendPOSTDataToServerAsync(url: string, data: FormData): Pr
 
 export function UnpackStandard(message: string): [string, any] {
     if (message == null) {
-        return [null, null]
+        return ["", null]
     }
     const split = message.split("?")
     const command = split[0]
@@ -278,7 +278,7 @@ export function PackStandard(command: string, params: any) {
     return command + "?" + new URLSearchParams(params).toString()
 }
 
-export function ConnectToWebSocket(type: string, newUrl = "/"): WebSocket {
+export function ConnectToWebSocket(type: string, newUrl = "/"): WebSocket | null {
     try {
         const webSocket = new WebSocket(newUrl + "websocket?" + encodeURIComponent("type") + "=" + encodeURIComponent(type))
         //const webSocket = new WebSocket("/websocket")

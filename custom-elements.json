@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "tags": [
+        {
+            "name": "form-box",
+            "description": "Custom form container"
+        },
+        {
+            "name": "form-status-message",
+            "description": "Displays form status messages"
+        },
+        {
+            "name": "form-toggle",
+            "description": "Form toggle switch",
+            "attributes": [
+                {
+                    "name": "checked",
+                    "description": "Boolean value if switch checked or not"
+                },
+                {
+                     "name": "labelBefore",
+                      "description": "Label text before toggle"
+                },
+                {
+                     "name": "labelAfter",
+                     "description": "Label text after toggle"
+                },
+                {
+                     "name": "enables",
+                     "description": "Element id that is enabled by this toggle"
+                }
+            ]
+        }
+    ]
+}

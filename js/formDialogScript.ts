@@ -85,7 +85,7 @@ export class FormDialogTemplate<T> {
 export class FormDialog<T> {
     readonly template: FormDialogTemplate<T>
     readonly element: HTMLDialogElement
-    readonly entryElement: HTMLInputElement
+    readonly entryElement: HTMLInputElement | HTMLTextAreaElement
     readonly inputfield: HTMLElement
     readonly progressLines: HTMLDivElement[]
     readonly progressLabels: HTMLSpanElement[]

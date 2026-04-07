@@ -35,14 +35,14 @@ export class LanguageManager {
      */
     TranslateElements() {
         document.querySelectorAll("[data-i18n]").forEach(element => {
-            let translation = this.Translate(element.getAttribute("data-i18n"), null)
+            let translation = this.Translate(element.getAttribute("data-i18n") as string, "")
             if (translation != null) {
                 (element as HTMLElement).innerText = translation
             }
         })
     }
 
-    constructor(localesFolderPath: string, fallbackLanguage: string = null, forceSetFallbackLanguage: boolean = false) {
+    constructor(localesFolderPath: string, fallbackLanguage: string = "", forceSetFallbackLanguage: boolean = false) {
         //Set language
         this.localesFolderPath = localesFolderPath
         const lang = localStorage.getItem("formLanguage")

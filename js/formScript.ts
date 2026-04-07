@@ -1,16 +1,7 @@
 //Do not forget to add formStyle.css and tableStyle.css
 
 import { GeneratePassword } from "./sharedScripts.js";
-
-/*
-Disables form and adds propried styles and animations
-*/
-export function DisableForms(disabled: boolean) {
-    const forms = document.getElementsByClassName("formBox")
-    for (let index = 0; index < forms.length; index++) {
-        RecursiveDisabler(forms.item(index) as HTMLElement, disabled)
-    }
-}
+import "./formScript"
 
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
@@ -29,138 +20,378 @@ export function RecursiveDisabler(target: HTMLElement, disabled: boolean) {
 }
 
 /*
-Sets wait status and message
+HTMLFormBoxElement element defition
 */
-export function SetWaitStatusForms(wait: boolean, message: string) {
-    const forms = document.getElementsByClassName("formBox")
-    for (let index = 0; index < forms.length; index++) {
-        let form = forms[index] as HTMLElement;
-        form.style.cursor = wait ? "wait" : "";
+export class HTMLFormBoxElement extends HTMLDivElement {
+    private messageID: string
+    constructor() {
+        super();
+        this.messageID = ""
     }
-    DisableForms(wait)
-    SetStatusMessageForms(wait, wait ? message : "", 0)
+    /**
+     * Disables form box
+     */
+    Disable() {
+        RecursiveDisabler(this, true)
+    }
+
+    /**
+     * Enables form box
+     */
+    Enable() {
+        RecursiveDisabler(this, false)
+    }
+
+    /**
+     * Sets Status message to form box
+     * @param blink Should status message blink
+     * @param message Message
+     * @param cleanAfterMs Clean after timeout
+     */
+    SetStatusMessage(blink: boolean, message: string, cleanAfterMs: number = 0) {
+        //Set message
+        const messageID = GeneratePassword(8, true, true)
+        this.messageID = messageID
+        this.querySelectorAll("form-status-message").forEach(element => {
+            let status = element as HTMLParagraphElement //TODO: FIX
+            status.innerText = message;
+
+            //Set blinking
+            if (blink) {
+                if (!status.classList.contains("puslatingEffectFull")) {
+                    status.classList.add("puslatingEffectFull")
+                }
+            } else {
+                if (status.classList.contains("puslatingEffectFull")) {
+                    status.classList.remove("puslatingEffectFull")
+                }
+            }
+
+            //Clean if needed
+            if (cleanAfterMs > 0) {
+                setTimeout(() => {
+                    if (this.messageID == messageID) {
+                        status.innerText = ""
+                        this.messageID = ""
+                    }
+                }, cleanAfterMs)
+            }
+        })
+    }
+
+    /**
+     * Sets waiting status to form box + disables it
+     * @param message Message
+     */
+    SetWaitStatusMessage(message: string) {
+        this.Disable()
+        this.style.cursor = "wait";
+        this.SetStatusMessage(true, message, 0)
+    }
+
+    /**
+     * Removes waiting status from form box + enables it
+     */
+    RemoveWaitStatusMessage() {
+        this.SetStatusMessage(false, "", 0)
+        this.style.cursor = "";
+        this.Enable()
+    }
 }
 
+/**
+ * Sets wait status to all forms in document
+ * @param message Message
+ */
+export function SetWaitStatusForms(message: string) {
+    document.querySelectorAll("form-box").forEach(form => {
+        (form as HTMLFormBoxElement).SetWaitStatusMessage(message)
+    })
+}
 
 /**
-* Sets status message to all forms
+ * Removes wait status from wall forms in document
+ */
+export function RemoveWaitStatusForms() {
+    document.querySelectorAll("form-box").forEach(form => {
+        (form as HTMLFormBoxElement).RemoveWaitStatusMessage()
+    })
+}
+
+/*
+HTMLFormBoxStatusMessageElement element defition
 */
-export function SetStatusMessageForms(blink: boolean, message: string, cleanAfterMs: number = 0) {
-    //Set message
-    const messageID = GeneratePassword(8, true, true)
-    let status = (document.getElementById("statusMessage") as HTMLElement);
-    if (status == null) { return }
-    status.setAttribute("messageID", messageID)
-    status.innerText = message;
-
-    //Set blinking
-    if (blink) {
-        if (!status.classList.contains("puslatingEffectFull")) {
-            status.classList.add("puslatingEffectFull")
-        }
-    } else {
-        if (status.classList.contains("puslatingEffectFull")) {
-            status.classList.remove("puslatingEffectFull")
-        }
-    }
-
-    //Clean if needed
-    if (cleanAfterMs > 0) {
-        setTimeout(() => {
-            if (status.getAttribute("messageID") == messageID) {
-                status.innerText = ""
-                status.removeAttribute("messageID")
-            }
-        }, cleanAfterMs)
+export class HTMLFormBoxStatusMessageElement extends HTMLParagraphElement {
+    constructor() {
+        super()
     }
 }
 
 /*
-Setups switches (toggles)
+HTMLFormToggleElement element defition
 */
-export function SetupToggles() {
-    const elements = document.getElementsByTagName("toggle")
-    for (let i = 0; i < elements.length; i++) {
-        //Prepare toggles -> CSS + subelements
-        const element = elements[i] as HTMLElement;
-        element.classList.add("formSwitch")
+export class HTMLFormToggleElement extends HTMLDivElement {
+    readonly labelBefore: HTMLLabelElement
+    readonly holder: HTMLLabelElement
+    readonly input: HTMLInputElement
+    readonly slider: HTMLSpanElement
+    readonly labelAfter: HTMLLabelElement
+    protected checked: boolean
+    constructor() {
+        super()
+        this.checked = false
 
-        //Label before
-        const labelBefore = document.createElement("label")
-        if (element.hasAttribute("labelBefore")) {
-            labelBefore.classList.add("labelBefore")
-            labelBefore.innerHTML = element.getAttribute("labelBefore")
-        }
-        element.appendChild(labelBefore)
+        //Create elements
+        this.labelBefore = document.createElement("label")
+        this.holder = document.createElement("label")
+        this.input = document.createElement("input")
+        this.slider = document.createElement("span")
+        this.labelAfter = document.createElement("label")
 
-        //Holder label
-        const holder = document.createElement("label")
-        holder.classList.add("toggle")
-        element.appendChild(holder)
+        //Add classes
+        this.classList.add("formSwitch")
+        this.labelAfter.classList.add("labelBefore")
+        this.holder.classList.add("toggle")
+        this.slider.classList.add("slider")
+        this.labelAfter.classList.add("labelAfter")
 
-        //Input element
-        const input = document.createElement("input") as HTMLInputElement
-        input.type = "checkbox"
-        input.id = element.getAttribute("valueId")
-        holder.appendChild(input)
+        //Move children
+        this.appendChild(this.labelBefore)
+        this.appendChild(this.holder)
+        this.holder.appendChild(this.input)
+        this.holder.appendChild(this.slider)
+        this.holder.appendChild(this.labelAfter)
 
-        //Span slider
-        const span = document.createElement("span") as HTMLSpanElement
-        span.classList.add("slider")
-        holder.appendChild(span)
-        switchChange(element, span, input)
-
-        //Label after
-        if (element.hasAttribute("labelAfter")) {
-            const labelAfter = document.createElement("span")
-            labelAfter.classList.add("labelAfter")
-            labelAfter.innerHTML = element.getAttribute("labelAfter")
-            holder.appendChild(labelAfter)
-        }
-
-        //Click event
-        element.addEventListener("click", function () {
-            //console.log("Click");
-            input.checked = !input.checked
-            input.dispatchEvent(new Event("change"))
-            switchChange(element, span, input)
+        //Setup basic events
+        this.addEventListener("click", () => {
+            this.input.checked = !this.input.checked
+            this.input.dispatchEvent(new Event("change"))
+            this.updateSwitch()
         })
-        //On key down
-        element.addEventListener("keydown", function (ev: KeyboardEvent) {
+        this.addEventListener("keydown", (ev: KeyboardEvent) => {
             if (ev.code === "Space") {
                 //console.log("Click");
-                input.checked = !input.checked
-                input.dispatchEvent(new Event("change"))
-                switchChange(element, span, input)
+                this.input.checked = !this.input.checked
+                this.input.dispatchEvent(new Event("change"))
+                this.updateSwitch()
             }
         })
     }
+
+    connectedCallback() {
+        this.labelBefore.innerText = this.getAttribute("labelBefore") as string
+        this.labelAfter.innerText = this.getAttribute("labelAfter") as string
+        this.checked = this.getAttribute("checked") == "true"
+        this.updateSwitch()
+    }
+
+    updateSwitch() {
+        //Switch color and do the animation
+        let onColorClass = this.getAttribute("onColorClass") as string
+        let offColorClass = this.getAttribute("offColorClass") as string
+        if (this.input.checked) {
+            this.slider.classList.add(onColorClass)
+            this.slider.classList.remove(offColorClass)
+            this.holder.classList.add("formSwitchChecked")
+        } else {
+            this.slider.classList.remove(onColorClass)
+            this.slider.classList.add(offColorClass)
+            this.holder.classList.remove("formSwitchChecked")
+        }
+
+        //Handle enables target document
+        if (this.hasAttribute("enables")) {
+            const enables = document.getElementById(this.getAttribute("enables") as string)
+            if (enables != null) {
+                if (!this.input.checked) {
+                    enables.setAttribute("disabled", "")
+                    //console.log("Disabled");
+                } else {
+                    enables.removeAttribute("disabled")
+                    //console.log("Enable");
+                }
+            }
+        }
+
+        //Update this element
+        this.checked = this.input.checked
+    }
+
+    attributeChangedCallback(name: string, oldValue: any, newValue: any) {
+        if (oldValue == newValue) {
+            return
+        }
+        if (name == "value") {
+            this.checked = newValue as string == "true"
+            this.updateSwitch()
+        } else if (name == "labelBefore") {
+            this.labelBefore.innerText = newValue
+        } else if (name == "labelAfter") {
+            this.labelAfter.innerText = newValue
+        }
+    }
 }
 
-function switchChange(element: HTMLElement, span: HTMLSpanElement, input: HTMLInputElement) {
-    const enables = document.getElementById(element.getAttribute("enables")) as HTMLInputElement
-    let onColorClass = element.getAttribute("onColorClass")
-    let offColorClass = element.getAttribute("offColorClass")
-    const holder = element.children[1] as HTMLElement
-    if (input.checked) {
-        span.classList.add(onColorClass)
-        span.classList.remove(offColorClass)
-        holder.classList.add("formSwitchChecked")
-    } else {
-        span.classList.remove(onColorClass)
-        span.classList.add(offColorClass)
-        holder.classList.remove("formSwitchChecked")
-    }
-    //console.log(enables);
+type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
+type HTMLFormInputValidationFunc = (value: string) => boolean
+/**
+ * HTMLFormInputElement element defition
+ */
+export class HTMLFormInputElement extends HTMLDivElement {
+    readonly img: HTMLImageElement
+    readonly input: HTMLInputElement
+    readonly textArea: HTMLTextAreaElement
+    readonly afterImg: HTMLImageElement
+    protected onEnterPressClickElementId: string
+    protected type: HTMLFormInputType
+    public validationFunction: HTMLFormInputValidationFunc |null
+    public doChangeCheck: boolean
+    public originalValue: string
+    public changeBorderClass: string = "formWarnBorderColor"
+    public invalidBorderClass: string = "formErrorBorderColor"
 
-    if (enables != null) {
-        if (!input.checked) {
-            enables.setAttribute("disabled", "")
-            //console.log("Disabled");
+    constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null,  doChangeCheck: boolean = false, originalValue: string) {
+        super()
+        this.onEnterPressClickElementId = onEnterPressClickElementId
+        this.type = "text"
+        this.validationFunction = validationFunction;
+        this.doChangeCheck = doChangeCheck
+        this.originalValue = originalValue
+
+        //Create elements
+        this.img = document.createElement("img")
+        this.input = document.createElement("input")
+        this.textArea = document.createElement("textarea")
+        this.afterImg = document.createElement("img")
+
+        //Add classes
+        this.afterImg.style.cursor = "pointer"
+
+        //Set attributes
+        this.input.setAttribute("disableRecursiveDisable", "true")
+        this.textArea.setAttribute("disableRecursiveDisable", "true")
+        this.input.tabIndex = this.tabIndex
+        this.textArea.tabIndex = this.tabIndex
+        this.tabIndex = -1
+
+        //Move children
+        this.appendChild(this.img)
+        this.appendChild(this.afterImg)
+
+        //Setup basic events
+        this.addEventListener("focusin", () => {
+            if (!this.classList.contains("formInputFocus")) {
+                this.classList.add("formInputFocus")
+            }
+        })
+        this.addEventListener("focusout", () => {
+            if (this.classList.contains("formInputFocus")) {
+                this.classList.remove("formInputFocus")
+            }
+            this.validateInternal()
+        })
+        this.addEventListener("keydown", (ev: KeyboardEvent) => {
+            if (this.onEnterPressClickElementId == "") {
+                return
+            }
+            if (ev.key == "Enter") {
+                document.getElementById(this.onEnterPressClickElementId)?.dispatchEvent(new Event("click"))
+            }
+        })
+        this.addEventListener("click",() => {
+            if(this.type == "textarea") {
+                this.textArea.focus()
+            } else {
+                this.input.focus()
+            }
+        })
+        this.addEventListener("input",() => {
+            this.validateInternal()
+        })
+    }
+
+    updateInputType() {
+        //Select input element based on type
+        const focused = this.classList.contains("formInputFocus")
+        this.removeChild(this.input)
+        this.removeChild(this.textArea)
+        if (this.type == "textarea") {
+            this.appendChild(this.textArea)
+            if (focused) {
+                this.textArea.focus()
+            }
         } else {
-            enables.removeAttribute("disabled")
-            //console.log("Enable");
+            this.appendChild(this.input)
+            this.input.type = this.type
+            if (focused) {
+                this.input.focus()
+            }
+        } 
+
+        //Add specific use cases
+        if (this.type == "password") {
+            //Make password eye
+            const updatePasswordEye = () => {
+                if (this.input.type == "password") {
+                    this.afterImg.src = "/formWebScripts/images/visibilityoff32.svg"
+                } else {
+                    this.afterImg.src = "/formWebScripts/images/visibility32.svg"
+                }
+            }
+            updatePasswordEye()
+            this.afterImg.onclick = () => {
+                if (this.input.type == "password") {
+                    this.input.type = "text"
+                } else {
+                    this.input.type = "password"
+                }
+                updatePasswordEye()
+            }
+        } else if (this.type == "color") {
+            //Random color generator
+            this.afterImg.src = "/formWebScripts/images/casino32.svg"
+            this.afterImg.onclick = () => {
+                this.input.value = GenerateRandomColor()
+            }
+        } else {
+            this.afterImg.src = ""
         }
+    }
+
+    connectedCallback() {
+        //Sort input type
+        this.type = this.getAttribute("type") as HTMLFormInputType
+        this.updateInputType()
+    }
+
+    attributeChangedCallback/(name: string, oldValue: any, newValue: any) {
+        if(oldValue == newValue) {
+            return
+        }
+        if (name == "type") {
+            this.type = newValue
+            this.updateInputType()
+        }
+    }
+
+    private validateInternal(): [changed: boolean, isValid: bool] {
+        //Check for changes
+        let changed = false
+        if (this.doChangeCheck) {
+            if(this.input.value != this.originalValue) {
+                changed = true;
+            }
+        }
+
+        //Do validation
+        let isValid = true
+        if (this.validationFunction != null) {
+            isValid = this.validationFunction(this.input.value)
+        }
+    }
+
+    public validate(): [changed: boolean, isValid: bool] {
+
     }
 }
 
@@ -174,7 +405,7 @@ export function SetupTextInputs() {
     }
 }
 
-export function SetupTextInput(element: HTMLElement): HTMLInputElement {
+export function SetupTextInput(element: HTMLElement): HTMLInputElement | HTMLTextAreaElement {
     //Prepare inputs -> CSS + subelements
     const inputHolder = document.createElement("div") as HTMLElement
     inputHolder.classList.add("formTextInput")
@@ -194,11 +425,11 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
     //}
 
     //Img element
-    if( element.hasAttribute("icon")) {
-    const img = document.createElement("img") as HTMLImageElement
-    img.src = element.getAttribute("icon")
-    img.classList.add("formTooltipIcon")
-    inputHolder.appendChild(img)
+    if (element.hasAttribute("icon")) {
+        const img = document.createElement("img") as HTMLImageElement
+        img.src = element.getAttribute("icon") as string
+        //img.classList.add("formTooltipIcon")
+        inputHolder.appendChild(img)
     }
 
     //Input element
@@ -207,12 +438,12 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
         input = document.createElement("textarea") as HTMLTextAreaElement
     } else {
         input = document.createElement("input") as HTMLInputElement
-        input.type = element.getAttribute("inputType")
+        input.type = element.getAttribute("inputType") as string
     }
-    input.id = element.getAttribute("valueId")
-    input.value = element.getAttribute("initialValue")
+    input.id = element.getAttribute("valueId") as string
+    input.value = element.getAttribute("initialValue") as string
     input.setAttribute("disableRecursiveDisable", "true")
-    input.placeholder = element.getAttribute("placeholder")
+    input.placeholder = element.getAttribute("placeholder") as string
     input.tabIndex = element.tabIndex
     element.tabIndex = -1
     inputHolder.appendChild(input)
@@ -223,11 +454,11 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
         if (element.getAttribute("showPass") == null) {
             element.setAttribute("showPass", "false")
         }
-        updatePasswordEye(passimg, element, input)
+        updatePasswordEye(passimg, element, input as HTMLInputElement)
         passimg.style.cursor = "pointer"
         passimg.addEventListener("click", function () {
             element.setAttribute("showPass", String(!(element.getAttribute("showPass") == "true")))
-            updatePasswordEye(passimg, element, input)
+            updatePasswordEye(passimg, element, input as HTMLInputElement)
         })
         inputHolder.appendChild(passimg)
     }
@@ -244,12 +475,12 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
     }
 
     //Focus event
-    element.addEventListener("focusin",function() {
+    element.addEventListener("focusin", function () {
         if (!inputHolder.classList.contains("formTextInputFocus")) {
             inputHolder.classList.add("formTextInputFocus")
         }
     })
-     element.addEventListener("focusout",function() {
+    element.addEventListener("focusout", function () {
         if (inputHolder.classList.contains("formTextInputFocus")) {
             inputHolder.classList.remove("formTextInputFocus")
         }
@@ -262,9 +493,9 @@ export function SetupTextInput(element: HTMLElement): HTMLInputElement {
 
     //Enter event
     if (element.hasAttribute("onEnterPressClickElement")) {
-        element.addEventListener("keydown",(ev: KeyboardEvent) => {
-            if (ev.key != "Enter") {return}
-            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"))
+        element.addEventListener("keydown", (ev: KeyboardEvent) => {
+            if (ev.key != "Enter") { return }
+            document.getElementById(element.getAttribute("onEnterPressClickElement") as string)?.dispatchEvent(new Event("click"))
         })
     }
     return input
@@ -300,23 +531,29 @@ export function SetupSelectInput(element: HTMLElement): HTMLSelectElement {
     //}
 
     //Img element
-    if( element.hasAttribute("icon")) {
-    const img = document.createElement("img") as HTMLImageElement
-    img.src = element.getAttribute("icon")
-    img.classList.add("formTooltipIcon")
-    inputHolder.appendChild(img)
+    if (element.hasAttribute("icon")) {
+        const img = document.createElement("img") as HTMLImageElement
+        img.src = element.getAttribute("icon") as string
+        img.classList.add("formTooltipIcon")
+        inputHolder.appendChild(img)
     }
 
     //Input element
-    let input = document.createElement("select")
-    input.id = element.getAttribute("valueId")
+    let input = document.createElement("input")
+    input.type = "text"
+    input.id = element.getAttribute("valueId") as string
     input.setAttribute("disableRecursiveDisable", "true")
     input.tabIndex = element.tabIndex
+
+    //Input options element
+    let optionHolder = document.createElement("div")
+    optionHolder.id = element.getAttribute("optionHolderId") as string
+
     let i = 0;
-    while(i < element.children.length) {
+    while (i < element.children.length) {
         const option = element.children.item(i)
-        if (option.tagName == "OPTION") {
-            input.options.add(option as HTMLOptionElement)
+        if (option?.tagName == "OPTION") {
+            //input.options.add(option as HTMLOptionElement)
         } else {
             i++
         }
@@ -331,12 +568,12 @@ export function SetupSelectInput(element: HTMLElement): HTMLSelectElement {
 
     //Enter event
     if (element.hasAttribute("onEnterPressClickElement")) {
-        element.addEventListener("keydown",(ev: KeyboardEvent) => {
-            if (ev.key != "Enter") {return}
-            document.getElementById(element.getAttribute("onEnterPressClickElement")).dispatchEvent(new Event("click"))
+        element.addEventListener("keydown", (ev: KeyboardEvent) => {
+            if (ev.key != "Enter") { return }
+            document.getElementById(element.getAttribute("onEnterPressClickElement") as string)?.dispatchEvent(new Event("click"))
         })
     }
-    return input
+    return document.createElement("select")
 }
 
 function updatePasswordEye(passimg: HTMLImageElement, element: HTMLElement, passwordField: HTMLInputElement) {
@@ -473,7 +710,7 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
         //colorDiv.classList.add("formBlackColor")
         console.error("Undefined icon!");
     } else {
-        img.src = toastImages.get(type).src
+        img.src = toastImages.get(type)?.src as string
     }
     imgHolder.appendChild(img)
 
@@ -490,16 +727,6 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
     colorDiv.remove()
 
     return toastId
-}
-
-export function SwitchToggle(toggle: HTMLElement, value: boolean) {
-    const holder = toggle.children[1] as HTMLElement
-    const input = holder.children[0] as HTMLInputElement
-    const span = holder.children[1] as HTMLSpanElement
-    input.checked = value
-    input.dispatchEvent(new Event("change"))
-    //console.log("Switch",toggle,value,input,span);
-    switchChange(toggle, span, input)
 }
 
 /*
@@ -530,7 +757,7 @@ export function SetupRows() {
         //Create label
         if (element.hasAttribute("label")) {
             const label = document.createElement("p")
-            label.innerHTML = element.getAttribute("label")
+            label.innerHTML = element.getAttribute("label") as string
             element.appendChild(label)
         }
         element.appendChild(holder)
@@ -542,7 +769,7 @@ export function SetupRows() {
  * @param movedElement Moved element
  * @param dragElement Element that acts as dragger (topbar of window, ...)
  */
-export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTMLElement = null) {
+export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTMLElement | null) {
     if (dragElement == null) {
         dragElement = movedElement
     }
@@ -558,7 +785,9 @@ export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTM
     function dragEnd() {
         //End drag
         movedElement.removeAttribute("formIsDragged")
-        dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor")
+        if (dragElement != null) {
+            dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor") as string
+        }
         movedElement.removeAttribute("formDragLastCursor")
         movedElement.removeAttribute("formDragLastX")
         movedElement.removeAttribute("formDragLastY")
@@ -593,5 +822,5 @@ export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTM
 
 SetupRows()
 SetupTextInputs()
-SetupToggles()
+//SetupToggles()
 SetupToasts()

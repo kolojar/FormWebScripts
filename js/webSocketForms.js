@@ -1,5 +1,5 @@
 import { FormDialogButton, FormDialogStyle, FormDialogTemplate } from "./formDialogScript.js";
-import { SendToast, SetWaitStatusForms } from "./formScript.js";
+import { RemoveWaitStatusForms, SendToast, SetWaitStatusForms } from "./formScript.js";
 import { LanguageManager } from "./languageManager.js";
 import { WebSocketConnection, WebSocketConnectionMessageType } from "./serverComunication.js";
 //Do not forget to add formStyle.css and tableStyle.css
@@ -22,7 +22,7 @@ export function SetupWebsocketWithToasts(type, dialogManager = null, newUrl = "/
                 if (dialogManager != null) {
                     dialogManager.ShowTemplate(ws.UserParams.connectingDialog);
                 }
-                SetWaitStatusForms(true, languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."));
+                SetWaitStatusForms(languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."));
                 break;
             }
             case WebSocketConnectionMessageType.Open:
@@ -33,7 +33,7 @@ export function SetupWebsocketWithToasts(type, dialogManager = null, newUrl = "/
                         ws.UserParams.reconnectingDialog.CloseChildrenDialogs();
                     }
                 }
-                SetWaitStatusForms(false, "");
+                RemoveWaitStatusForms();
                 if (Number(data) > 0) {
                     SendToast("Web Socket", languageManager.Translate("wsForms.connected", "Connection to client application established!"), "ok");
                 }
@@ -44,7 +44,7 @@ export function SetupWebsocketWithToasts(type, dialogManager = null, newUrl = "/
                     if (dialogManager != null) {
                         dialogManager.ShowTemplate(ws.UserParams.reconnectingDialog);
                     }
-                    SetWaitStatusForms(true, languageManager.Translate("wsForms.disconnectedReconnecting", "Connection lost, reconnecting..."));
+                    SetWaitStatusForms(languageManager.Translate("wsForms.disconnectedReconnecting", "Connection lost, reconnecting..."));
                     SendToast("Web Socket", languageManager.Translate("wsForms.disconnected", "Connection to client application closed!"), "error");
                 }
                 break;
@@ -59,7 +59,7 @@ export function SetupWebsocketWithToasts(type, dialogManager = null, newUrl = "/
                         window.location.reload();
                     } }, [new FormDialogButton("left", "error", languageManager.Translate("wsForms.btnNo", "No"), false), new FormDialogButton("right", "ok", languageManager.Translate("wsForms.btnYes", "Yes"), true)], FormDialogStyle.Normal, true, true));
                 }
-                SetWaitStatusForms(true, languageManager.Translate("wsForms.connectionLost", "Connection lost!"));
+                SetWaitStatusForms(languageManager.Translate("wsForms.connectionLost", "Connection lost!"));
                 SendToast("Web Socket", languageManager.Translate("wsForms.couldNotConnect", "Could not reconnect to Web Socket! Please reload the page."), "error");
                 break;
             default:
