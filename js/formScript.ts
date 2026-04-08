@@ -217,6 +217,7 @@ export class HTMLFormToggleElement extends HTMLDivElement {
         this.checked = this.input.checked
     }
 
+    static observedAttributes = ['value', 'labelBefore', 'labelAfter']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         if (oldValue == newValue) {
             return
@@ -232,8 +233,8 @@ export class HTMLFormToggleElement extends HTMLDivElement {
     }
 }
 
-type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
-type HTMLFormInputValidationFunc = (value: string) => boolean
+export type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "select" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
+export type HTMLFormInputValidationFunc = (value: string) => boolean
 /**
  * HTMLFormInputElement element defition
  */
@@ -242,30 +243,41 @@ export class HTMLFormInputElement extends HTMLDivElement {
     readonly input: HTMLInputElement
     readonly textArea: HTMLTextAreaElement
     readonly afterImg: HTMLImageElement
-    protected onEnterPressClickElementId: string
-    protected type: HTMLFormInputType
-    public validationFunction: HTMLFormInputValidationFunc |null
-    public doChangeCheck: boolean
-    public originalValue: string
-    public changeBorderClass: string = "formWarnBorderColor"
-    public invalidBorderClass: string = "formErrorBorderColor"
+    private onEnterPressClickElementId: string
+    private type: HTMLFormInputType
+    public validationFunction: HTMLFormInputValidationFunc | null
+    readonly doChangeCheck: boolean
+    private originalValue: string
+    readonly changeBorderClass: string = "formWarnBorderColor"
+    readonly invalidBorderClass: string = "formErrorBorderColor"
+    private listId: string = ""
+    private isStrictList: boolean = false
+    private options: string[]
+    readonly listHolder: HTMLDivElement
+    private usingJSList: boolean = false
 
-    constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null,  doChangeCheck: boolean = false, originalValue: string) {
+    constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null, listId: string = "", strictList: boolean = false, doChangeCheck: boolean = false, originalValue: string = "", changeBorderClass: string = "formWarnBorderColor", invalidBorderClass: string = "formErrorBorderColor") {
         super()
         this.onEnterPressClickElementId = onEnterPressClickElementId
         this.type = "text"
         this.validationFunction = validationFunction;
         this.doChangeCheck = doChangeCheck
         this.originalValue = originalValue
+        this.changeBorderClass = changeBorderClass
+        this.invalidBorderClass = invalidBorderClass
+        this.listId = listId
+        this.isStrictList = strictList
 
         //Create elements
         this.img = document.createElement("img")
         this.input = document.createElement("input")
         this.textArea = document.createElement("textarea")
         this.afterImg = document.createElement("img")
+        this.listHolder = document.createElement("div")
 
         //Add classes
         this.afterImg.style.cursor = "pointer"
+        this.listHolder.classList.add("listHolder")
 
         //Set attributes
         this.input.setAttribute("disableRecursiveDisable", "true")
@@ -273,6 +285,7 @@ export class HTMLFormInputElement extends HTMLDivElement {
         this.input.tabIndex = this.tabIndex
         this.textArea.tabIndex = this.tabIndex
         this.tabIndex = -1
+        this.listHolder.style.display = "none"
 
         //Move children
         this.appendChild(this.img)
@@ -280,11 +293,14 @@ export class HTMLFormInputElement extends HTMLDivElement {
 
         //Setup basic events
         this.addEventListener("focusin", () => {
+            this.renderList()
+            this.listHolder.style.display = ""
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus")
             }
         })
         this.addEventListener("focusout", () => {
+            this.listHolder.style.display = "none"
             if (this.classList.contains("formInputFocus")) {
                 this.classList.remove("formInputFocus")
             }
@@ -298,16 +314,62 @@ export class HTMLFormInputElement extends HTMLDivElement {
                 document.getElementById(this.onEnterPressClickElementId)?.dispatchEvent(new Event("click"))
             }
         })
-        this.addEventListener("click",() => {
-            if(this.type == "textarea") {
+        this.addEventListener("click", () => {
+            if (this.type == "textarea") {
                 this.textArea.focus()
             } else {
                 this.input.focus()
             }
         })
-        this.addEventListener("input",() => {
+        this.addEventListener("input", () => {
+            this.renderList()
             this.validateInternal()
         })
+        this.addEventListener("resize", () => {
+            this.renderList()
+        })
+    }
+
+    updateList() {
+        //Clear list
+        if (this.usingJSList) {
+            return
+        }
+        while (this.options.length > 0) {
+            this.options.pop()
+        }
+
+        //Updates hint list under the selection
+        if (this.listId == "") {
+            return
+        }
+        const list = document.getElementById(this.listId)
+        for (let i = 0; i < list.children.length; i++) {
+            const child = list.children[i];
+            if (child.tagName == "OPTION") {
+                this.options.push((child as HTMLOptionElement).value)
+            }
+        }
+        this.renderList()
+    }
+
+    renderList() {
+        //Clear list
+        while (this.listHolder.lastChild != null) {
+            this.listHolder.lastChild.remove()
+        }
+
+        //Update list
+        for (const value of this.options) {
+            if (value.includes(this.getValue())) {
+                const option = document.createElement("p")
+                option.innerText = value
+                option.addEventListener("click",() => {
+                    this.setValue(value)
+                })
+                this.listHolder.appendChild(option)
+            }
+        }
     }
 
     updateInputType() {
@@ -320,13 +382,15 @@ export class HTMLFormInputElement extends HTMLDivElement {
             if (focused) {
                 this.textArea.focus()
             }
+        } else if (this.type == "select") {
+            this.setIsScrictList(true)
         } else {
             this.appendChild(this.input)
             this.input.type = this.type
             if (focused) {
                 this.input.focus()
             }
-        } 
+        }
 
         //Add specific use cases
         if (this.type == "password") {
@@ -364,21 +428,35 @@ export class HTMLFormInputElement extends HTMLDivElement {
         this.updateInputType()
     }
 
-    attributeChangedCallback/(name: string, oldValue: any, newValue: any) {
-        if(oldValue == newValue) {
+    static observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'originalValue', 'list', 'placeholder', 'icon', 'isStrictList']
+    attributeChangedCallback(name: string, oldValue: any, newValue: any) {
+        if (oldValue == newValue) {
             return
         }
         if (name == "type") {
             this.type = newValue
             this.updateInputType()
+        } else if (name == "value") {
+            this.setValue(newValue)
+        } else if (name == "onEnterPressClickElementId") {
+            this.onEnterPressClickElementId = newValue
+        } else if (name == "placeholder") {
+            this.setPlaceHolder(newValue)
+        } else if (name == "icon") {
+            this.setIcon(newValue)
+        } else if (name == "isStrictList") {
+            this.setIsScrictList(newValue == "true")
+        } else if (name == "list") {
+            this.setListId(newValue)
         }
     }
 
-    private validateInternal(): [changed: boolean, isValid: bool] {
+    private validateInternal(): [changed: boolean, isValid: boolean] {
+        this.setAttribute("value", this.getValue())
         //Check for changes
         let changed = false
         if (this.doChangeCheck) {
-            if(this.input.value != this.originalValue) {
+            if (this.getValue() != this.originalValue) {
                 changed = true;
             }
         }
@@ -386,203 +464,111 @@ export class HTMLFormInputElement extends HTMLDivElement {
         //Do validation
         let isValid = true
         if (this.validationFunction != null) {
-            isValid = this.validationFunction(this.input.value)
+            isValid = this.validationFunction(this.getValue())
         }
+        return [changed, isValid]
     }
 
-    public validate(): [changed: boolean, isValid: bool] {
-
-    }
-}
-
-/*
-Setups text inputs
-*/
-export function SetupTextInputs() {
-    const elements = document.getElementsByTagName("inputfield")
-    for (let i = 0; i < elements.length; i++) {
-        SetupTextInput(elements[i] as HTMLElement)
-    }
-}
-
-export function SetupTextInput(element: HTMLElement): HTMLInputElement | HTMLTextAreaElement {
-    //Prepare inputs -> CSS + subelements
-    const inputHolder = document.createElement("div") as HTMLElement
-    inputHolder.classList.add("formTextInput")
-    element.appendChild(inputHolder)
-    //const holder = document.createElement("holder") as HTMLElement
-    //inputHolder.appendChild(holder);
-    //inputHolder.style.width = element.style.width
-
-    //Add label
-    //if (element.hasAttribute("label")) {
-    //    const label = document.createElement("p")
-    //    label.innerHTML = element.getAttribute("label")
-    //    if (element.hasAttribute("isFirst")) {
-    //        label.style.marginTop = "0px"
-    //    }
-    //    element.insertBefore(label, inputHolder)
-    //}
-
-    //Img element
-    if (element.hasAttribute("icon")) {
-        const img = document.createElement("img") as HTMLImageElement
-        img.src = element.getAttribute("icon") as string
-        //img.classList.add("formTooltipIcon")
-        inputHolder.appendChild(img)
+    public validate(): [changed: boolean, isValid: boolean] {
+        return this.validateInternal()
     }
 
-    //Input element
-    let input = null
-    if (element.getAttribute("inputType") == "textarea") {
-        input = document.createElement("textarea") as HTMLTextAreaElement
-    } else {
-        input = document.createElement("input") as HTMLInputElement
-        input.type = element.getAttribute("inputType") as string
-    }
-    input.id = element.getAttribute("valueId") as string
-    input.value = element.getAttribute("initialValue") as string
-    input.setAttribute("disableRecursiveDisable", "true")
-    input.placeholder = element.getAttribute("placeholder") as string
-    input.tabIndex = element.tabIndex
-    element.tabIndex = -1
-    inputHolder.appendChild(input)
-
-    //Password img element
-    if (element.getAttribute("inputType") == "password") {
-        const passimg = document.createElement("img") as HTMLImageElement
-        if (element.getAttribute("showPass") == null) {
-            element.setAttribute("showPass", "false")
-        }
-        updatePasswordEye(passimg, element, input as HTMLInputElement)
-        passimg.style.cursor = "pointer"
-        passimg.addEventListener("click", function () {
-            element.setAttribute("showPass", String(!(element.getAttribute("showPass") == "true")))
-            updatePasswordEye(passimg, element, input as HTMLInputElement)
-        })
-        inputHolder.appendChild(passimg)
-    }
-
-    //Color random button
-    if (element.getAttribute("inputType") == "color") {
-        const randomImg = document.createElement("img") as HTMLImageElement
-        randomImg.src = "/formWebScripts/images/casino32.svg"
-        randomImg.style.cursor = "pointer"
-        randomImg.onclick = function () {
-            input.value = GenerateRandomColor()
-        }
-        inputHolder.appendChild(randomImg)
-    }
-
-    //Focus event
-    element.addEventListener("focusin", function () {
-        if (!inputHolder.classList.contains("formTextInputFocus")) {
-            inputHolder.classList.add("formTextInputFocus")
-        }
-    })
-    element.addEventListener("focusout", function () {
-        if (inputHolder.classList.contains("formTextInputFocus")) {
-            inputHolder.classList.remove("formTextInputFocus")
-        }
-    })
-
-    //Click event
-    element.addEventListener("click", function () {
-        input.focus()
-    })
-
-    //Enter event
-    if (element.hasAttribute("onEnterPressClickElement")) {
-        element.addEventListener("keydown", (ev: KeyboardEvent) => {
-            if (ev.key != "Enter") { return }
-            document.getElementById(element.getAttribute("onEnterPressClickElement") as string)?.dispatchEvent(new Event("click"))
-        })
-    }
-    return input
-}
-
-/*
-Setups select inputs
-*/
-export function SetupSelectInputs() {
-    const elements = document.getElementsByTagName("inputselect")
-    for (let i = 0; i < elements.length; i++) {
-        SetupSelectInput(elements[i] as HTMLElement)
-    }
-}
-
-export function SetupSelectInput(element: HTMLElement): HTMLSelectElement {
-    //Prepare inputs -> CSS + subelements
-    const inputHolder = document.createElement("div") as HTMLElement
-    inputHolder.classList.add("formTextInput")
-    element.appendChild(inputHolder)
-    //const holder = document.createElement("holder") as HTMLElement
-    //inputHolder.appendChild(holder);
-    //inputHolder.style.width = element.style.width
-
-    //Add label
-    //if (element.hasAttribute("label")) {
-    //    const label = document.createElement("p")
-    //    label.innerHTML = element.getAttribute("label")
-    //    if (element.hasAttribute("isFirst")) {
-    //        label.style.marginTop = "0px"
-    //    }
-    //    element.insertBefore(label, inputHolder)
-    //}
-
-    //Img element
-    if (element.hasAttribute("icon")) {
-        const img = document.createElement("img") as HTMLImageElement
-        img.src = element.getAttribute("icon") as string
-        img.classList.add("formTooltipIcon")
-        inputHolder.appendChild(img)
-    }
-
-    //Input element
-    let input = document.createElement("input")
-    input.type = "text"
-    input.id = element.getAttribute("valueId") as string
-    input.setAttribute("disableRecursiveDisable", "true")
-    input.tabIndex = element.tabIndex
-
-    //Input options element
-    let optionHolder = document.createElement("div")
-    optionHolder.id = element.getAttribute("optionHolderId") as string
-
-    let i = 0;
-    while (i < element.children.length) {
-        const option = element.children.item(i)
-        if (option?.tagName == "OPTION") {
-            //input.options.add(option as HTMLOptionElement)
+    public getValue(): string {
+        if (this.type == "textarea") {
+            return this.textArea.value
         } else {
-            i++
+            return this.input.value
         }
     }
-    element.tabIndex = -1
-    inputHolder.appendChild(input)
 
-    //Click event
-    element.addEventListener("click", function () {
-        input.focus()
-    })
-
-    //Enter event
-    if (element.hasAttribute("onEnterPressClickElement")) {
-        element.addEventListener("keydown", (ev: KeyboardEvent) => {
-            if (ev.key != "Enter") { return }
-            document.getElementById(element.getAttribute("onEnterPressClickElement") as string)?.dispatchEvent(new Event("click"))
-        })
+    public setValue(value: string) {
+        if (this.type == "textarea") {
+            this.textArea.value = value
+        } else {
+            this.input.value = value
+        }
+        this.setAttribute("value", value)
     }
-    return document.createElement("select")
-}
 
-function updatePasswordEye(passimg: HTMLImageElement, element: HTMLElement, passwordField: HTMLInputElement) {
-    if (element.getAttribute("showPass") == "true") {
-        passimg.src = "/formWebScripts/images/visibility32.svg"
-        passwordField.type = "text"
-    } else {
-        passimg.src = "/formWebScripts/images/visibilityoff32.svg"
-        passwordField.type = "password"
+    public getType(): HTMLFormInputType {
+        return this.type
+    }
+
+    public setType(type: HTMLFormInputType) {
+        this.type = type
+        this.updateInputType()
+        this.setAttribute("type", type)
+    }
+
+    public getOriginalValue(): string {
+        return this.originalValue
+    }
+
+    public setOriginalValue(originalValue: string) {
+        this.originalValue = originalValue
+        this.validateInternal()
+        this.setAttribute("originalValue", originalValue)
+    }
+
+    public getListId() {
+        return this.listId
+    }
+
+    public setListId(listId: string) {
+        this.listId = listId
+        this.usingJSList = false
+        this.updateList()
+        this.setAttribute("list", listId)
+    }
+
+    public getPlaceHolder(): string {
+        if (this.type == "textarea") {
+            return this.textArea.placeholder
+        } else {
+            return this.input.placeholder
+        }
+    }
+
+    public setPlaceHolder(placeholder: string) {
+        if (this.type == "textarea") {
+            this.textArea.placeholder = placeholder
+        } else {
+            this.input.placeholder = placeholder
+        }
+        this.setAttribute("placeholder", placeholder)
+    }
+
+    public getIcon(): string {
+        return this.img.src
+    }
+
+    public setIcon(icon: string) {
+        this.img.src = icon
+        this.setAttribute("icon", icon)
+    }
+
+    public getIsStrictList(): boolean {
+        return this.isStrictList
+    }
+
+    public setIsScrictList(isStrictList: boolean) {
+        if (this.type == "select") {
+            isStrictList = true
+        }
+        this.isStrictList = isStrictList
+        this.setAttribute("isStrictList", isStrictList ? "true" : "false")
+        this.validateInternal()
+    }
+
+    public getOptions(): string[] {
+        return this.options
+    }
+
+    public setOptions(options: string[]) {
+        this.usingJSList = true
+        this.options = options
+        this.removeAttribute("list")
+        this.renderList()
     }
 }
 
@@ -821,6 +807,6 @@ export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTM
 }
 
 SetupRows()
-SetupTextInputs()
+//SetupTextInputs()
 //SetupToggles()
 SetupToasts()

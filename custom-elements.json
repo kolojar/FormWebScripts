@@ -18,16 +18,16 @@
                     "description": "Boolean value if switch checked or not"
                 },
                 {
-                     "name": "labelBefore",
-                      "description": "Label text before toggle"
+                    "name": "labelBefore",
+                    "description": "Label text before toggle"
                 },
                 {
-                     "name": "labelAfter",
-                     "description": "Label text after toggle"
+                    "name": "labelAfter",
+                    "description": "Label text after toggle"
                 },
                 {
-                     "name": "enables",
-                     "description": "Element id that is enabled by this toggle"
+                    "name": "enables",
+                    "description": "Element id that is enabled by this toggle"
                 }
             ]
         }

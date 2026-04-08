@@ -1,4 +1,4 @@
-import { MakeElementDraggable, SetupSelectInput, SetupTextInput } from "./formScript.js";
+import { MakeElementDraggable } from "./formScript.js";
 import { LanguageManager } from "./languageManager.js";
 export var FormDialogStyle;
 (function (FormDialogStyle) {
@@ -67,12 +67,20 @@ export class FormDialog {
         this.template = template;
         this.element = document.createElement("dialog");
         this.progressLines = [];
-        if (template.style == FormDialogStyle.Entry) {
+        if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
-            this.inputfield = document.createElement("inputfield");
-            this.inputfield.setAttribute("placeholder", template.placeholder);
-            this.inputfield.style.width = "500px";
-            this.inputfield.setAttribute("inputType", this.template.entryType);
+            this.inputElement = document.createElement("form-input");
+            this.inputElement.setPlaceHolder(template.placeholder);
+            this.inputElement.style.width = "500px";
+            if (template.style == FormDialogStyle.Entry) {
+                this.inputElement.setType(this.template.entryType);
+            }
+            else {
+                this.inputElement.setType("select");
+                this.inputElement.setIsScrictList(true);
+                document;
+            }
+            this.inputElement.setListId(template.listId);
             let image = "";
             switch (this.template.entryType.toLowerCase()) {
                 case "text": {
@@ -92,8 +100,7 @@ export class FormDialog {
                     break;
                 }
             }
-            this.inputfield.setAttribute("icon", "/formWebScripts/images/" + image);
-            this.entryElement = SetupTextInput(this.inputfield);
+            this.inputElement.setIcon("/formWebScripts/images/" + image);
         }
         if (template.style == FormDialogStyle.Progress) {
             //Setup progress
@@ -107,19 +114,6 @@ export class FormDialog {
                 line.appendChild(progress);
                 this.progressLines.push(line);
             }
-        }
-        if (template.style == FormDialogStyle.Select) {
-            //Setup select
-            this.selectfield = document.createElement("selectfield");
-            for (let i = 0; i < template.selectValues.length; i++) {
-                const value = template.selectValues[i];
-                const optionElement = document.createElement("option");
-                optionElement.value = i.toString();
-                optionElement.innerText = value.key;
-                this.selectfield.appendChild(optionElement);
-            }
-            this.selectfield.removeAttribute("icon");
-            this.selectElement = SetupSelectInput(this.selectfield);
         }
         this.template.createdDialogs.push(this);
     }
@@ -218,18 +212,14 @@ export class FormDialogManager {
         data.innerText = dialog.template.content;
         holder.appendChild(data);
         //Entry
-        if (dialog.template.style == FormDialogStyle.Entry) {
-            holder.appendChild(dialog.inputfield);
+        if (dialog.template.style == FormDialogStyle.Entry || dialog.template.style == FormDialogStyle.Select) {
+            holder.appendChild(dialog.inputElement);
         }
         //Progress
         if (dialog.template.style == FormDialogStyle.Progress) {
             for (let i = 0; i < dialog.progressLines.length; i++) {
                 holder.appendChild(dialog.progressLines[i]);
             }
-        }
-        //Select
-        if (dialog.template.style == FormDialogStyle.Select) {
-            holder.appendChild(dialog.selectfield);
         }
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
@@ -348,7 +338,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.entryElement.value);
+                    onCloseEvent(dialog.inputElement.getValue());
                     return;
                 }
                 onCloseEvent(value);
@@ -380,7 +370,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.template.selectValues[parseInt(dialog.selectElement.value)].GetValue());
+                    onCloseEvent(dialog.template.selectValues[dialog.inputElement.getValue()].GetValue());
                     return;
                 }
                 onCloseEvent(value);

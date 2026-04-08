@@ -1,4 +1,4 @@
-import { MakeElementDraggable, SetupSelectInput, SetupTextInput } from "./formScript.js"
+import { HTMLFormInputElement, HTMLFormInputType, MakeElementDraggable } from "./formScript.js"
 import { LanguageManager } from "./languageManager.js"
 import { KeyValuePair } from "./sharedScripts.js"
 
@@ -40,10 +40,11 @@ export class FormDialogTemplate<T> {
     readonly openOverOthers: boolean
     readonly style: FormDialogStyle
     placeholder: string
-    entryType: string
-    selectValues: KeyValuePair<string, T>[]
+    entryType: HTMLFormInputType
+    selectValues: Map<string, T>
     createdDialogs: FormDialog<T>[]
     progressLines: number
+    listId: string
 
     /**
      * Creates new dialog, do not modify any properties of element
@@ -67,7 +68,7 @@ export class FormDialogTemplate<T> {
         this.style = style
         this.placeholder = ""
         this.entryType = "text"
-        this.selectValues = []
+        this.selectValues = new Map<string,T>
         this.createdDialogs = []
         this.progressLines = 0
     }
@@ -85,12 +86,9 @@ export class FormDialogTemplate<T> {
 export class FormDialog<T> {
     readonly template: FormDialogTemplate<T>
     readonly element: HTMLDialogElement
-    readonly entryElement: HTMLInputElement | HTMLTextAreaElement
-    readonly inputfield: HTMLElement
+    readonly inputElement: HTMLFormInputElement
     readonly progressLines: HTMLDivElement[]
     readonly progressLabels: HTMLSpanElement[]
-    readonly selectfield: HTMLElement
-    readonly selectElement: HTMLSelectElement
     closed: boolean
 
     /**
@@ -101,12 +99,19 @@ export class FormDialog<T> {
         this.template = template
         this.element = document.createElement("dialog")
         this.progressLines = []
-        if (template.style == FormDialogStyle.Entry) {
+        if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
-            this.inputfield = document.createElement("inputfield")
-            this.inputfield.setAttribute("placeholder", template.placeholder)
-            this.inputfield.style.width = "500px"
-            this.inputfield.setAttribute("inputType", this.template.entryType)
+            this.inputElement = document.createElement("form-input")
+            this.inputElement.setPlaceHolder(template.placeholder)
+            this.inputElement.style.width = "500px"
+            if (template.style == FormDialogStyle.Entry) {
+            this.inputElement.setType(this.template.entryType)
+            } else {
+                this.inputElement.setType("select")
+                this.inputElement.setIsScrictList(true)
+                document
+            }
+            this.inputElement.setListId(template.listId)
             let image = ""
             switch (this.template.entryType.toLowerCase()) {
                 case "text": { image = "textfields32.svg"; break }
@@ -114,8 +119,7 @@ export class FormDialog<T> {
                 case "password": { image = "key32.svg"; break }
                 default: { image = "textfields32.svg"; break }
             }
-            this.inputfield.setAttribute("icon", "/formWebScripts/images/" + image)
-            this.entryElement = SetupTextInput(this.inputfield)
+            this.inputElement.setIcon("/formWebScripts/images/" + image)
         }
         if (template.style == FormDialogStyle.Progress) {
             //Setup progress
@@ -129,19 +133,6 @@ export class FormDialog<T> {
                 line.appendChild(progress)
                 this.progressLines.push(line)
             }
-        }
-        if (template.style == FormDialogStyle.Select) {
-            //Setup select
-            this.selectfield = document.createElement("selectfield")
-            for (let i = 0; i < template.selectValues.length; i++) {
-                const value = template.selectValues[i]
-                const optionElement = document.createElement("option")
-                optionElement.value = i.toString()
-                optionElement.innerText = value.key
-                this.selectfield.appendChild(optionElement)
-            }
-            this.selectfield.removeAttribute("icon")
-            this.selectElement = SetupSelectInput(this.selectfield)
         }
         this.template.createdDialogs.push(this)
     }
@@ -252,8 +243,8 @@ export class FormDialogManager {
         holder.appendChild(data)
 
         //Entry
-        if (dialog.template.style == FormDialogStyle.Entry) {
-            holder.appendChild(dialog.inputfield)
+        if (dialog.template.style == FormDialogStyle.Entry || dialog.template.style == FormDialogStyle.Select) {
+            holder.appendChild(dialog.inputElement)
         }
 
         //Progress
@@ -261,11 +252,6 @@ export class FormDialogManager {
             for (let i = 0; i < dialog.progressLines.length; i++) {
                 holder.appendChild(dialog.progressLines[i])
             }
-        }
-
-        //Select
-        if (dialog.template.style == FormDialogStyle.Select) {
-            holder.appendChild(dialog.selectfield)
         }
 
         //Button box holder
@@ -384,12 +370,12 @@ export class FormDialogManager {
         }
     }
 
-    ShowPrompt<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, entryType: string = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
+    ShowPrompt<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
         let dialog: FormDialog<T>
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.entryElement.value as unknown as T)
+                    onCloseEvent(dialog.inputElement.getValue() as unknown as T)
                     return
                 }
                 onCloseEvent(value)
@@ -420,12 +406,12 @@ export class FormDialogManager {
         new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver))
     }
 
-    ShowSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, selectValues: KeyValuePair<string, T>[], openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
+    ShowSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
         let dialog: FormDialog<T>
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.template.selectValues[parseInt(dialog.selectElement.value)].GetValue())
+                    onCloseEvent(dialog.template.selectValues.get(dialog.inputElement.getValue()))
                     return
                 }
                 onCloseEvent(value)
@@ -454,7 +440,7 @@ export class FormDialogManager {
         return dialog;
     }
 
-    OpenPrompt<T>(title: string, content: string, cancelValue: T, entryType: string = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    OpenPrompt<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
         return new Promise(resolve => {
             this.ShowPrompt(title, content, cancelValue, (value: T) => { resolve(value) }, entryType, placeholder, openOverOthers, blockedOpenOver)
         })
@@ -472,7 +458,7 @@ export class FormDialogManager {
         })
     }
 
-    OpenSelect<T>(title: string, content: string, cancelValue: T, selectValues: KeyValuePair<string, T>[], openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    OpenSelect<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
         return new Promise(resolve => {
             this.ShowSelect(title, content, cancelValue, (value: T) => { resolve(value) }, selectValues, openOverOthers, blockedOpenOver)
         })

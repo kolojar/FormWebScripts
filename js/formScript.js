@@ -207,186 +207,317 @@ export class HTMLFormToggleElement extends HTMLDivElement {
         }
     }
 }
-/*
-Setups text inputs
-*/
-export function SetupTextInputs() {
-    const elements = document.getElementsByTagName("inputfield");
-    for (let i = 0; i < elements.length; i++) {
-        SetupTextInput(elements[i]);
-    }
-}
-export function SetupTextInput(element) {
-    //Prepare inputs -> CSS + subelements
-    const inputHolder = document.createElement("div");
-    inputHolder.classList.add("formTextInput");
-    element.appendChild(inputHolder);
-    //const holder = document.createElement("holder") as HTMLElement
-    //inputHolder.appendChild(holder);
-    //inputHolder.style.width = element.style.width
-    //Add label
-    //if (element.hasAttribute("label")) {
-    //    const label = document.createElement("p")
-    //    label.innerHTML = element.getAttribute("label")
-    //    if (element.hasAttribute("isFirst")) {
-    //        label.style.marginTop = "0px"
-    //    }
-    //    element.insertBefore(label, inputHolder)
-    //}
-    //Img element
-    if (element.hasAttribute("icon")) {
-        const img = document.createElement("img");
-        img.src = element.getAttribute("icon");
-        img.classList.add("formTooltipIcon");
-        inputHolder.appendChild(img);
-    }
-    //Input element
-    let input = null;
-    if (element.getAttribute("inputType") == "textarea") {
-        input = document.createElement("textarea");
-    }
-    else {
-        input = document.createElement("input");
-        input.type = element.getAttribute("inputType");
-    }
-    input.id = element.getAttribute("valueId");
-    input.value = element.getAttribute("initialValue");
-    input.setAttribute("disableRecursiveDisable", "true");
-    input.placeholder = element.getAttribute("placeholder");
-    input.tabIndex = element.tabIndex;
-    element.tabIndex = -1;
-    inputHolder.appendChild(input);
-    //Password img element
-    if (element.getAttribute("inputType") == "password") {
-        const passimg = document.createElement("img");
-        if (element.getAttribute("showPass") == null) {
-            element.setAttribute("showPass", "false");
-        }
-        updatePasswordEye(passimg, element, input);
-        passimg.style.cursor = "pointer";
-        passimg.addEventListener("click", function () {
-            element.setAttribute("showPass", String(!(element.getAttribute("showPass") == "true")));
-            updatePasswordEye(passimg, element, input);
+HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter'];
+/**
+ * HTMLFormInputElement element defition
+ */
+export class HTMLFormInputElement extends HTMLDivElement {
+    constructor(onEnterPressClickElementId, validationFunction, listId = "", strictList = false, doChangeCheck = false, originalValue = "", changeBorderClass = "formWarnBorderColor", invalidBorderClass = "formErrorBorderColor") {
+        super();
+        this.changeBorderClass = "formWarnBorderColor";
+        this.invalidBorderClass = "formErrorBorderColor";
+        this.listId = "";
+        this.isStrictList = false;
+        this.usingJSList = false;
+        this.onEnterPressClickElementId = onEnterPressClickElementId;
+        this.type = "text";
+        this.validationFunction = validationFunction;
+        this.doChangeCheck = doChangeCheck;
+        this.originalValue = originalValue;
+        this.changeBorderClass = changeBorderClass;
+        this.invalidBorderClass = invalidBorderClass;
+        this.listId = listId;
+        this.isStrictList = strictList;
+        //Create elements
+        this.img = document.createElement("img");
+        this.input = document.createElement("input");
+        this.textArea = document.createElement("textarea");
+        this.afterImg = document.createElement("img");
+        this.listHolder = document.createElement("div");
+        //Add classes
+        this.afterImg.style.cursor = "pointer";
+        this.listHolder.classList.add("listHolder");
+        //Set attributes
+        this.input.setAttribute("disableRecursiveDisable", "true");
+        this.textArea.setAttribute("disableRecursiveDisable", "true");
+        this.input.tabIndex = this.tabIndex;
+        this.textArea.tabIndex = this.tabIndex;
+        this.tabIndex = -1;
+        this.listHolder.style.display = "none";
+        //Move children
+        this.appendChild(this.img);
+        this.appendChild(this.afterImg);
+        //Setup basic events
+        this.addEventListener("focusin", () => {
+            this.renderList();
+            this.listHolder.style.display = "";
+            if (!this.classList.contains("formInputFocus")) {
+                this.classList.add("formInputFocus");
+            }
         });
-        inputHolder.appendChild(passimg);
-    }
-    //Color random button
-    if (element.getAttribute("inputType") == "color") {
-        const randomImg = document.createElement("img");
-        randomImg.src = "/formWebScripts/images/casino32.svg";
-        randomImg.style.cursor = "pointer";
-        randomImg.onclick = function () {
-            input.value = GenerateRandomColor();
-        };
-        inputHolder.appendChild(randomImg);
-    }
-    //Focus event
-    element.addEventListener("focusin", function () {
-        if (!inputHolder.classList.contains("formTextInputFocus")) {
-            inputHolder.classList.add("formTextInputFocus");
-        }
-    });
-    element.addEventListener("focusout", function () {
-        if (inputHolder.classList.contains("formTextInputFocus")) {
-            inputHolder.classList.remove("formTextInputFocus");
-        }
-    });
-    //Click event
-    element.addEventListener("click", function () {
-        input.focus();
-    });
-    //Enter event
-    if (element.hasAttribute("onEnterPressClickElement")) {
-        element.addEventListener("keydown", (ev) => {
+        this.addEventListener("focusout", () => {
+            this.listHolder.style.display = "none";
+            if (this.classList.contains("formInputFocus")) {
+                this.classList.remove("formInputFocus");
+            }
+            this.validateInternal();
+        });
+        this.addEventListener("keydown", (ev) => {
             var _a;
-            if (ev.key != "Enter") {
+            if (this.onEnterPressClickElementId == "") {
                 return;
             }
-            (_a = document.getElementById(element.getAttribute("onEnterPressClickElement"))) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
+            if (ev.key == "Enter") {
+                (_a = document.getElementById(this.onEnterPressClickElementId)) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
+            }
+        });
+        this.addEventListener("click", () => {
+            if (this.type == "textarea") {
+                this.textArea.focus();
+            }
+            else {
+                this.input.focus();
+            }
+        });
+        this.addEventListener("input", () => {
+            this.renderList();
+            this.validateInternal();
+        });
+        this.addEventListener("resize", () => {
+            this.renderList();
         });
     }
-    return input;
-}
-/*
-Setups select inputs
-*/
-export function SetupSelectInputs() {
-    const elements = document.getElementsByTagName("inputselect");
-    for (let i = 0; i < elements.length; i++) {
-        SetupSelectInput(elements[i]);
+    updateList() {
+        //Clear list
+        if (this.usingJSList) {
+            return;
+        }
+        while (this.options.length > 0) {
+            this.options.pop();
+        }
+        //Updates hint list under the selection
+        if (this.listId == "") {
+            return;
+        }
+        const list = document.getElementById(this.listId);
+        for (let i = 0; i < list.children.length; i++) {
+            const child = list.children[i];
+            if (child.tagName == "OPTION") {
+                this.options.push(child.value);
+            }
+        }
+        this.renderList();
     }
-}
-export function SetupSelectInput(element) {
-    //Prepare inputs -> CSS + subelements
-    const inputHolder = document.createElement("div");
-    inputHolder.classList.add("formTextInput");
-    element.appendChild(inputHolder);
-    //const holder = document.createElement("holder") as HTMLElement
-    //inputHolder.appendChild(holder);
-    //inputHolder.style.width = element.style.width
-    //Add label
-    //if (element.hasAttribute("label")) {
-    //    const label = document.createElement("p")
-    //    label.innerHTML = element.getAttribute("label")
-    //    if (element.hasAttribute("isFirst")) {
-    //        label.style.marginTop = "0px"
-    //    }
-    //    element.insertBefore(label, inputHolder)
-    //}
-    //Img element
-    if (element.hasAttribute("icon")) {
-        const img = document.createElement("img");
-        img.src = element.getAttribute("icon");
-        img.classList.add("formTooltipIcon");
-        inputHolder.appendChild(img);
+    renderList() {
+        //Clear list
+        while (this.listHolder.lastChild != null) {
+            this.listHolder.lastChild.remove();
+        }
+        //Update list
+        for (const value of this.options) {
+            if (value.includes(this.getValue())) {
+                const option = document.createElement("p");
+                option.innerText = value;
+                option.addEventListener("click", () => {
+                    this.setValue(value);
+                });
+                this.listHolder.appendChild(option);
+            }
+        }
     }
-    //Input element
-    let input = document.createElement("input");
-    input.type = "text";
-    input.id = element.getAttribute("valueId");
-    input.setAttribute("disableRecursiveDisable", "true");
-    input.tabIndex = element.tabIndex;
-    //Input options element
-    let optionHolder = document.createElement("div");
-    optionHolder.id = element.getAttribute("optionHolderId");
-    let i = 0;
-    while (i < element.children.length) {
-        const option = element.children.item(i);
-        if ((option === null || option === void 0 ? void 0 : option.tagName) == "OPTION") {
-            //input.options.add(option as HTMLOptionElement)
+    updateInputType() {
+        //Select input element based on type
+        const focused = this.classList.contains("formInputFocus");
+        this.removeChild(this.input);
+        this.removeChild(this.textArea);
+        if (this.type == "textarea") {
+            this.appendChild(this.textArea);
+            if (focused) {
+                this.textArea.focus();
+            }
+        }
+        else if (this.type == "select") {
+            this.setIsScrictList(true);
         }
         else {
-            i++;
+            this.appendChild(this.input);
+            this.input.type = this.type;
+            if (focused) {
+                this.input.focus();
+            }
+        }
+        //Add specific use cases
+        if (this.type == "password") {
+            //Make password eye
+            const updatePasswordEye = () => {
+                if (this.input.type == "password") {
+                    this.afterImg.src = "/formWebScripts/images/visibilityoff32.svg";
+                }
+                else {
+                    this.afterImg.src = "/formWebScripts/images/visibility32.svg";
+                }
+            };
+            updatePasswordEye();
+            this.afterImg.onclick = () => {
+                if (this.input.type == "password") {
+                    this.input.type = "text";
+                }
+                else {
+                    this.input.type = "password";
+                }
+                updatePasswordEye();
+            };
+        }
+        else if (this.type == "color") {
+            //Random color generator
+            this.afterImg.src = "/formWebScripts/images/casino32.svg";
+            this.afterImg.onclick = () => {
+                this.input.value = GenerateRandomColor();
+            };
+        }
+        else {
+            this.afterImg.src = "";
         }
     }
-    element.tabIndex = -1;
-    inputHolder.appendChild(input);
-    //Click event
-    element.addEventListener("click", function () {
-        input.focus();
-    });
-    //Enter event
-    if (element.hasAttribute("onEnterPressClickElement")) {
-        element.addEventListener("keydown", (ev) => {
-            var _a;
-            if (ev.key != "Enter") {
-                return;
+    connectedCallback() {
+        //Sort input type
+        this.type = this.getAttribute("type");
+        this.updateInputType();
+    }
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue == newValue) {
+            return;
+        }
+        if (name == "type") {
+            this.type = newValue;
+            this.updateInputType();
+        }
+        else if (name == "value") {
+            this.setValue(newValue);
+        }
+        else if (name == "onEnterPressClickElementId") {
+            this.onEnterPressClickElementId = newValue;
+        }
+        else if (name == "placeholder") {
+            this.setPlaceHolder(newValue);
+        }
+        else if (name == "icon") {
+            this.setIcon(newValue);
+        }
+        else if (name == "isStrictList") {
+            this.setIsScrictList(newValue == "true");
+        }
+        else if (name == "list") {
+            this.setListId(newValue);
+        }
+    }
+    validateInternal() {
+        this.setAttribute("value", this.getValue());
+        //Check for changes
+        let changed = false;
+        if (this.doChangeCheck) {
+            if (this.getValue() != this.originalValue) {
+                changed = true;
             }
-            (_a = document.getElementById(element.getAttribute("onEnterPressClickElement"))) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
-        });
+        }
+        //Do validation
+        let isValid = true;
+        if (this.validationFunction != null) {
+            isValid = this.validationFunction(this.getValue());
+        }
+        return [changed, isValid];
     }
-    return document.createElement("select");
+    validate() {
+        return this.validateInternal();
+    }
+    getValue() {
+        if (this.type == "textarea") {
+            return this.textArea.value;
+        }
+        else {
+            return this.input.value;
+        }
+    }
+    setValue(value) {
+        if (this.type == "textarea") {
+            this.textArea.value = value;
+        }
+        else {
+            this.input.value = value;
+        }
+        this.setAttribute("value", value);
+    }
+    getType() {
+        return this.type;
+    }
+    setType(type) {
+        this.type = type;
+        this.updateInputType();
+        this.setAttribute("type", type);
+    }
+    getOriginalValue() {
+        return this.originalValue;
+    }
+    setOriginalValue(originalValue) {
+        this.originalValue = originalValue;
+        this.validateInternal();
+        this.setAttribute("originalValue", originalValue);
+    }
+    getListId() {
+        return this.listId;
+    }
+    setListId(listId) {
+        this.listId = listId;
+        this.usingJSList = false;
+        this.updateList();
+        this.setAttribute("list", listId);
+    }
+    getPlaceHolder() {
+        if (this.type == "textarea") {
+            return this.textArea.placeholder;
+        }
+        else {
+            return this.input.placeholder;
+        }
+    }
+    setPlaceHolder(placeholder) {
+        if (this.type == "textarea") {
+            this.textArea.placeholder = placeholder;
+        }
+        else {
+            this.input.placeholder = placeholder;
+        }
+        this.setAttribute("placeholder", placeholder);
+    }
+    getIcon() {
+        return this.img.src;
+    }
+    setIcon(icon) {
+        this.img.src = icon;
+        this.setAttribute("icon", icon);
+    }
+    getIsStrictList() {
+        return this.isStrictList;
+    }
+    setIsScrictList(isStrictList) {
+        if (this.type == "select") {
+            isStrictList = true;
+        }
+        this.isStrictList = isStrictList;
+        this.setAttribute("isStrictList", isStrictList ? "true" : "false");
+        this.validateInternal();
+    }
+    getOptions() {
+        return this.options;
+    }
+    setOptions(options) {
+        this.usingJSList = true;
+        this.options = options;
+        this.removeAttribute("list");
+        this.renderList();
+    }
 }
-function updatePasswordEye(passimg, element, passwordField) {
-    if (element.getAttribute("showPass") == "true") {
-        passimg.src = "/formWebScripts/images/visibility32.svg";
-        passwordField.type = "text";
-    }
-    else {
-        passimg.src = "/formWebScripts/images/visibilityoff32.svg";
-        passwordField.type = "password";
-    }
-}
+HTMLFormInputElement.observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'originalValue', 'list', 'placeholder', 'icon', 'isStrictList'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";
@@ -613,7 +744,7 @@ export function MakeElementDraggable(movedElement, dragElement) {
     }
 }
 SetupRows();
-SetupTextInputs();
+//SetupTextInputs()
 //SetupToggles()
 SetupToasts();
 //# sourceMappingURL=formScript.js.map

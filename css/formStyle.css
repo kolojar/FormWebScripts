@@ -390,7 +390,6 @@ form-input textarea {
     width: 100%;
 }
 
-
 @media (prefers-color-scheme: dark) {
     form-input textarea {
         background-color: black;
@@ -398,21 +397,34 @@ form-input textarea {
     }
 }
 
-inputfield p {
+form-input .listHolder {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    background-color: aqua;
+    width: 100px;
+    height: 100px;
+}
+
+form-input .listHolder:hover {
+    background-color: gray;
+}
+
+form-input p {
     margin-top: 8px;
     margin-left: 4px;
 }
 
-inputfield {
+form-input {
     display: inline-block;
 }
 
-.formTextInput input[type="color"] {
+form-input input[type="color"] {
     margin-bottom: 8px;
     height: 26px
 }
 
-.formTextInput input:focus {
+form-input input:focus {
     outline: none;
 }
 
