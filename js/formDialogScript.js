@@ -45,7 +45,7 @@ export class FormDialogTemplate {
         this.style = style;
         this.placeholder = "";
         this.entryType = "text";
-        this.selectValues = [];
+        this.selectValues = new Map;
         this.createdDialogs = [];
         this.progressLines = 0;
     }
@@ -370,7 +370,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.template.selectValues[dialog.inputElement.getValue()].GetValue());
+                    onCloseEvent(dialog.template.selectValues.get(dialog.inputElement.getValue()));
                     return;
                 }
                 onCloseEvent(value);

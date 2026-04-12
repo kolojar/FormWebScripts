@@ -1,7 +1,6 @@
 //Do not forget to add formStyle.css and tableStyle.css
 
 import { GeneratePassword } from "./sharedScripts.js";
-import "./formScript"
 
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
@@ -22,7 +21,7 @@ export function RecursiveDisabler(target: HTMLElement, disabled: boolean) {
 /*
 HTMLFormBoxElement element defition
 */
-export class HTMLFormBoxElement extends HTMLDivElement {
+export class HTMLFormBoxElement extends HTMLElement {
     private messageID: string
     constructor() {
         super();
@@ -238,7 +237,7 @@ export type HTMLFormInputValidationFunc = (value: string) => boolean
 /**
  * HTMLFormInputElement element defition
  */
-export class HTMLFormInputElement extends HTMLDivElement {
+export class HTMLFormInputElement extends HTMLElement {
     readonly img: HTMLImageElement
     readonly input: HTMLInputElement
     readonly textArea: HTMLTextAreaElement
@@ -267,6 +266,7 @@ export class HTMLFormInputElement extends HTMLDivElement {
         this.invalidBorderClass = invalidBorderClass
         this.listId = listId
         this.isStrictList = strictList
+        this.options = []
 
         //Create elements
         this.img = document.createElement("img")
@@ -375,17 +375,21 @@ export class HTMLFormInputElement extends HTMLDivElement {
     updateInputType() {
         //Select input element based on type
         const focused = this.classList.contains("formInputFocus")
-        this.removeChild(this.input)
+        if (this.input.parentElement == this) {
+            this.removeChild(this.input)
+        }
+        if (this.textArea.parentElement == this) {
         this.removeChild(this.textArea)
+        }
         if (this.type == "textarea") {
-            this.appendChild(this.textArea)
+            this.insertBefore(this.img,this.appendChild(this.textArea))
             if (focused) {
                 this.textArea.focus()
             }
         } else if (this.type == "select") {
             this.setIsScrictList(true)
         } else {
-            this.appendChild(this.input)
+            this.appendChild(this.img,this.appendChild(this.input))
             this.input.type = this.type
             if (focused) {
                 this.input.focus()
@@ -423,13 +427,35 @@ export class HTMLFormInputElement extends HTMLDivElement {
     }
 
     connectedCallback() {
-        //Sort input type
-        this.type = this.getAttribute("type") as HTMLFormInputType
-        this.updateInputType()
+        //if (this.hasAttribute("type")) {
+        //    //Sort input type
+        //this.type = this.getAttribute("type") as HTMLFormInputType
+        //this.updateInputType()
+        //}
+        //if (this.hasAttribute("value")) {
+        //    this.setValue(this.getAttribute("value"))
+        //}
+        // if (this.hasAttribute("onEnterPressClickElementId")) {
+        //    this.onEnterPressClickElementId = this.getAttribute("onEnterPressClickElementId")        
+        //}
+        // if (this.hasAttribute("list")) {
+        //    this.setListId(this.getAttribute("list"))
+        //}
+        // if (this.hasAttribute("placeholder")) {
+        //    this.setPlaceHolder(this.getAttribute("placeholder"))
+        //}
+        // if (this.hasAttribute("icon")) {
+        //    this.setIcon(this.getAttribute("icon"))
+        //}
+        // if (this.hasAttribute("isStrictList")) {
+        //    this.setIsScrictList(this.getAttribute("isStrictList") == "true")
+        //}
     }
 
-    static observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'originalValue', 'list', 'placeholder', 'icon', 'isStrictList']
+    static observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'list', 'placeholder', 'icon', 'isStrictList']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
+        console.log(name,oldValue,newValue);
+        
         if (oldValue == newValue) {
             return
         }
@@ -507,7 +533,6 @@ export class HTMLFormInputElement extends HTMLDivElement {
     public setOriginalValue(originalValue: string) {
         this.originalValue = originalValue
         this.validateInternal()
-        this.setAttribute("originalValue", originalValue)
     }
 
     public getListId() {
@@ -810,3 +835,4 @@ SetupRows()
 //SetupTextInputs()
 //SetupToggles()
 SetupToasts()
+customElements.define("form-input",HTMLFormInputElement)

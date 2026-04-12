@@ -1,6 +1,5 @@
 //Do not forget to add formStyle.css and tableStyle.css
 import { GeneratePassword } from "./sharedScripts.js";
-import "./formScript";
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
  */
@@ -19,7 +18,7 @@ export function RecursiveDisabler(target, disabled) {
 /*
 HTMLFormBoxElement element defition
 */
-export class HTMLFormBoxElement extends HTMLDivElement {
+export class HTMLFormBoxElement extends HTMLElement {
     constructor() {
         super();
         this.messageID = "";
@@ -211,7 +210,7 @@ HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter'
 /**
  * HTMLFormInputElement element defition
  */
-export class HTMLFormInputElement extends HTMLDivElement {
+export class HTMLFormInputElement extends HTMLElement {
     constructor(onEnterPressClickElementId, validationFunction, listId = "", strictList = false, doChangeCheck = false, originalValue = "", changeBorderClass = "formWarnBorderColor", invalidBorderClass = "formErrorBorderColor") {
         super();
         this.changeBorderClass = "formWarnBorderColor";
@@ -228,6 +227,7 @@ export class HTMLFormInputElement extends HTMLDivElement {
         this.invalidBorderClass = invalidBorderClass;
         this.listId = listId;
         this.isStrictList = strictList;
+        this.options = [];
         //Create elements
         this.img = document.createElement("img");
         this.input = document.createElement("input");
@@ -328,10 +328,14 @@ export class HTMLFormInputElement extends HTMLDivElement {
     updateInputType() {
         //Select input element based on type
         const focused = this.classList.contains("formInputFocus");
-        this.removeChild(this.input);
-        this.removeChild(this.textArea);
+        if (this.input.parentElement == this) {
+            this.removeChild(this.input);
+        }
+        if (this.textArea.parentElement == this) {
+            this.removeChild(this.textArea);
+        }
         if (this.type == "textarea") {
-            this.appendChild(this.textArea);
+            this.insertBefore(this.img, this.appendChild(this.textArea));
             if (focused) {
                 this.textArea.focus();
             }
@@ -340,7 +344,7 @@ export class HTMLFormInputElement extends HTMLDivElement {
             this.setIsScrictList(true);
         }
         else {
-            this.appendChild(this.input);
+            this.insertBefore(this.img, this.appendChild(this.input));
             this.input.type = this.type;
             if (focused) {
                 this.input.focus();
@@ -380,11 +384,32 @@ export class HTMLFormInputElement extends HTMLDivElement {
         }
     }
     connectedCallback() {
-        //Sort input type
-        this.type = this.getAttribute("type");
-        this.updateInputType();
+        //if (this.hasAttribute("type")) {
+        //    //Sort input type
+        //this.type = this.getAttribute("type") as HTMLFormInputType
+        //this.updateInputType()
+        //}
+        //if (this.hasAttribute("value")) {
+        //    this.setValue(this.getAttribute("value"))
+        //}
+        // if (this.hasAttribute("onEnterPressClickElementId")) {
+        //    this.onEnterPressClickElementId = this.getAttribute("onEnterPressClickElementId")        
+        //}
+        // if (this.hasAttribute("list")) {
+        //    this.setListId(this.getAttribute("list"))
+        //}
+        // if (this.hasAttribute("placeholder")) {
+        //    this.setPlaceHolder(this.getAttribute("placeholder"))
+        //}
+        // if (this.hasAttribute("icon")) {
+        //    this.setIcon(this.getAttribute("icon"))
+        //}
+        // if (this.hasAttribute("isStrictList")) {
+        //    this.setIsScrictList(this.getAttribute("isStrictList") == "true")
+        //}
     }
     attributeChangedCallback(name, oldValue, newValue) {
+        console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
             return;
         }
@@ -461,7 +486,6 @@ export class HTMLFormInputElement extends HTMLDivElement {
     setOriginalValue(originalValue) {
         this.originalValue = originalValue;
         this.validateInternal();
-        this.setAttribute("originalValue", originalValue);
     }
     getListId() {
         return this.listId;
@@ -517,7 +541,7 @@ export class HTMLFormInputElement extends HTMLDivElement {
         this.renderList();
     }
 }
-HTMLFormInputElement.observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'originalValue', 'list', 'placeholder', 'icon', 'isStrictList'];
+HTMLFormInputElement.observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'list', 'placeholder', 'icon', 'isStrictList'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";
@@ -747,4 +771,5 @@ SetupRows();
 //SetupTextInputs()
 //SetupToggles()
 SetupToasts();
+customElements.define("form-input", HTMLFormInputElement);
 //# sourceMappingURL=formScript.js.map

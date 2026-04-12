@@ -30,6 +30,47 @@
                     "description": "Element id that is enabled by this toggle"
                 }
             ]
+        },
+        {
+            "name": "form-input",
+            "description": "Form input field",
+            "attributes": [
+                {
+                    "name": "type",
+                    "type": {
+                        "text": "'button' | 'checkbox' | 'color' | 'datetime-local' | 'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' | 'password' |'radio' | 'range' | 'reset' | 'search' | 'select' | 'submit' | 'tel' | 'text' | 'textarea' | 'time' | 'url' | 'week'"
+                    },
+                    "default": "text",
+                    "description": "Type of input field "
+                },
+                {
+                    "name": "value",
+                    "description": "Value of input field"
+                },
+                {
+                    "name": "onEnterPressClickElementId",
+                    "description": "Element that is clicked when enter is pressed in this input field"
+                },
+                {
+                    "name": "list",
+                    "description": "Id of datalist for input field"
+                },
+                {
+                    "name": "placeholder",
+                    "description": "Placeholder for input field"
+                },{
+                    "name": "placeholder",
+                    "description": "Placeholder for input field"
+                },
+                {
+                    "name": "icon",
+                    "description": "Icon for input field"
+                },
+                {
+                    "name": "isStrictList",
+                    "description": "If value must be selected from list"
+                }
+            ]
         }
     ]
 }
