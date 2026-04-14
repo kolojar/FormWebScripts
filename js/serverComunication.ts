@@ -223,7 +223,7 @@ export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: 
 
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
-        if (xhr.readyState == 4 && xhr.status == 201) {
+        if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
             const responce = xhr.responseText
             console.log(responce);
