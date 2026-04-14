@@ -1,5 +1,5 @@
 export class LanguageManager {
-    private languageData: Map<string, any> = new Map()
+    private languageData: any = {}
     readonly localesFolderPath: string
     private language: string = ""
 
@@ -7,10 +7,11 @@ export class LanguageManager {
         if (this.languageData == null) {
             return fallbackText
         }
-        if (this.languageData.has(key)) {
+        const text = this.languageData[key]
+        if (text == null) {
             return fallbackText
         }
-        return this.languageData.get(key)
+        return text
     }
 
     async AsyncTranslate(key: string, fallbackText: string): Promise<string> {
@@ -21,10 +22,11 @@ export class LanguageManager {
                 }, 100)
                 return
             }
-            if (this.languageData.has(key)) {
+            const text = this.languageData[key]
+            if (text == null) {
                 resolve(fallbackText)
             }
-            resolve(this.languageData.get(key))
+            resolve(text)
         })
     }
 
