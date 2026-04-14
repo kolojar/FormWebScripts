@@ -1,4 +1,4 @@
-import { MakeElementDraggable } from "./formScript.js";
+import { HTMLFormInputElement, MakeElementDraggable } from "./formScript.js";
 import { LanguageManager } from "./languageManager.js";
 export var FormDialogStyle;
 (function (FormDialogStyle) {
@@ -69,7 +69,7 @@ export class FormDialog {
         this.progressLines = [];
         if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
-            this.inputElement = document.createElement("form-input");
+            this.inputElement = new HTMLFormInputElement("", null);
             this.inputElement.setPlaceHolder(template.placeholder);
             this.inputElement.style.width = "500px";
             if (template.style == FormDialogStyle.Entry) {
@@ -78,9 +78,12 @@ export class FormDialog {
             else {
                 this.inputElement.setType("select");
                 this.inputElement.setIsScrictList(true);
-                document;
+                const options = [];
+                for (const key of template.selectValues.keys()) {
+                    options.push(key);
+                }
+                this.inputElement.setOptions(options);
             }
-            this.inputElement.setListId(template.listId);
             let image = "";
             switch (this.template.entryType.toLowerCase()) {
                 case "text": {
@@ -240,6 +243,12 @@ export class FormDialogManager {
         //Close animation
         const manager = this;
         function closeDialog() {
+            if (dialog.template.style == FormDialogStyle.Select) {
+                const [_, valid] = dialog.inputElement.validate();
+                if (!valid) {
+                    return false;
+                }
+            }
             dialog.element.classList.add("is-hidden");
             dialog.element.addEventListener("animationend", (event) => {
                 if (event.animationName == "fadeOut") {
@@ -260,6 +269,7 @@ export class FormDialogManager {
                     }
                 }
             });
+            return true;
         }
         //ESC key press
         dialog.element.addEventListener('cancel', (event) => {
@@ -270,7 +280,9 @@ export class FormDialogManager {
                 dialog.element.showModal();
                 return;
             }
-            closeDialog();
+            if (!closeDialog()) {
+                return;
+            }
             if (dialog.template.onCloseEvent != null) {
                 dialog.template.onCloseEvent(-1, dialog.template.escapeCloseValue);
             }
@@ -278,7 +290,9 @@ export class FormDialogManager {
         //Close using close function
         dialog.element.addEventListener('force-cancel', (event) => {
             event.preventDefault();
-            closeDialog();
+            if (!closeDialog()) {
+                return;
+            }
             if (dialog.template.onCloseEvent != null) {
                 dialog.template.onCloseEvent(-2, dialog.template.escapeCloseValue);
             }
@@ -307,7 +321,9 @@ export class FormDialogManager {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = () => {
-                    closeDialog();
+                    if (!closeDialog()) {
+                        return;
+                    }
                     if (dialog.template.onCloseEvent != null) {
                         dialog.template.onCloseEvent(i, dialog.template.buttons[i].valueOnClick);
                     }

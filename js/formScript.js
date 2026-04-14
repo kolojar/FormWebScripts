@@ -229,6 +229,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.isStrictList = strictList;
         this.options = [];
         //Create elements
+        this.holder = document.createElement("div");
         this.img = document.createElement("img");
         this.input = document.createElement("input");
         this.textArea = document.createElement("textarea");
@@ -245,8 +246,9 @@ export class HTMLFormInputElement extends HTMLElement {
         this.tabIndex = -1;
         this.listHolder.style.display = "none";
         //Move children
-        this.appendChild(this.img);
-        this.appendChild(this.afterImg);
+        this.holder.appendChild(this.img);
+        this.holder.appendChild(this.afterImg);
+        this.appendChild(this.holder);
         //Setup basic events
         this.addEventListener("focusin", () => {
             this.renderList();
@@ -329,27 +331,29 @@ export class HTMLFormInputElement extends HTMLElement {
         //Select input element based on type
         const focused = this.classList.contains("formInputFocus");
         if (this.input.parentElement == this) {
-            this.removeChild(this.input);
+            this.holder.removeChild(this.input);
         }
         if (this.textArea.parentElement == this) {
-            this.removeChild(this.textArea);
+            this.holder.removeChild(this.textArea);
         }
+        this.holder.removeChild(this.afterImg);
         if (this.type == "textarea") {
-            this.insertBefore(this.img, this.appendChild(this.textArea));
+            this.holder.appendChild(this.textArea);
             if (focused) {
                 this.textArea.focus();
             }
         }
-        else if (this.type == "select") {
-            this.setIsScrictList(true);
-        }
         else {
-            this.insertBefore(this.img, this.appendChild(this.input));
+            this.holder.appendChild(this.input);
             this.input.type = this.type;
             if (focused) {
                 this.input.focus();
             }
         }
+        if (this.type == "select") {
+            this.setIsScrictList(true);
+        }
+        this.holder.appendChild(this.afterImg);
         //Add specific use cases
         if (this.type == "password") {
             //Make password eye
@@ -407,6 +411,7 @@ export class HTMLFormInputElement extends HTMLElement {
         // if (this.hasAttribute("isStrictList")) {
         //    this.setIsScrictList(this.getAttribute("isStrictList") == "true")
         //}
+        this.updateInputType();
     }
     attributeChangedCallback(name, oldValue, newValue) {
         console.log(name, oldValue, newValue);
@@ -449,6 +454,23 @@ export class HTMLFormInputElement extends HTMLElement {
         let isValid = true;
         if (this.validationFunction != null) {
             isValid = this.validationFunction(this.getValue());
+        }
+        if (isValid && this.isStrictList) {
+            console.log(this.options);
+            isValid = this.options.indexOf(this.getValue()) != -1;
+        }
+        //Add styles
+        if (changed) {
+            this.classList.add(this.changeBorderClass);
+        }
+        else {
+            this.classList.remove(this.changeBorderClass);
+        }
+        if (isValid) {
+            this.classList.remove(this.invalidBorderClass);
+        }
+        else {
+            this.classList.add(this.invalidBorderClass);
         }
         return [changed, isValid];
     }

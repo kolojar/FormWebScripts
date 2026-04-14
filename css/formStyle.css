@@ -192,11 +192,6 @@ body {
     display: block;
 }
 
-input[type="text"],
-input[type="url"] {
-    margin-bottom: 10px;
-}
-
 form-toggle .labelBefore {
     display: inline;
     position: relative;
@@ -322,22 +317,19 @@ form-input, form-select {
     min-height: 34px;
     margin: 4px;
     /*display: inline-block;*/
-    display: flex;
-    flex-flow: row nowrap;
     transition: border-color 0.5s ease;
+    display: inline-block;
 }
 
-.formInputFocus {
-    border-color: #333;
+form-input>div, form-select>div {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
 }
 
 @media (prefers-color-scheme: dark) {
     form-input {
         border: 1px solid white;
-    }
-
-    .formTextInputFocus {
-        border-color: #ccc;
     }
 }
 
@@ -347,7 +339,7 @@ form-input, form-select {
     flex-flow: row nowrap;
 }*/
 
-form-input img {
+form-input > div > img {
     height: 32px;
     margin: 1px 0.5rem;
     display: inline;
@@ -359,28 +351,28 @@ form-input img {
     }
 }
 
-form-input input,
-form-input select {
+form-input > div > input,
+form-input > div > select {
     border: none;
     margin: 4px;
     display: inline-block;
     position: relative;
     margin-left: 0px;
-    vertical-align: top;
+    vertical-align:middle;
     width: 100%;
 }
 
 
 @media (prefers-color-scheme: dark) {
-    form-input input,
-    form-input select {
+    form-input > div > input,
+    form-input > div > select {
         background-color: black;
         color: white;
     }
 }
 
 
-form-input textarea {
+form-input > div > textarea {
     border: none;
     margin: 4px;
     display: inline-block;
@@ -391,13 +383,13 @@ form-input textarea {
 }
 
 @media (prefers-color-scheme: dark) {
-    form-input textarea {
+    form-input > div > textarea {
         background-color: black;
         color: white;
     }
 }
 
-form-input .listHolder {
+form-input > div > .listHolder {
     position: relative;
     top: 0px;
     left: 0px;
@@ -406,25 +398,21 @@ form-input .listHolder {
     height: 100px;
 }
 
-form-input .listHolder:hover {
+form-input > div > .listHolder:hover {
     background-color: gray;
 }
 
-form-input p {
+form-input > div > p {
     margin-top: 8px;
     margin-left: 4px;
 }
 
-form-input {
-    display: inline-block;
-}
-
-form-input input[type="color"] {
+form-input > div > input[type="color"] {
     margin-bottom: 8px;
     height: 26px
 }
 
-form-input input:focus {
+form-input > div > input:focus {
     outline: none;
 }
 
@@ -669,4 +657,13 @@ formrow p:first-child {
 
 .formInfoBorderColor {
     border-color: #0099ff;
+}
+
+.formInputFocus {
+    border-color: #333;
+}
+@media (prefers-color-scheme: dark) {
+        .formTextInputFocus {
+        border-color: #ccc;
+    }
 }
