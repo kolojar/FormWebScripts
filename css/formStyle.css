@@ -310,7 +310,7 @@ form-toggle .labelAfter {
     background-color: #ccc;
 }
 
-form-input, form-select {
+form-input {
     border-radius: 4px;
     border: 1px solid black;
     /*transition: all 1s;*/
@@ -321,7 +321,7 @@ form-input, form-select {
     display: inline-block;
 }
 
-form-input>div, form-select>div {
+form-input>div {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;

@@ -7,12 +7,12 @@ import { WebSocketConnection, WebSocketConnectionMessageType } from "./serverCom
 Automatically connects to websocket and configures it with toasts and autoconnect, type is URL parameter
 */
 export function SetupWebsocketWithToasts(type, dialogManager = null, newUrl = "/websocket") {
-    const languageManager = new LanguageManager("/formWebScripts/locales", null, false);
+    const languageManager = new LanguageManager("/formWebScripts/locales", "", false);
     const ws = new WebSocketConnection(type, newUrl, languageManager);
     if (dialogManager != null) {
-        ws.UserParams.connectingDialog = new FormDialogTemplate("Web Socket", languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."), false, null, null, FormDialogStyle.Wait, true, true);
+        ws.UserParams.connectingDialog = new FormDialogTemplate("Web Socket", languageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."), false, (_a, _b) => { }, [], FormDialogStyle.Wait, true, true);
         let func = async () => {
-            ws.UserParams.reconnectingDialog = new FormDialogTemplate("Web Socket", await languageManager.AsyncTranslate("wsForms.reconnecting", "Reconnecting to Web Socket..."), false, null, null, FormDialogStyle.Wait, true, true);
+            ws.UserParams.reconnectingDialog = new FormDialogTemplate("Web Socket", await languageManager.AsyncTranslate("wsForms.reconnecting", "Reconnecting to Web Socket..."), false, (_a, _b) => { }, [], FormDialogStyle.Wait, true, true);
         };
         func();
     }

@@ -17,7 +17,7 @@ Web Socket connection
 export class WebSocketConnection {
     private type: string
     private url: string
-    ws: WebSocket
+    ws: WebSocket | null
     messageFuncs: WebSocketConnectionMessageFunc[]
     private closing: boolean = false
     private connectionCouter = -1
@@ -33,10 +33,15 @@ export class WebSocketConnection {
         this.autorefreshOnInvalidInstance = autorefreshOnInvalidInstance
         this.UserParams = {}
         this.languageManager = languageManager
+        this.ws = null
     }
 
     IsAlive(): boolean {
-        return this.ws.readyState == this.ws.OPEN
+        if (this.ws == undefined) {
+            return false
+        } else {
+            return this.ws?.readyState == this.ws?.OPEN
+        }
     }
 
     /*
@@ -51,7 +56,7 @@ export class WebSocketConnection {
     */
     Disconnect() {
         this.closing = true
-        this.ws.close()
+        this.ws?.close()
     }
 
     /*
@@ -64,14 +69,14 @@ export class WebSocketConnection {
         if (wsc.connectionCouter > 10) {
             //Could not connect to WebSocket
             this.messageFuncs.forEach(element => {
-                element(WebSocketConnectionMessageType.TotalClose, null)
+                element(WebSocketConnectionMessageType.TotalClose, "")
             });
             return
         }
 
         //Send message about connecting
         this.messageFuncs.forEach(element => {
-            element(WebSocketConnectionMessageType.Connecting, null)
+            element(WebSocketConnectionMessageType.Connecting, "")
         });
 
         //Try to connect
@@ -93,7 +98,9 @@ export class WebSocketConnection {
                         element(WebSocketConnectionMessageType.InvalidWebSocketInstance, event.data)
                     });
                     //From Webtools package
-                    webSocket.onerror(new Event("invalid cookies"))
+                    if (webSocket.onerror != null) {
+                        webSocket.onerror(new Event("invalid cookies"))
+                    }
                     if (wsc.autorefreshOnInvalidInstance) {
                         alert(wsc.languageManager.Translate("websockets.INVALID_WEB_SOCKET_INSTANCE", "Instance expired. Site will refresh, all unsaved work will be lost."))
                         window.location.reload()
@@ -121,7 +128,7 @@ export class WebSocketConnection {
                         element(WebSocketConnectionMessageType.Error, "")
                     });
                 }
-                wsc.ws.close()
+                wsc.ws?.close()
             };
 
             //Add event on close
@@ -144,13 +151,6 @@ export class WebSocketConnection {
         } catch {
             return
         }
-    }
-
-    /*
-       Sends data with standard to WebSocket
-       */
-    SendData(command: string, params: any) {
-        this.Send(PackStandard(command, params))
     }
 
     /*
@@ -260,58 +260,58 @@ export async function SendPOSTDataToServerAsync(url: string, data: FormData): Pr
     })
 }
 
-export function UnpackStandard(message: string): [string, any] {
-    if (message == null) {
-        return ["", null]
-    }
-    const split = message.split("?")
-    const command = split[0]
-    const paramsUrl = new URLSearchParams(split[1])
-    let paramsResult = {}
-    paramsUrl.forEach((value, key) => {
-        paramsResult[key] = value
-    })
-    return [command, paramsResult]
-}
+//export function UnpackStandard(message: string): [string, any] {
+//    if (message == null) {
+//        return ["", null]
+//    }
+//    const split = message.split("?")
+//    const command = split[0]
+//    const paramsUrl = new URLSearchParams(split[1])
+//    let paramsResult = new Map<string,any>()
+//    paramsUrl.forEach((value, key) => {
+//        paramsResult[key] = value
+//    })
+//    return [command, paramsResult]
+//}
+//
+//export function PackStandard(command: string, params: any) {
+//    return command + "?" + new URLSearchParams(params).toString()
+//}
 
-export function PackStandard(command: string, params: any) {
-    return command + "?" + new URLSearchParams(params).toString()
-}
+//export function ConnectToWebSocket(type: string, newUrl = "/"): WebSocket | null {
+//    try {
+//        const webSocket = new WebSocket(newUrl + "websocket?" + encodeURIComponent("type") + "=" + encodeURIComponent(type))
+//        //const webSocket = new WebSocket("/websocket")
+//        webSocket.addEventListener("message", function (event) {
+//            const [command, params] = UnpackStandard(event.data)
+//            console.log(command, params);
+//        });
+//        webSocket.onopen = function () {
+//            console.log("Connected to WebSocket server");
+//        };
+//        webSocket.onerror = function (error) {
+//            console.error("WebSocket error: ", error);
+//        };
+//        webSocket.onclose = function () {
+//            console.log("WebSocket connection closed");
+//        };
+//        return webSocket
+//    } catch {
+//        return null
+//    }
+//}
 
-export function ConnectToWebSocket(type: string, newUrl = "/"): WebSocket | null {
-    try {
-        const webSocket = new WebSocket(newUrl + "websocket?" + encodeURIComponent("type") + "=" + encodeURIComponent(type))
-        //const webSocket = new WebSocket("/websocket")
-        webSocket.addEventListener("message", function (event) {
-            const [command, params] = UnpackStandard(event.data)
-            console.log(command, params);
-        });
-        webSocket.onopen = function () {
-            console.log("Connected to WebSocket server");
-        };
-        webSocket.onerror = function (error) {
-            console.error("WebSocket error: ", error);
-        };
-        webSocket.onclose = function () {
-            console.log("WebSocket connection closed");
-        };
-        return webSocket
-    } catch {
-        return null
-    }
-}
-
-export function SendDataToWebSocket(websocket: WebSocket, command: string, params: any) {
-    if (websocket.readyState === 1) {
-        websocket.send(PackStandard(command, params))
-    } else {
-        if (websocket.readyState == 2 || websocket.readyState == 3) {
-            //WebSocket not ready -> stop loop
-            return
-        }
-        //Wait for ready
-        setTimeout(function () {
-            SendDataToWebSocket(websocket, command, params)
-        }, 500)
-    }
-}
+//export function SendDataToWebSocket(websocket: WebSocket, command: string, params: any) {
+//    if (websocket.readyState === 1) {
+//        websocket.send(PackStandard(command, params))
+//    } else {
+//        if (websocket.readyState == 2 || websocket.readyState == 3) {
+//            //WebSocket not ready -> stop loop
+//            return
+//        }
+//        //Wait for ready
+//        setTimeout(function () {
+//            SendDataToWebSocket(websocket, command, params)
+//        }, 500)
+//    }
+//}

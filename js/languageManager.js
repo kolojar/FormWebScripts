@@ -3,11 +3,10 @@ export class LanguageManager {
         if (this.languageData == null) {
             return fallbackText;
         }
-        const text = this.languageData[key];
-        if (text == null) {
+        if (this.languageData.has(key)) {
             return fallbackText;
         }
-        return text;
+        return this.languageData.get(key);
     }
     async AsyncTranslate(key, fallbackText) {
         return new Promise(resolve => {
@@ -17,11 +16,10 @@ export class LanguageManager {
                 }, 100);
                 return;
             }
-            const text = this.languageData[key];
-            if (text == null) {
+            if (this.languageData.has(key)) {
                 resolve(fallbackText);
             }
-            resolve(text);
+            resolve(this.languageData.get(key));
         });
     }
     /**
@@ -36,6 +34,8 @@ export class LanguageManager {
         });
     }
     constructor(localesFolderPath, fallbackLanguage = "", forceSetFallbackLanguage = false) {
+        this.languageData = new Map();
+        this.language = "";
         //Set language
         this.localesFolderPath = localesFolderPath;
         const lang = localStorage.getItem("formLanguage");

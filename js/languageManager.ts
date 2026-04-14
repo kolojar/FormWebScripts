@@ -1,17 +1,16 @@
 export class LanguageManager {
-    private languageData: string
+    private languageData: Map<string, any> = new Map()
     readonly localesFolderPath: string
-    private language: string
+    private language: string = ""
 
     Translate(key: string, fallbackText: string): string {
         if (this.languageData == null) {
             return fallbackText
         }
-        const text = this.languageData[key];
-        if (text == null) {
+        if (this.languageData.has(key)) {
             return fallbackText
         }
-        return text
+        return this.languageData.get(key)
     }
 
     async AsyncTranslate(key: string, fallbackText: string): Promise<string> {
@@ -22,11 +21,10 @@ export class LanguageManager {
                 }, 100)
                 return
             }
-            const text = this.languageData[key];
-            if (text == null) {
+            if (this.languageData.has(key)) {
                 resolve(fallbackText)
             }
-            resolve(text)
+            resolve(this.languageData.get(key))
         })
     }
 
@@ -54,7 +52,7 @@ export class LanguageManager {
                     }
                 }
             } else {
-                if (! await this.ChangeLanguage(lang, true)) {
+                if (! await this.ChangeLanguage(lang as string, true)) {
                     if (!await this.ChangeLanguage(fallbackLanguage, true)) {
                         if (! await this.ChangeLanguage(navigator.language.split('-')[0], true)) {
                             this.ChangeLanguage("en", true)
@@ -69,7 +67,7 @@ export class LanguageManager {
         window.addEventListener("storage", (ev: StorageEvent) => {
             if (ev.key == "formLanguage" && ev.newValue != this.language) {
                 console.log("Language change detected.");
-                this.ChangeLanguage(ev.newValue)
+                this.ChangeLanguage(ev.newValue as string)
             }
         })
     }

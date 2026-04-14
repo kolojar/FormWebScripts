@@ -58,12 +58,16 @@ export function DisableDragAndDrop(element: HTMLElement) {
     element.addEventListener("dragenter", (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
+        if ( ev.dataTransfer != null) {
         ev.dataTransfer.dropEffect = "none"
+        }
     })
     element.addEventListener("dragover", (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
+        if ( ev.dataTransfer != null) {
         ev.dataTransfer.dropEffect = "none"
+        }
     })
     element.addEventListener("drop", (ev) => {
         //ev.dataTransfer.dropEffect = "copy"

@@ -47,12 +47,16 @@ export function DisableDragAndDrop(element) {
     element.addEventListener("dragenter", (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
-        ev.dataTransfer.dropEffect = "none";
+        if (ev.dataTransfer != null) {
+            ev.dataTransfer.dropEffect = "none";
+        }
     });
     element.addEventListener("dragover", (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
-        ev.dataTransfer.dropEffect = "none";
+        if (ev.dataTransfer != null) {
+            ev.dataTransfer.dropEffect = "none";
+        }
     });
     element.addEventListener("drop", (ev) => {
         //ev.dataTransfer.dropEffect = "copy"
