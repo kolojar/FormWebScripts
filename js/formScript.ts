@@ -293,16 +293,18 @@ export class HTMLFormInputElement extends HTMLElement {
         this.holder.appendChild(this.img)
         this.holder.appendChild(this.afterImg)
         this.appendChild(this.holder)
+        this.appendChild(this.listHolder)
 
         //Setup basic events
         this.addEventListener("focusin", () => {
+            console.log("Focus in");
             this.renderList()
-            this.listHolder.style.display = ""
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus")
             }
         })
         this.addEventListener("focusout", () => {
+            console.log("Focus out");
             this.listHolder.style.display = "none"
             if (this.classList.contains("formInputFocus")) {
                 this.classList.remove("formInputFocus")
@@ -347,6 +349,9 @@ export class HTMLFormInputElement extends HTMLElement {
             return
         }
         const list = document.getElementById(this.listId)
+        if (list == null) {
+            return
+        }
         for (let i = 0; i < list.children.length; i++) {
             const child = list.children[i];
             if (child.tagName == "OPTION") {
@@ -357,6 +362,9 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     renderList() {
+        console.log("Render list");
+        this.listHolder.style.display = ""
+
         //Clear list
         while (this.listHolder.lastChild != null) {
             this.listHolder.lastChild.remove()
@@ -365,12 +373,17 @@ export class HTMLFormInputElement extends HTMLElement {
         //Update list
         for (const value of this.options) {
             if (value.includes(this.getValue())) {
+                const optionDiv = document.createElement("div")
                 const option = document.createElement("p")
                 option.innerText = value
-                option.addEventListener("click",() => {
+                optionDiv.addEventListener("mousedown",() => {
+                    console.log("Clicked on: " + value);
                     this.setValue(value)
+                    this.listHolder.style.display = "none"
+                    console.log(this.listHolder.style.display);
                 })
-                this.listHolder.appendChild(option)
+                optionDiv.appendChild(option)
+                this.listHolder.appendChild(optionDiv)
             }
         }
     }

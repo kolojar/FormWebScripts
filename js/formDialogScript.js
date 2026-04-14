@@ -12,11 +12,13 @@ export var FormDialogStyle;
  * Class for button in dialog
  */
 export class FormDialogButton {
-    constructor(location, color, text, valueOnClick) {
+    constructor(location, color, text, valueOnClick, isCancel = false) {
+        this.isCancel = false;
         this.location = location;
         this.color = color;
         this.valueOnClick = valueOnClick;
         this.text = text;
+        this.isCancel = isCancel;
     }
 }
 /**
@@ -64,6 +66,9 @@ export class FormDialog {
      * @param template Template of dialog
      */
     constructor(template) {
+        this.inputElement = null;
+        this.progressLabels = [];
+        this.closed = false;
         this.template = template;
         this.element = document.createElement("dialog");
         this.progressLines = [];
@@ -148,7 +153,7 @@ export class FormDialogManager {
         this.dialogs = [];
         this.opened = [];
         this.blockedOpenOver = false;
-        this.languageManager = new LanguageManager("/formWebScripts/locales", null, false);
+        this.languageManager = new LanguageManager("/formWebScripts/locales", "", false);
         const dialogHolder = document.createElement("div");
         dialogHolder.id = "formDialogHolder";
         document.body.appendChild(dialogHolder);
@@ -166,10 +171,12 @@ export class FormDialogManager {
         }
     }
     ShowDialog(dialog) {
+        var _c, _d, _e, _f, _g, _h, _j, _k, _l;
         //Check if dialog is valid
-        if (dialog == null || dialog.template == null) {
+        if (dialog == null || dialog == undefined || dialog.template == null) {
             return false;
         }
+        dialog = dialog;
         if (dialog.closed) {
             return false;
         }
@@ -193,7 +200,7 @@ export class FormDialogManager {
         }
         this.opened.push(dialog);
         //Create dialog
-        document.getElementById("formDialogHolder").appendChild(dialog.element);
+        (_c = document.getElementById("formDialogHolder")) === null || _c === void 0 ? void 0 : _c.appendChild(dialog.element);
         dialog.element.classList.add("formDialog");
         dialog.element.classList.add("formDialogFadeIn");
         if (dialog.template.style == FormDialogStyle.Wait) {
@@ -242,8 +249,11 @@ export class FormDialogManager {
         buttonBoxHolder.appendChild(buttonBoxRight);
         //Close animation
         const manager = this;
-        function closeDialog() {
-            if (dialog.template.style == FormDialogStyle.Select) {
+        function closeDialog(isCancel) {
+            if (dialog == null || dialog == undefined) {
+                return true;
+            }
+            if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
                 const [_, valid] = dialog.inputElement.validate();
                 if (!valid) {
                     return false;
@@ -280,7 +290,7 @@ export class FormDialogManager {
                 dialog.element.showModal();
                 return;
             }
-            if (!closeDialog()) {
+            if (!closeDialog(true)) {
                 return;
             }
             if (dialog.template.onCloseEvent != null) {
@@ -290,7 +300,7 @@ export class FormDialogManager {
         //Close using close function
         dialog.element.addEventListener('force-cancel', (event) => {
             event.preventDefault();
-            if (!closeDialog()) {
+            if (!closeDialog(true)) {
                 return;
             }
             if (dialog.template.onCloseEvent != null) {
@@ -300,41 +310,42 @@ export class FormDialogManager {
         //Setup buttons
         if (dialog.template.buttons != null) {
             for (let i = 0; i < dialog.template.buttons.length; i++) {
-                if (dialog.template.buttons[i] == null) {
+                if (dialog.template.buttons[i] == undefined) {
                     continue;
                 }
                 const button = document.createElement("button");
                 button.classList.add("formButton");
-                if (dialog.template.buttons[i].color == "ok") {
+                if (((_d = dialog.template.buttons[i]) === null || _d === void 0 ? void 0 : _d.color) == "ok") {
                     button.classList.add("formOkColor");
                 }
-                else if (dialog.template.buttons[i].color == "warn") {
+                else if (((_e = dialog.template.buttons[i]) === null || _e === void 0 ? void 0 : _e.color) == "warn") {
                     button.classList.add("formWarnColor");
                 }
-                else if (dialog.template.buttons[i].color == "info") {
+                else if (((_f = dialog.template.buttons[i]) === null || _f === void 0 ? void 0 : _f.color) == "info") {
                     button.classList.add("formInfoColor");
                 }
-                else if (dialog.template.buttons[i].color == "error") {
+                else if (((_g = dialog.template.buttons[i]) === null || _g === void 0 ? void 0 : _g.color) == "error") {
                     button.classList.add("formErrorColor");
                 }
-                else if (dialog.template.buttons[i].color == "black") {
+                else if (((_h = dialog.template.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "black") {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = () => {
-                    if (!closeDialog()) {
+                    var _c;
+                    if (!closeDialog(dialog.template.buttons[i].isCancel)) {
                         return;
                     }
                     if (dialog.template.onCloseEvent != null) {
-                        dialog.template.onCloseEvent(i, dialog.template.buttons[i].valueOnClick);
+                        dialog.template.onCloseEvent(i, (_c = dialog.template.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick);
                     }
                 };
-                if (dialog.template.buttons[i].location == "left") {
+                if (((_j = dialog.template.buttons[i]) === null || _j === void 0 ? void 0 : _j.location) == "left") {
                     buttonBoxLeft.appendChild(button);
                 }
-                else if (dialog.template.buttons[i].location == "center") {
+                else if (((_k = dialog.template.buttons[i]) === null || _k === void 0 ? void 0 : _k.location) == "center") {
                     buttonBoxCenter.appendChild(button);
                 }
-                else if (dialog.template.buttons[i].location == "right") {
+                else if (((_l = dialog.template.buttons[i]) === null || _l === void 0 ? void 0 : _l.location) == "right") {
                     buttonBoxRight.appendChild(button);
                 }
                 button.innerText = dialog.template.buttons[i].text;
@@ -352,9 +363,10 @@ export class FormDialogManager {
     ShowPrompt(title, content, cancelValue, onCloseEvent, entryType = "text", placeholder = "", openOverOthers = true, blockedOpenOver = true) {
         let dialog;
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
+            var _c;
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.inputElement.getValue());
+                    onCloseEvent((_c = dialog.inputElement) === null || _c === void 0 ? void 0 : _c.getValue());
                     return;
                 }
                 onCloseEvent(value);
@@ -367,7 +379,7 @@ export class FormDialogManager {
         return dialog;
     }
     ShowAlert(title, content, onCloseEvent, openOverOthers = true, blockedOpenOver = true) {
-        return this.ShowTemplate(new FormDialogTemplate(title, content, null, (a, _b) => {
+        return this.ShowTemplate(new FormDialogTemplate(title, content, null, (_a, _b) => {
             if (onCloseEvent != null) {
                 onCloseEvent();
             }
@@ -378,7 +390,7 @@ export class FormDialogManager {
             if (!onCloseEvent != null) {
                 onCloseEvent(value);
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false),
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false, true),
             new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver));
     }
     ShowSelect(title, content, cancelValue, onCloseEvent, selectValues, openOverOthers = true, blockedOpenOver = true) {
@@ -391,7 +403,7 @@ export class FormDialogManager {
                 }
                 onCloseEvent(value);
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
             new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Select, openOverOthers, blockedOpenOver);
         template.selectValues = selectValues;
         dialog = this.ShowTemplate(template);
@@ -406,7 +418,7 @@ export class FormDialogManager {
                     return;
                 }
             }
-        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false) : null], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
+        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
         template.progressLines = progressLines;
         dialog = this.ShowTemplate(template);
         return dialog;

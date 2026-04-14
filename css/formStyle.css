@@ -362,7 +362,6 @@ form-input > div > select {
     width: 100%;
 }
 
-
 @media (prefers-color-scheme: dark) {
     form-input > div > input,
     form-input > div > select {
@@ -389,16 +388,35 @@ form-input > div > textarea {
     }
 }
 
-form-input > div > .listHolder {
+form-input > .listHolder {
     position: relative;
     top: 0px;
     left: 0px;
-    background-color: aqua;
-    width: 100px;
-    height: 100px;
+    width: calc(100%-4px);
+    max-height: 100px;
+    flex-direction: column;
+    align-items: start;
+    display: flex;
+    overflow: auto;
+    z-index: 1;
+    border-radius: 4px;
+    margin: 2px;
+    border: none;
 }
 
-form-input > div > .listHolder:hover {
+form-input > .listHolder > div {
+    width: 100%;
+    cursor: pointer;
+    background-color: #ccc;
+}
+
+@media (prefers-color-scheme: dark) {
+    form-input > .listHolder > div {
+    background-color: #333;
+}
+}
+
+form-input > .listHolder > div:hover {
     background-color: gray;
 }
 
