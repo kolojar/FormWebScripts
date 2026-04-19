@@ -198,7 +198,7 @@ export function SendPOSTDataToServer(url, data, responceFunc) {
     //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
-        if (xhr.readyState == 4 && xhr.status == 201) {
+        if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
             const responce = xhr.responseText;
             console.log(responce);
