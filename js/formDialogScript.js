@@ -249,12 +249,12 @@ export class FormDialogManager {
         buttonBoxHolder.appendChild(buttonBoxRight);
         //Close animation
         const manager = this;
-        function closeDialog(isCancel) {
+        async function closeDialog(isCancel) {
             if (dialog == null || dialog == undefined) {
                 return true;
             }
             if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
-                const [_, valid] = dialog.inputElement.validate();
+                const [_, valid] = await dialog.inputElement.validate();
                 if (!valid) {
                     return false;
                 }

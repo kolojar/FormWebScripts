@@ -233,7 +233,7 @@ export class HTMLFormToggleElement extends HTMLDivElement {
 }
 
 export type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "select" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
-export type HTMLFormInputValidationFunc = (value: string) => boolean
+export type HTMLFormInputValidationFunc = (value: string) => Promise<boolean>
 /**
  * HTMLFormInputElement element defition
  */
@@ -246,7 +246,7 @@ export class HTMLFormInputElement extends HTMLElement {
     private onEnterPressClickElementId: string
     private type: HTMLFormInputType
     public validationFunction: HTMLFormInputValidationFunc | null
-    readonly doChangeCheck: boolean
+    private doChangeCheck: boolean
     private originalValue: string
     readonly changeBorderClass: string = "formWarnBorderColor"
     readonly invalidBorderClass: string = "formErrorBorderColor"
@@ -255,6 +255,9 @@ export class HTMLFormInputElement extends HTMLElement {
     private options: string[]
     readonly listHolder: HTMLDivElement
     private usingJSList: boolean = false
+    private areOptionsVisible: boolean = false;
+    private optionsTimestamp: Date
+    private isCaseSensitiveList: boolean
 
     constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null, listId: string = "", strictList: boolean = false, doChangeCheck: boolean = false, originalValue: string = "", changeBorderClass: string = "formWarnBorderColor", invalidBorderClass: string = "formErrorBorderColor") {
         super()
@@ -268,6 +271,8 @@ export class HTMLFormInputElement extends HTMLElement {
         this.listId = listId
         this.isStrictList = strictList
         this.options = []
+        this.optionsTimestamp = new Date(0)
+        this.isCaseSensitiveList= true;
 
         //Create elements
         this.holder = document.createElement("div")
@@ -298,6 +303,7 @@ export class HTMLFormInputElement extends HTMLElement {
         //Setup basic events
         this.addEventListener("focusin", () => {
             console.log("Focus in");
+            this.areOptionsVisible = true;
             this.renderList()
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus")
@@ -305,6 +311,7 @@ export class HTMLFormInputElement extends HTMLElement {
         })
         this.addEventListener("focusout", () => {
             console.log("Focus out");
+            this.areOptionsVisible = false;
             this.listHolder.style.display = "none"
             if (this.classList.contains("formInputFocus")) {
                 this.classList.remove("formInputFocus")
@@ -327,10 +334,12 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         })
         this.addEventListener("input", () => {
+            this.areOptionsVisible = true;
             this.renderList()
             this.validateInternal()
         })
         this.addEventListener("resize", () => {
+            //this.areOptionsVisible = true;
             this.renderList()
         })
     }
@@ -363,23 +372,32 @@ export class HTMLFormInputElement extends HTMLElement {
 
     renderList() {
         console.log("Render list");
+        if(this.options.length == 0 || !this.areOptionsVisible) {
+            console.log("Render list cancel");
+            return
+        }
+        console.log(this.options);
         this.listHolder.style.display = ""
 
         //Clear list
         while (this.listHolder.lastChild != null) {
             this.listHolder.lastChild.remove()
+            console.log("Clearing");
         }
 
         //Update list
+        console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.options) {
-            if (value.includes(this.getValue())) {
+            if ((this.isCaseSensitiveList ? value : value.toLowerCase()).includes((this.isCaseSensitiveList ? this.getValue() : this.getValue().toLocaleLowerCase()))) {
                 const optionDiv = document.createElement("div")
                 const option = document.createElement("p")
                 option.innerText = value
                 optionDiv.addEventListener("mousedown",() => {
                     console.log("Clicked on: " + value);
                     this.setValue(value)
+                    this.areOptionsVisible = false
                     this.listHolder.style.display = "none"
+                    //this.renderList()
                     console.log(this.listHolder.style.display);
                 })
                 optionDiv.appendChild(option)
@@ -397,7 +415,9 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.textArea.parentElement == this) {
         this.holder.removeChild(this.textArea)
         }
+        if(this.afterImg.parentElement == this.holder) {
         this.holder.removeChild(this.afterImg)
+        }
         if (this.type == "textarea") {
             this.holder.appendChild(this.textArea)
             if (focused) {
@@ -470,12 +490,17 @@ export class HTMLFormInputElement extends HTMLElement {
         //    this.setIsScrictList(this.getAttribute("isStrictList") == "true")
         //}
         this.updateInputType()
+        if(this.hasAttribute("do-change-check")) {
+            this.doChangeCheck = this.getAttribute("do-change-check") as string == "true"
+        }
+        for (const attribute of HTMLFormInputElement.observedAttributes) {
+            if (this.hasAttribute(attribute)) {            this.setAttribute(attribute,this.getAttribute(attribute) as string)}
+        }
     }
 
-    static observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'list', 'placeholder', 'icon', 'isStrictList']
+    static observedAttributes = ['type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list','is-case-sensitive-list','original-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         console.log(name,oldValue,newValue);
-        
         if (oldValue == newValue) {
             return
         }
@@ -483,21 +508,25 @@ export class HTMLFormInputElement extends HTMLElement {
             this.type = newValue
             this.updateInputType()
         } else if (name == "value") {
-            this.setValue(newValue)
-        } else if (name == "onEnterPressClickElementId") {
+            this.setValue(newValue,true)
+        } else if (name == "on-enter-press-click-element-id") {
             this.onEnterPressClickElementId = newValue
         } else if (name == "placeholder") {
             this.setPlaceHolder(newValue)
         } else if (name == "icon") {
             this.setIcon(newValue)
-        } else if (name == "isStrictList") {
+        } else if (name == "is-strict-list") {
             this.setIsScrictList(newValue == "true")
         } else if (name == "list") {
             this.setListId(newValue)
+        } else if (name == "is-case-sensitive-list") {
+            this.setIsCaseSensitiveList(newValue == "true")
+        } else if(name == 'original-value') {
+            this.setOriginalValue(newValue)
         }
     }
-
-    private validateInternal(): [changed: boolean, isValid: boolean] {
+ 
+    private async validateInternal(): Promise<[changed: boolean, isValid: boolean]> {
         this.setAttribute("value", this.getValue())
         //Check for changes
         let changed = false
@@ -510,10 +539,11 @@ export class HTMLFormInputElement extends HTMLElement {
         //Do validation
         let isValid = true
         if (this.validationFunction != null) {
-            isValid = this.validationFunction(this.getValue())
+            isValid = await this.validationFunction(this.getValue())
         }
         if (isValid && this.isStrictList) {
             console.log(this.options);
+            console.log(this.getValue());
             isValid = this.options.indexOf(this.getValue()) != -1
         }
 
@@ -531,7 +561,7 @@ export class HTMLFormInputElement extends HTMLElement {
         return [changed, isValid]
     }
 
-    public validate(): [changed: boolean, isValid: boolean] {
+    public async validate(): Promise<[changed: boolean, isValid: boolean]> {
         return this.validateInternal()
     }
 
@@ -543,13 +573,15 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
 
-    public setValue(value: string) {
+    public setValue(value: string, calledFromProperty: boolean = false) {
         if (this.type == "textarea") {
             this.textArea.value = value
         } else {
             this.input.value = value
         }
+        if (!calledFromProperty) {
         this.setAttribute("value", value)
+        }
     }
 
     public getType(): HTMLFormInputType {
@@ -568,6 +600,7 @@ export class HTMLFormInputElement extends HTMLElement {
 
     public setOriginalValue(originalValue: string) {
         this.originalValue = originalValue
+        this.setAttribute("original-value",originalValue)
         this.validateInternal()
     }
 
@@ -625,10 +658,23 @@ export class HTMLFormInputElement extends HTMLElement {
         return this.options
     }
 
-    public setOptions(options: string[]) {
+    public setOptions(options: string[], timestamp: Date | null = null) {
         this.usingJSList = true
-        this.options = options
+        if(timestamp != null && timestamp >this.optionsTimestamp) {
+        this.optionsTimestamp = timestamp;
+            this.options = options
         this.removeAttribute("list")
+        this.renderList()
+        }
+    }
+
+    public getIsCaseSensitiveList(): boolean {
+        return this.isCaseSensitiveList;
+    }
+
+    public setIsCaseSensitiveList(isCaseSensitiveList: boolean) {
+        this.isCaseSensitiveList = isCaseSensitiveList;
+        this.setAttribute("isCaseSensitiveList",isCaseSensitiveList ? "true"  : "false")
         this.renderList()
     }
 }

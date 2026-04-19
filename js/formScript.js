@@ -218,6 +218,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.listId = "";
         this.isStrictList = false;
         this.usingJSList = false;
+        this.areOptionsVisible = false;
         this.onEnterPressClickElementId = onEnterPressClickElementId;
         this.type = "text";
         this.validationFunction = validationFunction;
@@ -228,6 +229,8 @@ export class HTMLFormInputElement extends HTMLElement {
         this.listId = listId;
         this.isStrictList = strictList;
         this.options = [];
+        this.optionsTimestamp = new Date(0);
+        this.isCaseSensitiveList = true;
         //Create elements
         this.holder = document.createElement("div");
         this.img = document.createElement("img");
@@ -253,6 +256,7 @@ export class HTMLFormInputElement extends HTMLElement {
         //Setup basic events
         this.addEventListener("focusin", () => {
             console.log("Focus in");
+            this.areOptionsVisible = true;
             this.renderList();
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus");
@@ -260,6 +264,7 @@ export class HTMLFormInputElement extends HTMLElement {
         });
         this.addEventListener("focusout", () => {
             console.log("Focus out");
+            this.areOptionsVisible = false;
             this.listHolder.style.display = "none";
             if (this.classList.contains("formInputFocus")) {
                 this.classList.remove("formInputFocus");
@@ -284,10 +289,12 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         });
         this.addEventListener("input", () => {
+            this.areOptionsVisible = true;
             this.renderList();
             this.validateInternal();
         });
         this.addEventListener("resize", () => {
+            //this.areOptionsVisible = true;
             this.renderList();
         });
     }
@@ -317,21 +324,30 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     renderList() {
         console.log("Render list");
+        if (this.options.length == 0 || !this.areOptionsVisible) {
+            console.log("Render list cancel");
+            return;
+        }
+        console.log(this.options);
         this.listHolder.style.display = "";
         //Clear list
         while (this.listHolder.lastChild != null) {
             this.listHolder.lastChild.remove();
+            console.log("Clearing");
         }
         //Update list
+        console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.options) {
-            if (value.includes(this.getValue())) {
+            if ((this.isCaseSensitiveList ? value : value.toLowerCase()).includes((this.isCaseSensitiveList ? this.getValue() : this.getValue().toLocaleLowerCase()))) {
                 const optionDiv = document.createElement("div");
                 const option = document.createElement("p");
                 option.innerText = value;
                 optionDiv.addEventListener("mousedown", () => {
                     console.log("Clicked on: " + value);
                     this.setValue(value);
+                    this.areOptionsVisible = false;
                     this.listHolder.style.display = "none";
+                    //this.renderList()
                     console.log(this.listHolder.style.display);
                 });
                 optionDiv.appendChild(option);
@@ -348,7 +364,9 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.textArea.parentElement == this) {
             this.holder.removeChild(this.textArea);
         }
-        this.holder.removeChild(this.afterImg);
+        if (this.afterImg.parentElement == this.holder) {
+            this.holder.removeChild(this.afterImg);
+        }
         if (this.type == "textarea") {
             this.holder.appendChild(this.textArea);
             if (focused) {
@@ -424,6 +442,14 @@ export class HTMLFormInputElement extends HTMLElement {
         //    this.setIsScrictList(this.getAttribute("isStrictList") == "true")
         //}
         this.updateInputType();
+        if (this.hasAttribute("do-change-check")) {
+            this.doChangeCheck = this.getAttribute("do-change-check") == "true";
+        }
+        for (const attribute of HTMLFormInputElement.observedAttributes) {
+            if (this.hasAttribute(attribute)) {
+                this.setAttribute(attribute, this.getAttribute(attribute));
+            }
+        }
     }
     attributeChangedCallback(name, oldValue, newValue) {
         console.log(name, oldValue, newValue);
@@ -435,9 +461,9 @@ export class HTMLFormInputElement extends HTMLElement {
             this.updateInputType();
         }
         else if (name == "value") {
-            this.setValue(newValue);
+            this.setValue(newValue, true);
         }
-        else if (name == "onEnterPressClickElementId") {
+        else if (name == "on-enter-press-click-element-id") {
             this.onEnterPressClickElementId = newValue;
         }
         else if (name == "placeholder") {
@@ -446,14 +472,20 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == "icon") {
             this.setIcon(newValue);
         }
-        else if (name == "isStrictList") {
+        else if (name == "is-strict-list") {
             this.setIsScrictList(newValue == "true");
         }
         else if (name == "list") {
             this.setListId(newValue);
         }
+        else if (name == "is-case-sensitive-list") {
+            this.setIsCaseSensitiveList(newValue == "true");
+        }
+        else if (name == 'original-value') {
+            this.setOriginalValue(newValue);
+        }
     }
-    validateInternal() {
+    async validateInternal() {
         this.setAttribute("value", this.getValue());
         //Check for changes
         let changed = false;
@@ -465,10 +497,11 @@ export class HTMLFormInputElement extends HTMLElement {
         //Do validation
         let isValid = true;
         if (this.validationFunction != null) {
-            isValid = this.validationFunction(this.getValue());
+            isValid = await this.validationFunction(this.getValue());
         }
         if (isValid && this.isStrictList) {
             console.log(this.options);
+            console.log(this.getValue());
             isValid = this.options.indexOf(this.getValue()) != -1;
         }
         //Add styles
@@ -486,7 +519,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         return [changed, isValid];
     }
-    validate() {
+    async validate() {
         return this.validateInternal();
     }
     getValue() {
@@ -497,14 +530,16 @@ export class HTMLFormInputElement extends HTMLElement {
             return this.input.value;
         }
     }
-    setValue(value) {
+    setValue(value, calledFromProperty = false) {
         if (this.type == "textarea") {
             this.textArea.value = value;
         }
         else {
             this.input.value = value;
         }
-        this.setAttribute("value", value);
+        if (!calledFromProperty) {
+            this.setAttribute("value", value);
+        }
     }
     getType() {
         return this.type;
@@ -519,6 +554,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     setOriginalValue(originalValue) {
         this.originalValue = originalValue;
+        this.setAttribute("original-value", originalValue);
         this.validateInternal();
     }
     getListId() {
@@ -568,14 +604,25 @@ export class HTMLFormInputElement extends HTMLElement {
     getOptions() {
         return this.options;
     }
-    setOptions(options) {
+    setOptions(options, timestamp = null) {
         this.usingJSList = true;
-        this.options = options;
-        this.removeAttribute("list");
+        if (timestamp != null && timestamp > this.optionsTimestamp) {
+            this.optionsTimestamp = timestamp;
+            this.options = options;
+            this.removeAttribute("list");
+            this.renderList();
+        }
+    }
+    getIsCaseSensitiveList() {
+        return this.isCaseSensitiveList;
+    }
+    setIsCaseSensitiveList(isCaseSensitiveList) {
+        this.isCaseSensitiveList = isCaseSensitiveList;
+        this.setAttribute("isCaseSensitiveList", isCaseSensitiveList ? "true" : "false");
         this.renderList();
     }
 }
-HTMLFormInputElement.observedAttributes = ['type', 'value', 'onEnterPressClickElementId', 'list', 'placeholder', 'icon', 'isStrictList'];
+HTMLFormInputElement.observedAttributes = ['type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";

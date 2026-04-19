@@ -281,12 +281,12 @@ export class FormDialogManager {
 
         //Close animation
         const manager = this
-        function closeDialog(isCancel: boolean): boolean {
+        async function closeDialog(isCancel: boolean): Promise<boolean> {
             if (dialog == null ||dialog == undefined) {
                 return true
             }
             if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
-                const [_, valid] = (dialog.inputElement as HTMLFormInputElement).validate()
+                const [_, valid] = await (dialog.inputElement as HTMLFormInputElement).validate()
                 if (!valid) {
                     return false
                 }
