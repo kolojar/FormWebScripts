@@ -110,11 +110,7 @@ export class FormDialog<T> {
             } else {
                 this.inputElement.setType("select")
                 this.inputElement.setIsScrictList(true)
-                const options  = []
-                for (const key of template.selectValues.keys()) {
-                    options.push(key)
-                }
-                this.inputElement.setOptions(options)
+                this.inputElement.setOptions(template.selectValues)
             }
             let image = ""
             switch (this.template.entryType.toLowerCase()) {
@@ -427,7 +423,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.template.selectValues.get((dialog.inputElement as HTMLFormInputElement).getValue()) as T)
+                    onCloseEvent((dialog.inputElement as HTMLFormInputElement).getValue()[1] as T)
                     return
                 }
                 onCloseEvent(value)
