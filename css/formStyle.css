@@ -580,7 +580,9 @@ formrow p:first-child {
     left: 50%;
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
-    white-space: nowrap;
+    width: max-content;
+    height: max-content;
+    /*white-space: ;*/
 }
 
 .formDialogFadeIn {
