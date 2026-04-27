@@ -264,6 +264,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.textArea = document.createElement("textarea");
         this.afterImg = document.createElement("img");
         this.listHolder = document.createElement("div");
+        this.label = document.createElement("label");
         //Add classes
         this.afterImg.style.cursor = "pointer";
         this.listHolder.classList.add("listHolder");
@@ -277,6 +278,7 @@ export class HTMLFormInputElement extends HTMLElement {
         //Move children
         this.holder.appendChild(this.img);
         this.holder.appendChild(this.afterImg);
+        this.appendChild(this.label);
         this.appendChild(this.holder);
         this.appendChild(this.listHolder);
         //Setup basic events
@@ -509,6 +511,9 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == 'original-value') {
             this.setOriginalValue(newValue);
         }
+        else if (name == 'label') {
+            this.setLabel(newValue);
+        }
     }
     async validateInternal() {
         this.setAttribute("value", this.getValueRaw());
@@ -531,16 +536,16 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         //Add styles
         if (changed) {
-            this.classList.add(this.changeBorderClass);
+            this.holder.classList.add(this.changeBorderClass);
         }
         else {
-            this.classList.remove(this.changeBorderClass);
+            this.holder.classList.remove(this.changeBorderClass);
         }
         if (isValid) {
-            this.classList.remove(this.invalidBorderClass);
+            this.holder.classList.remove(this.invalidBorderClass);
         }
         else {
-            this.classList.add(this.invalidBorderClass);
+            this.holder.classList.add(this.invalidBorderClass);
         }
         return [changed, isValid];
     }
@@ -679,8 +684,15 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("isCaseSensitiveList", isCaseSensitiveList ? "true" : "false");
         this.renderList();
     }
+    getLabel() {
+        return this.label.innerText;
+    }
+    setLabel(label) {
+        this.label.innerText = label;
+        this.setAttribute("label", label);
+    }
 }
-HTMLFormInputElement.observedAttributes = ['type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value'];
+HTMLFormInputElement.observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";

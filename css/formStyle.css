@@ -311,13 +311,10 @@ form-toggle .labelAfter {
 }
 
 form-input {
-    border-radius: 4px;
-    border: 1px solid black;
     /*transition: all 1s;*/
     min-height: 34px;
     margin: 4px;
     /*display: inline-block;*/
-    transition: border-color 0.5s ease;
     display: inline-block;
 }
 
@@ -325,10 +322,13 @@ form-input>div {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
+    transition: border-color 0.5s ease;
+    border-radius: 4px;
+    border: 1px solid black;
 }
 
 @media (prefers-color-scheme: dark) {
-    form-input {
+    form-input>div {
         border: 1px solid white;
     }
 }
@@ -339,7 +339,7 @@ form-input>div {
     flex-flow: row nowrap;
 }*/
 
-form-input > div > img {
+form-input>div>img {
     height: 32px;
     margin: 1px 0.5rem;
     display: inline;
@@ -351,27 +351,28 @@ form-input > div > img {
     }
 }
 
-form-input > div > input,
-form-input > div > select {
+form-input>div>input,
+form-input>div>select {
     border: none;
     margin: 4px;
     display: inline-block;
     position: relative;
     margin-left: 0px;
-    vertical-align:middle;
+    vertical-align: middle;
     width: 100%;
 }
 
 @media (prefers-color-scheme: dark) {
-    form-input > div > input,
-    form-input > div > select {
+
+    form-input>div>input,
+    form-input>div>select {
         background-color: black;
         color: white;
     }
 }
 
 
-form-input > div > textarea {
+form-input>div>textarea {
     border: none;
     margin: 4px;
     display: inline-block;
@@ -382,13 +383,13 @@ form-input > div > textarea {
 }
 
 @media (prefers-color-scheme: dark) {
-    form-input > div > textarea {
+    form-input>div>textarea {
         background-color: black;
         color: white;
     }
 }
 
-form-input > .listHolder {
+form-input>.listHolder {
     position: relative;
     top: 0px;
     left: 0px;
@@ -404,33 +405,33 @@ form-input > .listHolder {
     border: none;
 }
 
-form-input > .listHolder > div {
+form-input>.listHolder>div {
     width: 100%;
     cursor: pointer;
     background-color: #ccc;
 }
 
 @media (prefers-color-scheme: dark) {
-    form-input > .listHolder > div {
-    background-color: #333;
-}
+    form-input>.listHolder>div {
+        background-color: #333;
+    }
 }
 
-form-input > .listHolder > div:hover {
+form-input>.listHolder>div:hover {
     background-color: gray;
 }
 
-form-input > div > p {
+form-input>div>p {
     margin-top: 8px;
     margin-left: 4px;
 }
 
-form-input > div > input[type="color"] {
+form-input>div>input[type="color"] {
     margin-bottom: 8px;
     height: 26px
 }
 
-form-input > div > input:focus {
+form-input>div>input:focus {
     outline: none;
 }
 
@@ -682,8 +683,9 @@ formrow p:first-child {
 .formInputFocus {
     border-color: #333;
 }
+
 @media (prefers-color-scheme: dark) {
-        .formTextInputFocus {
+    .formTextInputFocus {
         border-color: #ccc;
     }
 }
