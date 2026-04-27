@@ -167,7 +167,7 @@ export class HTMLFormToggleElement extends HTMLElement {
 
         //Setup basic events
         this.addEventListener("mousedown", () => {
-            console.log("Click",this.input.checked);
+            console.log("Click", this.input.checked);
             this.setValue(!this.getValue())
             this.input.dispatchEvent(new Event("change"))
             this.dispatchEvent(new Event("change"))
@@ -182,7 +182,7 @@ export class HTMLFormToggleElement extends HTMLElement {
                 this.updateSwitch()
             }
         })
-        this.input.addEventListener("change",() => {
+        this.input.addEventListener("change", () => {
             this.updateSwitch()
         })
     }
@@ -226,7 +226,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         //this.checked = this.input.checked
     }
 
-    static observedAttributes = ['value', 'labelBefore', 'labelAfter','original-value']
+    static observedAttributes = ['value', 'labelBefore', 'labelAfter', 'original-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         if (oldValue == newValue) {
             return
@@ -246,15 +246,22 @@ export class HTMLFormToggleElement extends HTMLElement {
         return this.input.checked
     }
     setValue(value: boolean) {
-        this.setAttribute("value",value ? "true" : "false");
+        this.setAttribute("value", value ? "true" : "false");
         this.input.checked = value;
         this.updateSwitch()
     }
-    validate(): [boolean,boolean] {
+    validate(): [boolean, boolean] {
         return [this.originalValue != this.getValue(), true];
     }
     getOriginalValue(): boolean {
         return this.originalValue;
+    }
+    getLabel(before: boolean = true): string {
+        if (before) {
+            return this.labelBefore.innerText;
+        } else {
+            return this.labelAfter.innerText;
+        }
     }
 }
 
@@ -345,7 +352,7 @@ export class HTMLFormInputElement extends HTMLElement {
             if (this.classList.contains("formInputFocus")) {
                 this.classList.remove("formInputFocus")
             }
-            this.validateInternal()
+            this.validate()
         })
         this.addEventListener("keydown", (ev: KeyboardEvent) => {
             if (this.onEnterPressClickElementId == "") {
@@ -365,7 +372,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.addEventListener("input", () => {
             this.areOptionsVisible = true;
             this.renderList()
-            this.validateInternal()
+            this.validate()
         })
         this.addEventListener("resize", () => {
             //this.areOptionsVisible = true;
@@ -556,14 +563,12 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
 
-    private async validateInternal(): Promise<[changed: boolean, isValid: boolean]> {
+    public async validate(): Promise<[changed: boolean, isValid: boolean]> {
         this.setAttribute("value", this.getValueRaw())
         //Check for changes
         let changed = false
-        if (this.doChangeCheck) {
-            if (this.getValueRaw() != this.originalValue) {
-                changed = true;
-            }
+        if (this.getValueRaw() != this.originalValue) {
+            changed = true;
         }
 
         //Do validation
@@ -578,10 +583,12 @@ export class HTMLFormInputElement extends HTMLElement {
         }
 
         //Add styles
-        if (changed) {
-            this.holder.classList.add(this.changeBorderClass)
-        } else {
-            this.holder.classList.remove(this.changeBorderClass)
+        if (this.doChangeCheck) {
+            if (changed) {
+                this.holder.classList.add(this.changeBorderClass)
+            } else {
+                this.holder.classList.remove(this.changeBorderClass)
+            }
         }
         if (isValid) {
             this.holder.classList.remove(this.invalidBorderClass)
@@ -589,10 +596,6 @@ export class HTMLFormInputElement extends HTMLElement {
             this.holder.classList.add(this.invalidBorderClass)
         }
         return [changed, isValid]
-    }
-
-    public async validate(): Promise<[changed: boolean, isValid: boolean]> {
-        return this.validateInternal()
     }
 
     public getValueRaw(): string {
@@ -608,10 +611,10 @@ export class HTMLFormInputElement extends HTMLElement {
      * Get value retuns value of input
      * @returns Value is pair value in select options or null when not found in strictList mode or the value typed inside, if it is generic input
      */
-    public getValue(): any{
+    public getValue(): any {
         const raw = this.getValueRaw()
         //Check if is in select options
-        if(this.options.has(raw)) {
+        if (this.options.has(raw)) {
             return this.options.get(raw)
         }
         if (this.isStrictList) {
@@ -653,7 +656,7 @@ export class HTMLFormInputElement extends HTMLElement {
     public setOriginalValue(originalValue: string) {
         this.originalValue = originalValue
         this.setAttribute("original-value", originalValue)
-        this.validateInternal()
+        this.validate()
     }
 
     public getListId() {
@@ -703,10 +706,10 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         this.isStrictList = isStrictList
         this.setAttribute("isStrictList", isStrictList ? "true" : "false")
-        this.validateInternal()
+        this.validate()
     }
 
-    public getOptions(): Map<string,any> {
+    public getOptions(): Map<string, any> {
         return this.options
     }
 
@@ -715,16 +718,16 @@ export class HTMLFormInputElement extends HTMLElement {
      * @param options Map<label, value> -> label is displayed, value is returned | string[] -> used as values and labels
      * @param timestamp 
      */
-    public setOptions(options: Map<string,any> | string[], timestamp: Date | null = null) {
+    public setOptions(options: Map<string, any> | string[], timestamp: Date | null = null) {
         this.usingJSList = true
         if (timestamp != null && timestamp > this.optionsTimestamp) {
             this.optionsTimestamp = timestamp;
             if (options instanceof Map) {
-            this.options = options
+                this.options = options
             } else {
                 this.options.clear()
                 for (const element of options) {
-                    this.options.set(element,element)
+                    this.options.set(element, element)
                 }
             }
             this.removeAttribute("list")
@@ -746,7 +749,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     public setLabel(label: string) {
         this.label.innerText = label;
-        this.setAttribute("label",label)
+        this.setAttribute("label", label)
     }
 }
 

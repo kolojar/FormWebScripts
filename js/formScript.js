@@ -231,6 +231,14 @@ export class HTMLFormToggleElement extends HTMLElement {
     getOriginalValue() {
         return this.originalValue;
     }
+    getLabel(before = true) {
+        if (before) {
+            return this.labelBefore.innerText;
+        }
+        else {
+            return this.labelAfter.innerText;
+        }
+    }
 }
 HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter', 'original-value'];
 /**
@@ -297,7 +305,7 @@ export class HTMLFormInputElement extends HTMLElement {
             if (this.classList.contains("formInputFocus")) {
                 this.classList.remove("formInputFocus");
             }
-            this.validateInternal();
+            this.validate();
         });
         this.addEventListener("keydown", (ev) => {
             var _a;
@@ -319,7 +327,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.addEventListener("input", () => {
             this.areOptionsVisible = true;
             this.renderList();
-            this.validateInternal();
+            this.validate();
         });
         this.addEventListener("resize", () => {
             //this.areOptionsVisible = true;
@@ -515,14 +523,12 @@ export class HTMLFormInputElement extends HTMLElement {
             this.setLabel(newValue);
         }
     }
-    async validateInternal() {
+    async validate() {
         this.setAttribute("value", this.getValueRaw());
         //Check for changes
         let changed = false;
-        if (this.doChangeCheck) {
-            if (this.getValueRaw() != this.originalValue) {
-                changed = true;
-            }
+        if (this.getValueRaw() != this.originalValue) {
+            changed = true;
         }
         //Do validation
         let isValid = true;
@@ -535,11 +541,13 @@ export class HTMLFormInputElement extends HTMLElement {
             isValid = this.options.has(this.getValueRaw());
         }
         //Add styles
-        if (changed) {
-            this.holder.classList.add(this.changeBorderClass);
-        }
-        else {
-            this.holder.classList.remove(this.changeBorderClass);
+        if (this.doChangeCheck) {
+            if (changed) {
+                this.holder.classList.add(this.changeBorderClass);
+            }
+            else {
+                this.holder.classList.remove(this.changeBorderClass);
+            }
         }
         if (isValid) {
             this.holder.classList.remove(this.invalidBorderClass);
@@ -548,9 +556,6 @@ export class HTMLFormInputElement extends HTMLElement {
             this.holder.classList.add(this.invalidBorderClass);
         }
         return [changed, isValid];
-    }
-    async validate() {
-        return this.validateInternal();
     }
     getValueRaw() {
         if (this.type == "textarea") {
@@ -605,7 +610,7 @@ export class HTMLFormInputElement extends HTMLElement {
     setOriginalValue(originalValue) {
         this.originalValue = originalValue;
         this.setAttribute("original-value", originalValue);
-        this.validateInternal();
+        this.validate();
     }
     getListId() {
         return this.listId;
@@ -649,7 +654,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         this.isStrictList = isStrictList;
         this.setAttribute("isStrictList", isStrictList ? "true" : "false");
-        this.validateInternal();
+        this.validate();
     }
     getOptions() {
         return this.options;
