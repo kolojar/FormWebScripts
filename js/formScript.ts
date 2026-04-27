@@ -135,9 +135,13 @@ export class HTMLFormToggleElement extends HTMLElement {
     readonly input: HTMLInputElement
     readonly slider: HTMLSpanElement
     readonly labelAfter: HTMLLabelElement
+    protected originalValue: boolean
+    //public activeValue: any
+    //public notActiveValue: any
     //protected checked: boolean
     constructor() {
         super()
+        this.originalValue = false;
         //this.checked = false
 
         //Create elements
@@ -186,6 +190,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     connectedCallback() {
         this.labelBefore.innerText = this.getAttribute("labelBefore") as string
         this.labelAfter.innerText = this.getAttribute("labelAfter") as string
+        this.originalValue = this.getAttribute("original-value") as string == "true"
         this.setValue(this.getAttribute("checked") == "true")
     }
 
@@ -221,7 +226,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         //this.checked = this.input.checked
     }
 
-    static observedAttributes = ['value', 'labelBefore', 'labelAfter']
+    static observedAttributes = ['value', 'labelBefore', 'labelAfter','original-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         if (oldValue == newValue) {
             return
@@ -232,16 +237,24 @@ export class HTMLFormToggleElement extends HTMLElement {
             this.labelBefore.innerText = newValue
         } else if (name == "labelAfter") {
             this.labelAfter.innerText = newValue
+        } else if (name == "original-value") {
+            this.originalValue = (newValue as string) == "true"
         }
     }
 
     getValue(): boolean {
-        return this.input.checked;
+        return this.input.checked
     }
     setValue(value: boolean) {
         this.setAttribute("value",value ? "true" : "false");
         this.input.checked = value;
         this.updateSwitch()
+    }
+    validate(): [boolean,boolean] {
+        return [this.originalValue != this.getValue(), true];
+    }
+    getOriginalValue(): boolean {
+        return this.originalValue;
     }
 }
 
@@ -625,6 +638,9 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("type", type)
     }
 
+    public getOriginalValueRaw(): string {
+        return this.originalValue
+    }
     public getOriginalValue(): string {
         return this.originalValue
     }

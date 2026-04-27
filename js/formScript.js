@@ -117,9 +117,12 @@ export class HTMLFormBoxStatusMessageElement extends HTMLParagraphElement {
 HTMLFormToggleElement element defition
 */
 export class HTMLFormToggleElement extends HTMLElement {
+    //public activeValue: any
+    //public notActiveValue: any
     //protected checked: boolean
     constructor() {
         super();
+        this.originalValue = false;
         //this.checked = false
         //Create elements
         this.labelBefore = document.createElement("label");
@@ -163,6 +166,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     connectedCallback() {
         this.labelBefore.innerText = this.getAttribute("labelBefore");
         this.labelAfter.innerText = this.getAttribute("labelAfter");
+        this.originalValue = this.getAttribute("original-value") == "true";
         this.setValue(this.getAttribute("checked") == "true");
     }
     updateSwitch() {
@@ -209,6 +213,9 @@ export class HTMLFormToggleElement extends HTMLElement {
         else if (name == "labelAfter") {
             this.labelAfter.innerText = newValue;
         }
+        else if (name == "original-value") {
+            this.originalValue = newValue == "true";
+        }
     }
     getValue() {
         return this.input.checked;
@@ -218,8 +225,14 @@ export class HTMLFormToggleElement extends HTMLElement {
         this.input.checked = value;
         this.updateSwitch();
     }
+    validate() {
+        return [this.originalValue != this.getValue(), true];
+    }
+    getOriginalValue() {
+        return this.originalValue;
+    }
 }
-HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter'];
+HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter', 'original-value'];
 /**
  * HTMLFormInputElement element defition
  */
@@ -577,6 +590,9 @@ export class HTMLFormInputElement extends HTMLElement {
         this.type = type;
         this.updateInputType();
         this.setAttribute("type", type);
+    }
+    getOriginalValueRaw() {
+        return this.originalValue;
     }
     getOriginalValue() {
         return this.originalValue;
