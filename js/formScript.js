@@ -116,10 +116,11 @@ export class HTMLFormBoxStatusMessageElement extends HTMLParagraphElement {
 /*
 HTMLFormToggleElement element defition
 */
-export class HTMLFormToggleElement extends HTMLDivElement {
+export class HTMLFormToggleElement extends HTMLElement {
+    //protected checked: boolean
     constructor() {
         super();
-        this.checked = false;
+        //this.checked = false
         //Create elements
         this.labelBefore = document.createElement("label");
         this.holder = document.createElement("label");
@@ -139,25 +140,30 @@ export class HTMLFormToggleElement extends HTMLDivElement {
         this.holder.appendChild(this.slider);
         this.holder.appendChild(this.labelAfter);
         //Setup basic events
-        this.addEventListener("click", () => {
-            this.input.checked = !this.input.checked;
+        this.addEventListener("mousedown", () => {
+            console.log("Click", this.input.checked);
+            this.setValue(!this.getValue());
             this.input.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change"));
             this.updateSwitch();
         });
         this.addEventListener("keydown", (ev) => {
             if (ev.code === "Space") {
-                //console.log("Click");
-                this.input.checked = !this.input.checked;
+                console.log("Click");
+                this.setValue(!this.getValue());
                 this.input.dispatchEvent(new Event("change"));
+                this.dispatchEvent(new Event("change"));
                 this.updateSwitch();
             }
+        });
+        this.input.addEventListener("change", () => {
+            this.updateSwitch();
         });
     }
     connectedCallback() {
         this.labelBefore.innerText = this.getAttribute("labelBefore");
         this.labelAfter.innerText = this.getAttribute("labelAfter");
-        this.checked = this.getAttribute("checked") == "true";
-        this.updateSwitch();
+        this.setValue(this.getAttribute("checked") == "true");
     }
     updateSwitch() {
         //Switch color and do the animation
@@ -179,24 +185,23 @@ export class HTMLFormToggleElement extends HTMLDivElement {
             if (enables != null) {
                 if (!this.input.checked) {
                     enables.setAttribute("disabled", "");
-                    //console.log("Disabled");
+                    console.log("Disabled");
                 }
                 else {
                     enables.removeAttribute("disabled");
-                    //console.log("Enable");
+                    console.log("Enable");
                 }
             }
         }
         //Update this element
-        this.checked = this.input.checked;
+        //this.checked = this.input.checked
     }
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue == newValue) {
             return;
         }
         if (name == "value") {
-            this.checked = newValue == "true";
-            this.updateSwitch();
+            this.setValue(newValue == "true");
         }
         else if (name == "labelBefore") {
             this.labelBefore.innerText = newValue;
@@ -204,6 +209,14 @@ export class HTMLFormToggleElement extends HTMLDivElement {
         else if (name == "labelAfter") {
             this.labelAfter.innerText = newValue;
         }
+    }
+    getValue() {
+        return this.input.checked;
+    }
+    setValue(value) {
+        this.setAttribute("value", value ? "true" : "false");
+        this.input.checked = value;
+        this.updateSwitch();
     }
 }
 HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter'];
@@ -881,5 +894,6 @@ SetupRows();
 //SetupTextInputs()
 //SetupToggles()
 SetupToasts();
+customElements.define("form-toggle", HTMLFormToggleElement);
 customElements.define("form-input", HTMLFormInputElement);
 //# sourceMappingURL=formScript.js.map

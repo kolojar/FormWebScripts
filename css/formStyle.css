@@ -242,7 +242,7 @@ form-toggle .toggle .slider:before {
     transition: .4s;
 }
 
-form-toggle .slider:before {
+form-toggle .formSwitchChecked .slider:before {
     transform: translateX(27px);
 }
 

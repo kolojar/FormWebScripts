@@ -88,3 +88,7 @@ main {
 .flexContainerRow{
   flex-direction: row;
 }
+
+form-input {
+  width: max-content;
+}
