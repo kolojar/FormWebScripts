@@ -52,7 +52,7 @@ input[type="checkbox"] {
   cursor: pointer;
 }
 
-:disabled {
+*:disabled {
   cursor: not-allowed;
 }
 

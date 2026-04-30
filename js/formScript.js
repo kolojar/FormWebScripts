@@ -373,7 +373,9 @@ export class HTMLFormInputElement extends HTMLElement {
         //Update list
         console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.options) {
-            if ((this.isCaseSensitiveList ? value : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.getValueRaw() : this.getValueRaw().toLocaleLowerCase()))) {
+            const contains = (this.isCaseSensitiveList ? value[0] : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.getValueRaw() : this.getValueRaw().toLocaleLowerCase()));
+            console.log(value, contains);
+            if (contains) {
                 const optionDiv = document.createElement("div");
                 const option = document.createElement("p");
                 option.innerText = value[0];
