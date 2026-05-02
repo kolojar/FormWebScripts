@@ -242,7 +242,8 @@ export class HTMLFormToggleElement extends HTMLElement {
 }
 HTMLFormToggleElement.observedAttributes = ['value', 'labelBefore', 'labelAfter', 'original-value'];
 /**
- * HTMLFormInputElement element defition
+ * HTMLFormInputElement element defition.
+ * Sends event validation-done on complete validation.
  */
 export class HTMLFormInputElement extends HTMLElement {
     constructor(onEnterPressClickElementId, validationFunction, listId = "", strictList = false, doChangeCheck = false, originalValue = "", changeBorderClass = "formWarnBorderColor", invalidBorderClass = "formErrorBorderColor") {
@@ -296,6 +297,12 @@ export class HTMLFormInputElement extends HTMLElement {
             this.renderList();
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus");
+            }
+            try {
+                this.input.showPicker();
+            }
+            catch (error) {
+                console.warn("Ignoring error: " + error);
             }
         });
         this.addEventListener("focusout", () => {
@@ -498,7 +505,7 @@ export class HTMLFormInputElement extends HTMLElement {
             this.updateInputType();
         }
         else if (name == "value") {
-            this.setValueRaw(newValue, true);
+            this.setValue(newValue, true);
         }
         else if (name == "on-enter-press-click-element-id") {
             this.onEnterPressClickElementId = newValue;
@@ -524,12 +531,24 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == 'label') {
             this.setLabel(newValue);
         }
+        else if (name == 'min') {
+            this.setMinimum(newValue);
+        }
+        else if (name == 'max') {
+            this.setMaximum(newValue);
+        }
+        else if (name == 'step') {
+            this.setStep(newValue);
+        }
+        else if (name == 'raw-value') {
+            this.setValueRaw(newValue, true);
+        }
     }
     async validate() {
         this.setAttribute("value", this.getValueRaw());
         //Check for changes
         let changed = false;
-        if (this.getValueRaw() != this.originalValue) {
+        if (this.getValue() != this.originalValue && this.getValueRaw() != this.originalValue) {
             changed = true;
         }
         //Do validation
@@ -541,6 +560,10 @@ export class HTMLFormInputElement extends HTMLElement {
             console.log(this.options);
             console.log(this.getValue());
             isValid = this.options.has(this.getValueRaw());
+        }
+        //Check for validity
+        if (!this.input.checkValidity()) {
+            isValid = false;
         }
         //Add styles
         if (this.doChangeCheck) {
@@ -557,6 +580,7 @@ export class HTMLFormInputElement extends HTMLElement {
         else {
             this.holder.classList.add(this.invalidBorderClass);
         }
+        this.dispatchEvent(new Event("validation-done"));
         return [changed, isValid];
     }
     getValueRaw() {
@@ -583,6 +607,17 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         //Normal value
         return raw;
+    }
+    setValue(value, calledFromProperty) {
+        //Check if is in select options
+        console.log("New value:", value, this.options);
+        for (const element of this.options) {
+            if (element[1] == value) {
+                this.setValueRaw(element[0], calledFromProperty);
+                return;
+            }
+        }
+        this.setValueRaw(value, calledFromProperty);
     }
     setValueRaw(value, calledFromProperty = false) {
         if (this.type == "textarea") {
@@ -698,8 +733,23 @@ export class HTMLFormInputElement extends HTMLElement {
         this.label.innerText = label;
         this.setAttribute("label", label);
     }
+    setMinimum(minimum) {
+        this.input.min = minimum;
+        this.setAttribute("min", minimum);
+        this.validate();
+    }
+    setMaximum(maximum) {
+        this.input.max = maximum;
+        this.setAttribute("max", maximum);
+        this.validate();
+    }
+    setStep(step) {
+        this.input.step = step;
+        this.setAttribute("step", step);
+        this.validate();
+    }
 }
-HTMLFormInputElement.observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value'];
+HTMLFormInputElement.observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";

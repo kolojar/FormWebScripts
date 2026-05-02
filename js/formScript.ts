@@ -268,7 +268,8 @@ export class HTMLFormToggleElement extends HTMLElement {
 export type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "select" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
 export type HTMLFormInputValidationFunc = (value: string) => Promise<boolean>
 /**
- * HTMLFormInputElement element defition
+ * HTMLFormInputElement element defition.
+ * Sends event validation-done on complete validation.
  */
 export class HTMLFormInputElement extends HTMLElement {
     readonly holder: HTMLDivElement
@@ -343,6 +344,11 @@ export class HTMLFormInputElement extends HTMLElement {
             this.renderList()
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus")
+            }
+            try {
+                this.input.showPicker();
+            } catch (error) {
+                console.warn("Ignoring error: " + error);
             }
         })
         this.addEventListener("focusout", () => {
@@ -535,7 +541,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
 
-    static observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value']
+    static observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value','min','max','step','raw-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
@@ -545,7 +551,7 @@ export class HTMLFormInputElement extends HTMLElement {
             this.type = newValue
             this.updateInputType()
         } else if (name == "value") {
-            this.setValueRaw(newValue, true)
+            this.setValue(newValue, true)
         } else if (name == "on-enter-press-click-element-id") {
             this.onEnterPressClickElementId = newValue
         } else if (name == "placeholder") {
@@ -562,6 +568,14 @@ export class HTMLFormInputElement extends HTMLElement {
             this.setOriginalValue(newValue)
         } else if (name == 'label') {
             this.setLabel(newValue);
+        } else if(name == 'min') {
+            this.setMinimum(newValue)
+        } else if(name == 'max') {
+            this.setMaximum(newValue)
+        } else if (name == 'step') {
+            this.setStep(newValue)
+        } else if (name == 'raw-value') {
+            this.setValueRaw(newValue, true)
         }
     }
 
@@ -569,7 +583,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("value", this.getValueRaw())
         //Check for changes
         let changed = false
-        if (this.getValueRaw() != this.originalValue) {
+        if (this.getValue() != this.originalValue && this.getValueRaw() != this.originalValue) {
             changed = true;
         }
 
@@ -582,6 +596,11 @@ export class HTMLFormInputElement extends HTMLElement {
             console.log(this.options);
             console.log(this.getValue());
             isValid = this.options.has(this.getValueRaw())
+        }
+
+        //Check for validity
+        if(!this.input.checkValidity()) {
+            isValid = false;
         }
 
         //Add styles
@@ -597,6 +616,7 @@ export class HTMLFormInputElement extends HTMLElement {
         } else {
             this.holder.classList.add(this.invalidBorderClass)
         }
+        this.dispatchEvent(new Event("validation-done"))
         return [changed, isValid]
     }
 
@@ -625,6 +645,18 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         //Normal value
         return raw;
+    }
+
+    setValue(value: string, calledFromProperty: boolean) {
+        //Check if is in select options
+        console.log("New value:", value, this.options );
+        for (const element of this.options) {
+            if(element[1] == value) {
+                this.setValueRaw(element[0],calledFromProperty)
+                return
+            }
+        }
+        this.setValueRaw(value,calledFromProperty)
     }
 
     public setValueRaw(value: string, calledFromProperty: boolean = false) {
@@ -752,6 +784,21 @@ export class HTMLFormInputElement extends HTMLElement {
     public setLabel(label: string) {
         this.label.innerText = label;
         this.setAttribute("label", label)
+    }
+    public setMinimum(minimum: string) {
+        this.input.min = minimum;
+        this.setAttribute("min",minimum)
+        this.validate()
+    }
+    public setMaximum(maximum: string) {
+        this.input.max = maximum;
+        this.setAttribute("max",maximum)
+        this.validate()
+    }
+    public setStep(step: string) {
+        this.input.step = step
+        this.setAttribute("step",step)
+        this.validate()
     }
 }
 

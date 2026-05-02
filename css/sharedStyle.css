@@ -21,13 +21,26 @@ html {
 }
 
 @media (prefers-color-scheme: dark) {
-    html {
-      background-color: black;
-      color: white;
-    }
-    a  {
-      color: cornflowerblue;
-    }
+  html {
+    background-color: black;
+    color: white;
+  }
+
+  a {
+    color: cornflowerblue;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
 }
 
 html {
@@ -85,7 +98,7 @@ main {
   overflow: hidden;
 }
 
-.flexContainerRow{
+.flexContainerRow {
   flex-direction: row;
 }
 
