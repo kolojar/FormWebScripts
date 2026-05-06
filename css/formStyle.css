@@ -132,12 +132,20 @@ body {
 }
 
 .formButton:hover {
-    background-color: gray;
+    /*background-color: gray;*/
+    transition: 0.5s;
+    filter: saturate(2);
+}
+
+.formButton:active {
+    transition: 0.3s;
+    filter: saturate(0.5);
 }
 
 .formButton:disabled {
-    background-color: gray;
-    cursor:not-allowed;
+    /*background-color: gray;*/
+    cursor: not-allowed;
+    filter: saturate(0.5);
 }
 
 .inputFullScale {
@@ -645,19 +653,19 @@ formrow p:first-child {
 }
 
 .formOkColor {
-    background: #05AA6C;
+    background: #02aa42;
 }
 
 .formWarnColor {
-    background: #e6ac00;
+    background: #dba401;
 }
 
 .formErrorColor {
-    background: #e60000;
+    background: #cf0000;
 }
 
 .formInfoColor {
-    background: #0099ff;
+    background: #008ce8;
 }
 
 .formBlackColor {
@@ -666,19 +674,19 @@ formrow p:first-child {
 }
 
 .formOkBorderColor {
-    border-color: #05AA6C;
+    border-color: #02aa42;
 }
 
 .formWarnBorderColor {
-    border-color: #e6ac00;
+    border-color: #dba401;
 }
 
 .formErrorBorderColor {
-    border-color: #e60000;
+    border-color: #cf0000;
 }
 
 .formInfoBorderColor {
-    border-color: #0099ff;
+    border-color: #008ce8;
 }
 
 .formInputFocus {
