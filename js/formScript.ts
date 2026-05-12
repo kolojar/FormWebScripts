@@ -429,8 +429,8 @@ export class HTMLFormInputElement extends HTMLElement {
         //Update list
         console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.options) {
-            const contains =(this.isCaseSensitiveList ? value[0] : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.getValueRaw() : this.getValueRaw().toLocaleLowerCase()))
-            console.log(value,contains);
+            const contains = (this.isCaseSensitiveList ? value[0] : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.getValueRaw() : this.getValueRaw().toLocaleLowerCase()))
+            console.log(value, contains);
             if (contains) {
                 const optionDiv = document.createElement("div")
                 const option = document.createElement("p")
@@ -541,7 +541,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
 
-    static observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value','min','max','step','raw-value']
+    static observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
@@ -568,9 +568,9 @@ export class HTMLFormInputElement extends HTMLElement {
             this.setOriginalValue(newValue)
         } else if (name == 'label') {
             this.setLabel(newValue);
-        } else if(name == 'min') {
+        } else if (name == 'min') {
             this.setMinimum(newValue)
-        } else if(name == 'max') {
+        } else if (name == 'max') {
             this.setMaximum(newValue)
         } else if (name == 'step') {
             this.setStep(newValue)
@@ -599,7 +599,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
 
         //Check for validity
-        if(!this.input.checkValidity()) {
+        if (!this.input.checkValidity()) {
             isValid = false;
         }
 
@@ -649,14 +649,14 @@ export class HTMLFormInputElement extends HTMLElement {
 
     setValue(value: string, calledFromProperty: boolean) {
         //Check if is in select options
-        console.log("New value:", value, this.options );
+        console.log("New value:", value, this.options);
         for (const element of this.options) {
-            if(element[1] == value) {
-                this.setValueRaw(element[0],calledFromProperty)
+            if (element[1] == value) {
+                this.setValueRaw(element[0], calledFromProperty)
                 return
             }
         }
-        this.setValueRaw(value,calledFromProperty)
+        this.setValueRaw(value, calledFromProperty)
     }
 
     public setValueRaw(value: string, calledFromProperty: boolean = false) {
@@ -787,17 +787,17 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     public setMinimum(minimum: string) {
         this.input.min = minimum;
-        this.setAttribute("min",minimum)
+        this.setAttribute("min", minimum)
         this.validate()
     }
     public setMaximum(maximum: string) {
         this.input.max = maximum;
-        this.setAttribute("max",maximum)
+        this.setAttribute("max", maximum)
         this.validate()
     }
     public setStep(step: string) {
         this.input.step = step
-        this.setAttribute("step",step)
+        this.setAttribute("step", step)
         this.validate()
     }
 }
@@ -980,60 +980,147 @@ export function SetupRows() {
     }
 }
 
+export class DraggableElement {
+    private dragDisabled: boolean
+    private movedElement: HTMLElement
+    private dragElement: HTMLElement
+
+    /**
+     * Starts moving element based on mouse position
+     * @param event Mouse event
+     */
+    private readonly dragStartEvent = (event: MouseEvent) => {
+        if (this.movedElement.getAttribute("formIsDragged") == "true") { return }
+        //Start drag
+        this.movedElement.setAttribute("formIsDragged", "true")
+        this.movedElement.setAttribute("formDragLastCursor", this.dragElement.style.cursor)
+        this.dragElement.style.cursor = "move"
+        this.movedElement.setAttribute("formDragLastX", event.clientX.toString())
+        this.movedElement.setAttribute("formDragLastY", event.clientY.toString())
+    }
+
+    /**
+    * Stops moving element based on mouse position
+    * @param event Mouse event
+    */
+    private readonly dragEndEvent = (event: MouseEvent) => {
+        //End drag
+        this.movedElement.removeAttribute("formIsDragged")
+        if (this.dragElement != null) {
+            this.dragElement.style.cursor = this.movedElement.getAttribute("formDragLastCursor") as string
+        }
+        this.movedElement.removeAttribute("formDragLastCursor")
+        this.movedElement.removeAttribute("formDragLastX")
+        this.movedElement.removeAttribute("formDragLastY")
+    }
+
+    /**
+     * Sets position of element based on mouse cursor position
+     * @param event Mouse event
+     */
+    private drag = (event: MouseEvent) => {
+        //Drag
+        if (this.movedElement.getAttribute("formIsDragged") != "true") { return }
+        let posX = Number(this.movedElement.getAttribute("formDragLastX")) - event.clientX
+        let posY = Number(this.movedElement.getAttribute("formDragLastY")) - event.clientY
+        this.movedElement.setAttribute("formDragLastX", event.clientX.toString())
+        this.movedElement.setAttribute("formDragLastY", event.clientY.toString())
+        this.movedElement.style.left = (this.movedElement.offsetLeft - posX) + "px";
+        this.movedElement.style.top = (this.movedElement.offsetTop - posY) + "px";
+    }
+
+    /**
+     * Stops element from active dragging when dragged
+     */
+    public StopDrag() {
+        this.dragEndEvent(new MouseEvent("mouseup"))
+    }
+
+    /**
+     * Disables dragging from selected element(s)
+     */
+    public DisableDrag() {
+        if (this.dragDisabled) {
+            return
+        }
+        this.dragDisabled = true;
+        this.StopDrag()
+        this.dragElement.removeEventListener("mousedown", this.dragStartEvent)
+        this.movedElement.removeEventListener("mouseup", this.dragEndEvent)
+        if (this.dragElement != this.movedElement) {
+            this.dragElement.removeEventListener("mouseup", this.dragEndEvent)
+        }
+        this.movedElement.removeEventListener("mousemove", this.drag)
+        if (this.dragElement != this.movedElement) {
+            this.dragElement.removeEventListener("mousemove", this.drag)
+        }
+    }
+
+    /**
+    * Enables dragging from selected element(s)
+    */
+    public EnableDrag() {
+        if (!this.dragDisabled) {
+            return
+        }
+        this.dragDisabled = false;
+        this.dragElement.addEventListener("mousedown", this.dragStartEvent)
+        this.movedElement.addEventListener("mouseup", this.dragEndEvent)
+        if (this.dragElement != this.movedElement) {
+            this.dragElement.addEventListener("mouseup", this.dragEndEvent)
+        }
+        this.movedElement.addEventListener("mousemove", this.drag)
+        if (this.dragElement != this.movedElement) {
+            this.dragElement.addEventListener("mousemove", this.drag)
+        }
+    }
+
+    /**
+     * Changes moved element
+     * @param movedElement Target element
+     * @param sameDragElement If target element should start dragging
+     */
+    public ChangeMovedElement(movedElement: HTMLElement, sameDragElement: boolean) {
+        this.DisableDrag()
+        this.movedElement = movedElement;
+        if (sameDragElement) {
+            this.dragElement = movedElement;
+        }
+        this.EnableDrag()
+    }
+
+    /**
+     * Chnages drag element
+     * @param dragElement What element starts dragging, null = uses same as movedElement
+     */
+    public ChangeDragElement(dragElement: HTMLElement | null) {
+        this.DisableDrag()
+        if (dragElement == null) {
+            this.dragElement = this.movedElement;
+        } else {
+            this.dragElement = dragElement;
+        }
+        this.EnableDrag()
+    }
+
+    constructor(movedElement: HTMLElement, dragElement: HTMLElement | null) {
+        this.movedElement = movedElement;
+        if (dragElement == null) {
+            dragElement = movedElement
+        }
+        this.dragElement = dragElement;
+        this.dragDisabled = false;
+        this.EnableDrag()
+    }
+}
+
 /**
  * Makes HTML element dragable
  * @param movedElement Moved element
  * @param dragElement Element that acts as dragger (topbar of window, ...)
  */
-export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTMLElement | null) {
-    if (dragElement == null) {
-        dragElement = movedElement
-    }
-    dragElement.addEventListener("mousedown", (event: MouseEvent) => {
-        if (movedElement.getAttribute("formIsDragged") == "true") { return }
-        //Start drag
-        movedElement.setAttribute("formIsDragged", "true")
-        movedElement.setAttribute("formDragLastCursor", dragElement.style.cursor)
-        dragElement.style.cursor = "move"
-        movedElement.setAttribute("formDragLastX", event.clientX.toString())
-        movedElement.setAttribute("formDragLastY", event.clientY.toString())
-    })
-    function dragEnd() {
-        //End drag
-        movedElement.removeAttribute("formIsDragged")
-        if (dragElement != null) {
-            dragElement.style.cursor = movedElement.getAttribute("formDragLastCursor") as string
-        }
-        movedElement.removeAttribute("formDragLastCursor")
-        movedElement.removeAttribute("formDragLastX")
-        movedElement.removeAttribute("formDragLastY")
-    }
-    movedElement.addEventListener("mouseup", () => {
-        dragEnd()
-    })
-    if (dragElement != movedElement) {
-        dragElement.addEventListener("mouseup", () => {
-            dragEnd()
-        })
-    }
-    function drag(event: MouseEvent) {
-        //Drag
-        if (movedElement.getAttribute("formIsDragged") != "true") { return }
-        let posX = Number(movedElement.getAttribute("formDragLastX")) - event.clientX
-        let posY = Number(movedElement.getAttribute("formDragLastY")) - event.clientY
-        movedElement.setAttribute("formDragLastX", event.clientX.toString())
-        movedElement.setAttribute("formDragLastY", event.clientY.toString())
-        movedElement.style.left = (movedElement.offsetLeft - posX) + "px";
-        movedElement.style.top = (movedElement.offsetTop - posY) + "px";
-    }
-    movedElement.addEventListener("mousemove", (event: MouseEvent) => {
-        drag(event)
-    })
-    if (dragElement != movedElement) {
-        dragElement.addEventListener("mousemove", (event: MouseEvent) => {
-            drag(event)
-        })
-    }
+export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTMLElement | null): DraggableElement {
+    return new DraggableElement(movedElement, dragElement)
 }
 
 SetupRows()

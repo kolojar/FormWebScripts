@@ -1,4 +1,4 @@
-import { HTMLFormInputElement, HTMLFormInputType, MakeElementDraggable } from "./formScript.js"
+import { DraggableElement, HTMLFormInputElement, HTMLFormInputType, MakeElementDraggable } from "./formScript.js"
 import { LanguageManager } from "./languageManager.js"
 import { KeyValuePair } from "./sharedScripts.js"
 
@@ -37,7 +37,7 @@ export class FormDialogTemplate<T> {
     readonly content: string
     readonly escapeCloseValue: T
     readonly onCloseEvent: (clickedButtonID: number, clickedValue: T) => void
-    readonly buttons: (FormDialogButton|undefined)[]
+    readonly buttons: (FormDialogButton | undefined)[]
     readonly blockOpenOver: boolean
     readonly openOverOthers: boolean
     readonly style: FormDialogStyle
@@ -69,7 +69,7 @@ export class FormDialogTemplate<T> {
         this.style = style
         this.placeholder = ""
         this.entryType = "text"
-        this.selectValues = new Map<string,T>
+        this.selectValues = new Map<string, T>
         this.createdDialogs = []
         this.progressLines = 0
     }
@@ -90,6 +90,10 @@ export class FormDialog<T> {
     readonly inputElement: HTMLFormInputElement | null = null
     readonly progressLines: HTMLDivElement[]
     readonly progressLabels: HTMLSpanElement[] = []
+    /**
+     * Do not edit externally
+     */
+    public draggableElement: DraggableElement |null
     closed: boolean = false
 
     /**
@@ -98,15 +102,16 @@ export class FormDialog<T> {
      */
     constructor(template: FormDialogTemplate<T>) {
         this.template = template
+        this.draggableElement = null;
         this.element = document.createElement("dialog")
         this.progressLines = []
         if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
-            this.inputElement = new HTMLFormInputElement("",null)
+            this.inputElement = new HTMLFormInputElement("", null)
             this.inputElement.setPlaceHolder(template.placeholder)
             this.inputElement.style.width = "500px"
             if (template.style == FormDialogStyle.Entry) {
-            this.inputElement.setType(this.template.entryType)
+                this.inputElement.setType(this.template.entryType)
             } else {
                 this.inputElement.setType("select")
                 this.inputElement.setIsScrictList(true)
@@ -157,6 +162,23 @@ export class FormDialog<T> {
         this.closed = true;
         this.template.createdDialogs = this.template.createdDialogs.filter(item => item != this)
     }
+    AllowSelect(allowSelect: boolean) {
+        const holder = this.element.children.item(0) as HTMLElement
+        const title = holder.children.item(0) as HTMLElement
+        if (allowSelect) {
+            for (let i = 1; i < holder.children.length; i++) {
+                holder.children.item(i)?.classList.add("allowSelect")
+            }
+            this.draggableElement?.ChangeDragElement(title)
+            title.classList.add("formDialogTitleDrag")
+        } else {
+            for (let i = 1; i < holder.children.length; i++) {
+                holder.children.item(i)?.classList.remove("allowSelect")
+            }
+            this.draggableElement?.ChangeDragElement(null)
+            title.classList.remove("formDialogTitleDrag")
+        }
+    }
 }
 
 /**
@@ -178,7 +200,7 @@ export class FormDialogManager {
         document.body.appendChild(dialogHolder)
     }
 
-    ShowTemplate<T>(template: FormDialogTemplate<T>): FormDialog<T> | null{
+    ShowTemplate<T>(template: FormDialogTemplate<T>): FormDialog<T> | null {
         if (template == null) {
             return null
         }
@@ -226,7 +248,6 @@ export class FormDialogManager {
         }
 
         const holder = document.createElement("div")
-        MakeElementDraggable(dialog.element, holder)
         dialog.element.appendChild(holder)
 
         //Title
@@ -234,6 +255,7 @@ export class FormDialogManager {
         title.classList.add("formHeader")
         title.innerText = dialog.template.title
         holder.appendChild(title)
+        dialog.draggableElement = MakeElementDraggable(dialog.element, title)
 
         //Data
         const data = document.createElement("p")
@@ -278,7 +300,7 @@ export class FormDialogManager {
         //Close animation
         const manager = this
         async function closeDialog(isCancel: boolean): Promise<boolean> {
-            if (dialog == null ||dialog == undefined) {
+            if (dialog == null || dialog == undefined) {
                 return true
             }
             if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
@@ -319,7 +341,7 @@ export class FormDialogManager {
                 dialog.element.showModal()
                 return
             }
-            if (!closeDialog(true)) {return}
+            if (!closeDialog(true)) { return }
             if (dialog.template.onCloseEvent != null) {
                 dialog.template.onCloseEvent(-1, dialog.template.escapeCloseValue)
             }
@@ -328,7 +350,7 @@ export class FormDialogManager {
         //Close using close function
         dialog.element.addEventListener('force-cancel', (event) => {
             event.preventDefault();
-            if (!closeDialog(true)) {return}
+            if (!closeDialog(true)) { return }
             if (dialog.template.onCloseEvent != null) {
                 dialog.template.onCloseEvent(-2, dialog.template.escapeCloseValue)
             }
@@ -337,7 +359,7 @@ export class FormDialogManager {
         //Setup buttons
         if (dialog.template.buttons != null) {
             for (let i = 0; i < dialog.template.buttons.length; i++) {
-                if (dialog.template.buttons[i] == undefined ) {
+                if (dialog.template.buttons[i] == undefined) {
                     continue
                 }
                 const button = document.createElement("button")
@@ -355,7 +377,7 @@ export class FormDialogManager {
                 }
 
                 button.onclick = () => {
-                    if (!closeDialog( (dialog.template.buttons[i] as FormDialogButton).isCancel)) {return}
+                    if (!closeDialog((dialog.template.buttons[i] as FormDialogButton).isCancel)) { return }
                     if (dialog.template.onCloseEvent != null) {
                         dialog.template.onCloseEvent(i, dialog.template.buttons[i]?.valueOnClick)
                     }
@@ -409,12 +431,12 @@ export class FormDialogManager {
         }, [new FormDialogButton("center", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<null>
     }
 
-    ShowConfirm(title: string, content: string, onCloseEvent: (value: boolean) => void, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
+    ShowConfirm(title: string, content: string, onCloseEvent: (value: boolean) => void | Promise<void>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
         return this.ShowTemplate(new FormDialogTemplate(title, content, false, (_, value) => {
             if (!onCloseEvent != null) {
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false,true),
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false, true),
         new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<boolean>
     }
 
@@ -428,7 +450,7 @@ export class FormDialogManager {
                 }
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue,true),
+        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
         new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)],
             FormDialogStyle.Select, openOverOthers, blockedOpenOver)
         template.selectValues = selectValues
@@ -436,7 +458,7 @@ export class FormDialogManager {
         return dialog;
     }
 
-    ShowProgress(title: string, content: string, onCancelEvent: () => void, progressLines: number, allowCancel: boolean = true,  openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
+    ShowProgress(title: string, content: string, onCancelEvent: () => void, progressLines: number, allowCancel: boolean = true, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
         let dialog: FormDialog<boolean>
         const template = new FormDialogTemplate(title, content, false, (btn, value) => {
             if (onCancelEvent != null) {
@@ -445,7 +467,7 @@ export class FormDialogManager {
                     return
                 }
             }
-        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false,true) : undefined],
+        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined],
             FormDialogStyle.Progress, openOverOthers, blockedOpenOver)
         template.progressLines = progressLines;
         dialog = this.ShowTemplate(template) as FormDialog<boolean>

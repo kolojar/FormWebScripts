@@ -70,6 +70,7 @@ export class FormDialog {
         this.progressLabels = [];
         this.closed = false;
         this.template = template;
+        this.draggableElement = null;
         this.element = document.createElement("dialog");
         this.progressLines = [];
         if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
@@ -140,6 +141,25 @@ export class FormDialog {
         this.closed = true;
         this.template.createdDialogs = this.template.createdDialogs.filter(item => item != this);
     }
+    AllowSelect(allowSelect) {
+        var _c, _d, _e, _f;
+        const holder = this.element.children.item(0);
+        const title = holder.children.item(0);
+        if (allowSelect) {
+            for (let i = 1; i < holder.children.length; i++) {
+                (_c = holder.children.item(i)) === null || _c === void 0 ? void 0 : _c.classList.add("allowSelect");
+            }
+            (_d = this.draggableElement) === null || _d === void 0 ? void 0 : _d.ChangeDragElement(title);
+            title.classList.add("formDialogTitleDrag");
+        }
+        else {
+            for (let i = 1; i < holder.children.length; i++) {
+                (_e = holder.children.item(i)) === null || _e === void 0 ? void 0 : _e.classList.remove("allowSelect");
+            }
+            (_f = this.draggableElement) === null || _f === void 0 ? void 0 : _f.ChangeDragElement(null);
+            title.classList.remove("formDialogTitleDrag");
+        }
+    }
 }
 /**
  * Class for managing dialogs
@@ -203,13 +223,13 @@ export class FormDialogManager {
             dialog.element.style.cursor = "wait";
         }
         const holder = document.createElement("div");
-        MakeElementDraggable(dialog.element, holder);
         dialog.element.appendChild(holder);
         //Title
         const title = document.createElement("p");
         title.classList.add("formHeader");
         title.innerText = dialog.template.title;
         holder.appendChild(title);
+        dialog.draggableElement = MakeElementDraggable(dialog.element, title);
         //Data
         const data = document.createElement("p");
         if (dialog.template.style == FormDialogStyle.Wait || dialog.template.style == FormDialogStyle.Progress) {

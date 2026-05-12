@@ -652,6 +652,17 @@ formrow p:first-child {
     width: 100%;
 }
 
+.formDialogTitleDrag {
+    background-color: #ccc;
+    cursor: move;
+}
+
+@media (prefers-color-scheme: dark) {
+    .formDialogTitleDrag {
+        background-color: #333;
+    }
+}
+
 .formOkColor {
     background: #02aa42;
 }

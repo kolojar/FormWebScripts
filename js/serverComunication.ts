@@ -245,7 +245,7 @@ export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: 
 /*
 Sends POST request to server async
 */
-export async function SendPOSTMessageToServerAsync(url: string, message: string): Promise<[boolean,string]> { 
+export async function SendPOSTMessageToServerAsync(url: string, message: string): Promise<[ok: boolean,responce: string]> { 
     return new Promise<[boolean,string]>(resolve => {
         SendPOSTMessageToServer(url,message,(ok,responce) => {resolve([ok,responce])})
     })
@@ -254,7 +254,7 @@ export async function SendPOSTMessageToServerAsync(url: string, message: string)
 /*
 Sends POST request to server async
 */
-export async function SendPOSTDataToServerAsync(url: string, data: FormData): Promise<[boolean,string]> { 
+export async function SendPOSTDataToServerAsync(url: string, data: FormData): Promise<[ok: boolean,responce: string]> { 
     return new Promise<[boolean,string]>(resolve => {
         SendPOSTDataToServer(url,data,(ok,responce) => {resolve([ok,responce])})
     })
