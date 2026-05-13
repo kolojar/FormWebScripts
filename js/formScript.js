@@ -596,6 +596,9 @@ export class HTMLFormInputElement extends HTMLElement {
      * @returns Value is pair value in select options or null when not found in strictList mode or the value typed inside, if it is generic input
      */
     getValue() {
+        if (this.type == "file") {
+            return this.input.files;
+        }
         const raw = this.getValueRaw();
         //Check if is in select options
         if (this.options.has(raw)) {
@@ -609,6 +612,23 @@ export class HTMLFormInputElement extends HTMLElement {
         return raw;
     }
     setValue(value, calledFromProperty) {
+        if (this.type == "file") {
+            if (value == null) {
+                this.input.files = null;
+                return;
+            }
+            else if (value instanceof FileList) {
+                this.input.files = value;
+                return;
+            }
+            else if (value == "") {
+                this.input.value = "";
+                return;
+            }
+            else {
+                return;
+            }
+        }
         //Check if is in select options
         console.log("New value:", value, this.options);
         for (const element of this.options) {

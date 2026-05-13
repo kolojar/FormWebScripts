@@ -634,6 +634,10 @@ export class HTMLFormInputElement extends HTMLElement {
      * @returns Value is pair value in select options or null when not found in strictList mode or the value typed inside, if it is generic input
      */
     public getValue(): any {
+        if (this.type == "file") {
+            return this.input.files;
+        }
+
         const raw = this.getValueRaw()
         //Check if is in select options
         if (this.options.has(raw)) {
@@ -647,16 +651,31 @@ export class HTMLFormInputElement extends HTMLElement {
         return raw;
     }
 
-    setValue(value: string, calledFromProperty: boolean) {
+    setValue(value: string | FileList | null, calledFromProperty: boolean) {
+        if (this.type == "file") {
+            if (value == null) {
+                this.input.files = null
+                return
+            } else if (value instanceof FileList) {
+                this.input.files = value
+                return
+            } else if(value == "") {
+                this.input.value = "";
+                return
+            } else {
+                return
+            }
+        }
+
         //Check if is in select options
         console.log("New value:", value, this.options);
         for (const element of this.options) {
-            if (element[1] == value) {
+            if (element[1] == value as string) {
                 this.setValueRaw(element[0], calledFromProperty)
                 return
             }
         }
-        this.setValueRaw(value, calledFromProperty)
+        this.setValueRaw(value as string, calledFromProperty)
     }
 
     public setValueRaw(value: string, calledFromProperty: boolean = false) {
