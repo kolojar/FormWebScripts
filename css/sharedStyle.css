@@ -96,6 +96,8 @@ main {
   flex-direction: column;
   flex-wrap: nowrap;
   overflow: hidden;
+  width: 100dvw;
+  height: 100dvh;
 }
 
 .flexContainerRow {
