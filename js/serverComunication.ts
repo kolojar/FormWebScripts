@@ -181,7 +181,7 @@ export type XHRServerResponceFunc = (ok: boolean, message: any) => void
 /*
 Sends POST request to server
 */
-export function SendPOSTMessageToServer(url: string, message: string, responceFunc: XHRServerResponceFunc | null) {
+export function SendPOSTMessageToServer(url: string, message: any, responceFunc: XHRServerResponceFunc | null) {
     console.log("Sending request...");
 
     //Create request
@@ -193,7 +193,7 @@ export function SendPOSTMessageToServer(url: string, message: string, responceFu
     xhr.addEventListener("load", () => {
         if (xhr.readyState == 4 && xhr.status == 201) {
             //console.log(JSON.parse(xhr.responseText));
-            const responce = xhr.responseText
+            const responce = xhr.response
             console.log(responce);
             if (responceFunc != null) {
                 responceFunc(true,responce)

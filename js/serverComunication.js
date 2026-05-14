@@ -171,7 +171,7 @@ export function SendPOSTMessageToServer(url, message, responceFunc) {
     xhr.addEventListener("load", () => {
         if (xhr.readyState == 4 && xhr.status == 201) {
             //console.log(JSON.parse(xhr.responseText));
-            const responce = xhr.responseText;
+            const responce = xhr.response;
             console.log(responce);
             if (responceFunc != null) {
                 responceFunc(true, responce);
