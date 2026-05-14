@@ -651,7 +651,7 @@ export class HTMLFormInputElement extends HTMLElement {
         return raw;
     }
 
-    setValue(value: string | FileList | null, calledFromProperty: boolean) {
+    public setValue(value: string | FileList | null, calledFromProperty: boolean) {
         if (this.type == "file") {
             if (value == null) {
                 this.input.files = null
@@ -813,6 +813,12 @@ export class HTMLFormInputElement extends HTMLElement {
         this.input.max = maximum;
         this.setAttribute("max", maximum)
         this.validate()
+    }
+    public getMinimum(): string {
+       return this.input.min;
+    }
+    public getMaximum(): string {
+        return this.input.max;
     }
     public setStep(step: string) {
         this.input.step = step

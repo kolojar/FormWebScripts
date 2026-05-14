@@ -763,6 +763,12 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("max", maximum);
         this.validate();
     }
+    getMinimum() {
+        return this.input.min;
+    }
+    getMaximum() {
+        return this.input.max;
+    }
     setStep(step) {
         this.input.step = step;
         this.setAttribute("step", step);

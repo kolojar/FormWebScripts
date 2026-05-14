@@ -176,7 +176,7 @@ export class WebSocketConnection {
     }
 }
 
-export type XHRServerResponceFunc = (ok: boolean, message: string) => void
+export type XHRServerResponceFunc = (ok: boolean, message: any) => void
 
 /*
 Sends POST request to server
@@ -225,7 +225,7 @@ export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: 
     xhr.addEventListener("load", () => {
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
-            const responce = xhr.responseText
+            const responce = xhr.response
             console.log(responce);
             if (responceFunc != null) {
                 responceFunc(true,responce)

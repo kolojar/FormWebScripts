@@ -200,7 +200,7 @@ export function SendPOSTDataToServer(url, data, responceFunc) {
     xhr.addEventListener("load", () => {
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
-            const responce = xhr.responseText;
+            const responce = xhr.response;
             console.log(responce);
             if (responceFunc != null) {
                 responceFunc(true, responce);
