@@ -198,10 +198,10 @@ export function SendPOSTDataToServer(url, data, responceFunc) {
     //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
+        const responce = xhr.responseText;
+        console.log(responce);
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
-            const responce = xhr.response;
-            console.log(responce);
             if (responceFunc != null) {
                 responceFunc(true, responce);
             }
@@ -209,7 +209,7 @@ export function SendPOSTDataToServer(url, data, responceFunc) {
         else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(false, "");
+                responceFunc(false, responce);
             }
         }
     });

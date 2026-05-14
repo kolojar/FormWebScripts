@@ -176,12 +176,12 @@ export class WebSocketConnection {
     }
 }
 
-export type XHRServerResponceFunc = (ok: boolean, message: any) => void
+export type XHRServerResponceFunc = (ok: boolean, message: string) => void
 
 /*
 Sends POST request to server
 */
-export function SendPOSTMessageToServer(url: string, message: any, responceFunc: XHRServerResponceFunc | null) {
+export function SendPOSTMessageToServer(url: string, message: string, responceFunc: XHRServerResponceFunc | null) {
     console.log("Sending request...");
 
     //Create request
@@ -223,17 +223,17 @@ export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: 
 
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
+        const responce = xhr.responseText
+        console.log(responce);
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
-            const responce = xhr.response
-            console.log(responce);
             if (responceFunc != null) {
                 responceFunc(true,responce)
             }
         } else {
             console.log(`Error: ${xhr.status}`);
             if (responceFunc != null) {
-                responceFunc(false,"")
+                responceFunc(false,responce)
             }
         }
     });
