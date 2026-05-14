@@ -634,7 +634,9 @@ formrow p:first-child {
 }
 
 .formButtonBoxTable {
-    padding: 4px;
+    padding: 2px 4px;
+    justify-content: center;
+    text-align: center;
 }
 
 .formButtonBoxTable>* {
