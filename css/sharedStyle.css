@@ -1,15 +1,3 @@
-* {
-  /*margin: 0;*/
-  /*font-family: "Fira Code", monospace;*/
-  user-select: none;
-  -moz-user-select: none;
-}
-
-.allowSelect {
-  user-select: text;
-  -moz-user-select: text;
-}
-
 html {
   overflow: hidden;
   margin: 0;
@@ -18,29 +6,6 @@ html {
   --posY: 0px;
   --width: calc(100% - 15vw - 20px);
   --height: calc(100% - 20px);
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    background-color: black;
-    color: white;
-  }
-
-  a {
-    color: cornflowerblue;
-  }
-
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-  }
-
-  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-  }
-
-  input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-  }
 }
 
 html {
@@ -57,55 +22,11 @@ h2 {
   margin-bottom: 0px;
 }
 
-button {
-  cursor: pointer;
-}
-
-input[type="checkbox"] {
-  cursor: pointer;
-}
-
-*:disabled {
-  cursor: not-allowed;
-}
-
 input[type="checkbox"]:disabled {
   cursor: not-allowed;
-}
-
-header {
-  flex-shrink: 0;
-  margin-bottom: 4px;
-}
-
-footer {
-  margin-top: 4px;
-  flex-shrink: 0;
-}
-
-main {
-  flex: 1;
-  overflow: auto;
-  scrollbar-gutter: stable;
-  margin-left: 4px;
-  margin-right: 4px;
-}
-
-.pageHolder {
-  max-width: 100dvw;
-  max-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  overflow: hidden;
-  width: 100dvw;
-  height: 100dvh;
 }
 
 .flexContainerRow {
   flex-direction: row;
 }
 
-form-input {
-  width: max-content;
-}
