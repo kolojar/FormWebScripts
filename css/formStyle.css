@@ -3,6 +3,12 @@
     --color-next-layer: #333;
     --color: #1a1a1a;
     --background-color-next-layer: #ccc;
+    --form-ok-color: #02aa42;
+    --form-warn-color: #dba401;
+    --form-error-color: #cf0000;
+    --form-info-color: #008ce8;
+    --table-header-color: rgb(0, 200, 0);
+    --table-highlight-color: rgb(255, 180, 0);
 }
 
 html.darkMode {
@@ -672,6 +678,96 @@ formrow p:first-child {
 .formDialogTitleDrag {
     background-color: var(--background-color-next-layer);
     cursor: move;
+}
+
+td,
+th,
+table {
+    /*Join table borders*/
+    border-collapse: collapse;
+}
+
+.styledTable {
+    border: solid var(--color) 3px;
+    white-space-collapse: preserve-spaces;
+}
+.styledTable tr {
+    transition: 0.3s;
+}
+
+/*@media (prefers-color-scheme: dark) {
+    .styledTableAuto {
+        border: solid white 3px;
+    }
+}*/
+
+.styledTableNoWrap td,
+th,
+table {
+    text-wrap-mode: nowrap;
+    white-space: nowrap;
+}
+
+.styledTable tr:first-child {
+    border-bottom: solid var(--color) 3px;
+}
+
+.styledTable tr:hover {
+    background-color: var(--background-color-next-layer);
+}
+
+/*@media (prefers-color-scheme: dark) {
+    .styledTableAuto tr:first-child {
+        border-bottom: solid white 3px;
+    }
+
+    .styledTableAuto tr:hover {
+        color: black;
+    }
+}*/
+
+.styledTable .trHighlight {
+    background-color: var(--table-highlight-color);
+}
+
+.styledTable th {
+    background-color: var(--table-header-color);
+    border-top: solid var(--color) 2px;
+    border-left: solid var(--color) 2px;
+    text-align: center;
+    font-weight: bold;
+    color:black;
+}
+
+.styledTable th:last-child {
+    border-right: solid var(--color) 2px;
+    border-left: solid var(--color) 2px
+}
+
+.styledTable td {
+    border: solid var(--color) 2px;
+}
+
+/*@media (prefers-color-scheme: dark) {
+    .styledTableAuto th {
+        border-top: solid white 2px;
+        border-left: solid white 2px;
+        text-align: center;
+        color: black;
+    }
+
+    .styledTableAuto th:last-child {
+        border-right: solid white 2px;
+        border-left: solid white 2px
+    }
+
+    .styledTableAuto td {
+        border: solid white 2px;
+    }
+}*/
+
+.tableScrollHolder {
+    overflow: scroll;
 }
 
 /*@media (prefers-color-scheme: dark) {

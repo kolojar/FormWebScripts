@@ -87,6 +87,8 @@ main {
   flex: 1;
   overflow: auto;
   scrollbar-gutter: stable;
+  margin-left: 4px;
+  margin-right: 4px;
 }
 
 .pageHolder {
