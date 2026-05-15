@@ -1,5 +1,16 @@
+:root {
+    --background-color: #f4f7fa;
+    --color: #1a1a1a;
+}
+html.darkMode {
+    --background-color: #f4f7fa;
+    --color: #1a1a1a;
+}
+
 body {
     margin: 0;
+    background-color: black;
+    color: white;
 }
 
 .formBox {
