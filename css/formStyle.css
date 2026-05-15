@@ -1,20 +1,25 @@
 :root {
     --background-color: #f4f7fa;
+    --color-next-layer: #333;
     --color: #1a1a1a;
+    --background-color-next-layer: #ccc;
 }
+
 html.darkMode {
-    --background-color: #f4f7fa;
-    --color: #1a1a1a;
+    --color: #f4f7fa;
+    --color-next-layer: #ccc;
+    --background-color: #1a1a1a;
+    --background-color-next-layer: #333;
 }
 
 body {
     margin: 0;
-    background-color: black;
-    color: white;
+    background-color: var(--background-color);
+    color: var(--color);
 }
 
 .formBox {
-    background-color: white;
+    background-color: var(--color);
     border-radius: 10px;
     /*box-shadow: 10px 10px 10px black;*/
     padding: 20px;
@@ -30,12 +35,12 @@ body {
     overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     .formBox {
         background-color: black;
         color: white;
     }
-}
+}*/
 
 .formBoxScrollContent {
     overflow: auto;
@@ -344,13 +349,7 @@ form-input>div {
     align-items: center;
     transition: border-color 0.5s ease;
     border-radius: 4px;
-    border: 1px solid black;
-}
-
-@media (prefers-color-scheme: dark) {
-    form-input>div {
-        border: 1px solid white;
-    }
+    border: 1px solid var(--color);
 }
 
 
@@ -380,17 +379,18 @@ form-input>div>select {
     margin-left: 0px;
     vertical-align: middle;
     width: 100%;
+    background-color: var(--background-color);
+    color: var(--color);
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
 
     form-input>div>input,
     form-input>div>select {
         background-color: black;
         color: white;
     }
-}
-
+}*/
 
 form-input>div>textarea {
     border: none;
@@ -400,14 +400,16 @@ form-input>div>textarea {
     vertical-align: top;
     position: relative;
     width: 100%;
+    background-color: var(--background-color);
+    color: var(--color);
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     form-input>div>textarea {
         background-color: black;
         color: white;
     }
-}
+}*/
 
 form-input>.listHolder {
     position: relative;
@@ -428,14 +430,14 @@ form-input>.listHolder {
 form-input>.listHolder>div {
     width: 100%;
     cursor: pointer;
-    background-color: #ccc;
+    background-color: var(--background-color-next-layer);
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     form-input>.listHolder>div {
         background-color: #333;
     }
-}
+}*/
 
 form-input>.listHolder>div:hover {
     background-color: gray;
@@ -470,20 +472,21 @@ form-input>div>input:focus {
 
 .formToast {
     margin-left: auto;
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 4px;
     padding: 4px;
     cursor: pointer;
     width: max-content;
-    pointer-events: all
+    pointer-events: all;
+    color: black;
 }
 
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     .formToast {
         color: black;
     }
-}
+}*/
 
 @keyframes slideInFromRight {
     0% {
@@ -592,7 +595,8 @@ formrow p:first-child {
 }
 
 .formDialog {
-    background-color: white;
+    background-color: var(--background-color);
+    color: var(--color);
     border-radius: 10px;
     box-shadow: 10px 10px 10px black;
     font-size: large;
@@ -627,12 +631,12 @@ formrow p:first-child {
     animation: fadeOut 0.25s forwards;
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     .formDialog {
         background-color: black;
         color: white;
     }
-}
+}*/
 
 .formButtonMakeInline {
     width: auto;
@@ -666,15 +670,15 @@ formrow p:first-child {
 }
 
 .formDialogTitleDrag {
-    background-color: #ccc;
+    background-color: var(--background-color-next-layer);
     cursor: move;
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     .formDialogTitleDrag {
         background-color: #333;
     }
-}
+}*/
 
 .formOkColor {
     background: #02aa42;
@@ -714,11 +718,11 @@ formrow p:first-child {
 }
 
 .formInputFocus {
-    border-color: #333;
+    border-color: var(--color-next-layer);
 }
 
-@media (prefers-color-scheme: dark) {
+/*@media (prefers-color-scheme: dark) {
     .formTextInputFocus {
         border-color: #ccc;
     }
-}
+}*/
