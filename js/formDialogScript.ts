@@ -109,7 +109,6 @@ export class FormDialog<T> {
             //Setup entry
             this.inputElement = new HTMLFormInputElement("", null)
             this.inputElement.setPlaceHolder(template.placeholder)
-            this.inputElement.style.width = "500px"
             if (template.style == FormDialogStyle.Entry) {
                 this.inputElement.setType(this.template.entryType)
             } else {
@@ -256,13 +255,14 @@ export class FormDialogManager {
         title.innerText = dialog.template.title
         holder.appendChild(title)
         dialog.draggableElement = MakeElementDraggable(dialog.element, title)
+        dialog.AllowSelect(false);
 
         //Data
         const data = document.createElement("p")
         if (dialog.template.style == FormDialogStyle.Wait || dialog.template.style == FormDialogStyle.Progress) {
             data.classList.add("puslatingEffectFull")
         }
-        data.innerText = dialog.template.content
+        data.innerHTML = dialog.template.content
         holder.appendChild(data)
 
         //Entry
