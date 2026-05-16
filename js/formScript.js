@@ -732,10 +732,10 @@ export class HTMLFormInputElement extends HTMLElement {
     setOptions(options, timestamp = null) {
         this.usingJSList = true;
         if (timestamp != null) {
-            this.optionsTimestamp = timestamp;
             if (timestamp <= this.optionsTimestamp) {
                 return;
             }
+            this.optionsTimestamp = timestamp;
         }
         if (options instanceof Map) {
             this.options = options;
