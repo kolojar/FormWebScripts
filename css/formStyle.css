@@ -55,19 +55,14 @@ a {
     transition: color 0.3s ease;
 }
 
+
 body {
     margin: 0;
     background-color: var(--background-color);
     color: var(--color);
 }
 
-header {
-    flex-shrink: 0;
-    margin-bottom: 4px;
-}
-
-footer {
-    margin-top: 4px;
+header, footer {
     flex-shrink: 0;
 }
 
@@ -75,8 +70,13 @@ main {
     flex: 1;
     overflow: auto;
     /*scrollbar-gutter: stable;*/
-    padding-left: 4px;
-    padding-right: 4px;
+    padding: 4px;
+    padding: 4px;
+}
+
+ul {
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .pageHolder {
@@ -88,6 +88,12 @@ main {
     overflow: hidden;
     width: 100dvw;
     height: 100dvh;
+}
+
+.lineVerticalCenter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 form-input {
@@ -247,7 +253,7 @@ form-input {
     margin-right: 0.25rem;
     border-radius: 4px;
     padding: 2px 4px;
-    margin: 0;
+    margin: 2px;
 }
 
 .imageAsText {
@@ -271,7 +277,7 @@ input[type="checkbox"] {
 
 .formButtonBoxHolder {
     display: flex;
-    gap: 4px;
+    gap: 12px;
     margin: 4px;
 }
 
