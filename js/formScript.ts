@@ -452,14 +452,20 @@ export class HTMLFormInputElement extends HTMLElement {
     updateInputType() {
         //Select input element based on type
         const focused = this.classList.contains("formInputFocus")
-        if (this.input.parentElement == this) {
+        if (this.img.parentElement == this.holder) {
+            this.holder.removeChild(this.img)
+        }
+        if (this.input.parentElement == this.holder) {
             this.holder.removeChild(this.input)
         }
-        if (this.textArea.parentElement == this) {
+        if (this.textArea.parentElement == this.holder) {
             this.holder.removeChild(this.textArea)
         }
         if (this.afterImg.parentElement == this.holder) {
             this.holder.removeChild(this.afterImg)
+        }
+        if(this.img.src != "") {
+            this.holder.appendChild(this.img)
         }
         if (this.type == "textarea") {
             this.holder.appendChild(this.textArea)
@@ -476,7 +482,6 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.type == "select") {
             this.setIsScrictList(true)
         }
-        this.holder.appendChild(this.afterImg)
 
         //Add specific use cases
         if (this.type == "password") {
@@ -497,14 +502,16 @@ export class HTMLFormInputElement extends HTMLElement {
                 }
                 updatePasswordEye()
             }
+            this.holder.appendChild(this.afterImg)
         } else if (this.type == "color") {
             //Random color generator
             this.afterImg.src = "/formWebScripts/images/casino32.svg"
             this.afterImg.onclick = () => {
                 this.input.value = GenerateRandomColor()
             }
+            this.holder.appendChild(this.afterImg)
         } else {
-            this.afterImg.src = ""
+            this.afterImg.removeAttribute("src")
         }
     }
 
@@ -659,7 +666,7 @@ export class HTMLFormInputElement extends HTMLElement {
             } else if (value instanceof FileList) {
                 this.input.files = value
                 return
-            } else if(value == "") {
+            } else if (value == "") {
                 this.input.value = "";
                 return
             } else {
@@ -747,6 +754,7 @@ export class HTMLFormInputElement extends HTMLElement {
     public setIcon(icon: string) {
         this.img.src = icon
         this.setAttribute("icon", icon)
+        this.updateInputType()
     }
 
     public getIsStrictList(): boolean {
@@ -815,7 +823,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.validate()
     }
     public getMinimum(): string {
-       return this.input.min;
+        return this.input.min;
     }
     public getMaximum(): string {
         return this.input.max;
