@@ -167,7 +167,7 @@ export class HTMLFormToggleElement extends HTMLElement {
 
         //Setup basic events
         this.addEventListener("mousedown", () => {
-            console.log("Click", this.input.checked);
+            //console.log("Click", this.input.checked);
             this.setValue(!this.getValue())
             this.input.dispatchEvent(new Event("change"))
             this.dispatchEvent(new Event("change"))
@@ -175,7 +175,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         })
         this.addEventListener("keydown", (ev: KeyboardEvent) => {
             if (ev.code === "Space") {
-                console.log("Click");
+                //console.log("Click");
                 this.setValue(!this.getValue())
                 this.input.dispatchEvent(new Event("change"))
                 this.dispatchEvent(new Event("change"))
@@ -214,10 +214,10 @@ export class HTMLFormToggleElement extends HTMLElement {
             if (enables != null) {
                 if (!this.input.checked) {
                     enables.setAttribute("disabled", "")
-                    console.log("Disabled");
+                    //console.log("Disabled");
                 } else {
                     enables.removeAttribute("disabled")
-                    console.log("Enable");
+                    //console.log("Enable");
                 }
             }
         }
@@ -339,7 +339,7 @@ export class HTMLFormInputElement extends HTMLElement {
 
         //Setup basic events
         this.addEventListener("focusin", () => {
-            console.log("Focus in");
+            //console.log("Focus in");
             this.areOptionsVisible = true;
             this.renderList()
             if (!this.classList.contains("formInputFocus")) {
@@ -352,7 +352,7 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         })
         this.addEventListener("focusout", () => {
-            console.log("Focus out");
+            //console.log("Focus out");
             this.areOptionsVisible = false;
             this.listHolder.style.display = "none"
             if (this.classList.contains("formInputFocus")) {
@@ -412,36 +412,36 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     renderList() {
-        console.log("Render list");
+        //console.log("Render list");
         if (this.options.size == 0 || !this.areOptionsVisible) {
-            console.log("Render list cancel");
+            //console.log("Render list cancel");
             return
         }
-        console.log(this.options);
+        //console.log(this.options);
         this.listHolder.style.display = ""
 
         //Clear list
         while (this.listHolder.lastChild != null) {
             this.listHolder.lastChild.remove()
-            console.log("Clearing");
+            //console.log("Clearing");
         }
 
         //Update list
-        console.log("isCaseSensitive", this.isCaseSensitiveList);
+        //console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.options) {
             const contains = (this.isCaseSensitiveList ? value[0] : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.getValueRaw() : this.getValueRaw().toLocaleLowerCase()))
-            console.log(value, contains);
+            //console.log(value, contains);
             if (contains) {
                 const optionDiv = document.createElement("div")
                 const option = document.createElement("p")
                 option.innerText = value[0]
                 optionDiv.addEventListener("mousedown", () => {
-                    console.log("Clicked on: " + value);
+                    //console.log("Clicked on: " + value);
                     this.setValueRaw(value[0])
                     this.areOptionsVisible = false
                     this.listHolder.style.display = "none"
                     //this.renderList()
-                    console.log(this.listHolder.style.display);
+                    //console.log(this.listHolder.style.display);
                 })
                 optionDiv.appendChild(option)
                 this.listHolder.appendChild(optionDiv)
@@ -543,7 +543,7 @@ export class HTMLFormInputElement extends HTMLElement {
 
     static observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
-        console.log(name, oldValue, newValue);
+        //console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
             return
         }
@@ -593,8 +593,8 @@ export class HTMLFormInputElement extends HTMLElement {
             isValid = await this.validationFunction(this.getValueRaw())
         }
         if (isValid && this.isStrictList) {
-            console.log(this.options);
-            console.log(this.getValue());
+            //console.log(this.options);
+            //console.log(this.getValue());
             isValid = this.options.has(this.getValueRaw())
         }
 
@@ -668,7 +668,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
 
         //Check if is in select options
-        console.log("New value:", value, this.options);
+        //console.log("New value:", value, this.options);
         for (const element of this.options) {
             if (element[1] == value as string) {
                 this.setValueRaw(element[0], calledFromProperty)
