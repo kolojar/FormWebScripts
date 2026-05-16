@@ -258,7 +258,7 @@ export class FormDialogManager {
         dialog.AllowSelect(false);
 
         //Data
-        const data = document.createElement("p")
+        const data = document.createElement("div")
         if (dialog.template.style == FormDialogStyle.Wait || dialog.template.style == FormDialogStyle.Progress) {
             data.classList.add("puslatingEffectFull")
         }
