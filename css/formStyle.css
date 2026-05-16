@@ -223,7 +223,7 @@ form-input {
     margin-right: auto;
 }
 
-.formButton:hover {
+.formButton:hover:not(:disabled) {
     /*background-color: gray;*/
     transition: 0.5s;
     filter: saturate(2);
@@ -241,17 +241,13 @@ form-input {
 }
 
 .formButtonInline {
-        width: auto;
-        height: 1.5rem;
-        vertical-align: text-top;
-        margin-right: 0.25rem;
-        border-radius: 4px;
-        padding: 2px 4px;
-        margin: 0;
-}
-
-.inputFullScale {
-    width: 100%;
+    width: auto;
+    height: 1.5rem;
+    vertical-align: text-top;
+    margin-right: 0.25rem;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 0;
 }
 
 .imageAsText {
@@ -291,6 +287,8 @@ input[type="checkbox"] {
     grid-template-rows: 1fr;
     opacity: 1;
     transition: grid-template-rows 0.4s ease, opacity 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .formCollapsable>* {
@@ -304,6 +302,8 @@ input[type="checkbox"] {
     padding-bottom: 0;
     margin-top: 0;
     margin-bottom: 0;
+    pointer-events: none;
+    visibility: collapse;
 }
 
 .formButtonBox>* {
@@ -458,9 +458,8 @@ form-input {
     min-height: 34px;
     margin: 4px;
     /*display: inline-block;*/
-    display: inline-block;
-    width: 99%;
-    box-sizing: border-box;
+    display: block;
+    width: auto;
 }
 
 form-input>div {
@@ -471,7 +470,6 @@ form-input>div {
     border-radius: 4px;
     border: 1px solid var(--color);
 }
-
 
 /*.formTextInput holder {
     display: flex;
@@ -484,10 +482,8 @@ form-input>div>img {
     display: inline;
 }
 
-@media (prefers-color-scheme: dark) {
-    form-input img {
-        filter: invert(1)
-    }
+html.darkMode form-input img {
+    filter: invert(1)
 }
 
 form-input>div>input,
