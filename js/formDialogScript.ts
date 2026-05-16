@@ -109,6 +109,9 @@ export class FormDialog<T> {
             //Setup entry
             this.inputElement = new HTMLFormInputElement("", null)
             this.inputElement.setPlaceHolder(template.placeholder)
+            this.inputElement.addEventListener("mousedown",(ev: MouseEvent) => {
+                ev.stopImmediatePropagation()
+            })
             if (template.style == FormDialogStyle.Entry) {
                 this.inputElement.setType(this.template.entryType)
             } else {

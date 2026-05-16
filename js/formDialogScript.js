@@ -77,6 +77,9 @@ export class FormDialog {
             //Setup entry
             this.inputElement = new HTMLFormInputElement("", null);
             this.inputElement.setPlaceHolder(template.placeholder);
+            this.inputElement.addEventListener("mousedown", (ev) => {
+                ev.stopImmediatePropagation();
+            });
             if (template.style == FormDialogStyle.Entry) {
                 this.inputElement.setType(this.template.entryType);
             }

@@ -413,11 +413,11 @@ export class HTMLFormInputElement extends HTMLElement {
 
     renderList() {
         //console.log("Render list");
+        //console.log(this.options);
         if (this.options.size == 0 || !this.areOptionsVisible) {
             //console.log("Render list cancel");
             return
         }
-        //console.log(this.options);
         this.listHolder.style.display = ""
 
         //Clear list
@@ -464,7 +464,7 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.afterImg.parentElement == this.holder) {
             this.holder.removeChild(this.afterImg)
         }
-        if(this.img.src != "") {
+        if (this.img.src != "") {
             this.holder.appendChild(this.img)
         }
         if (this.type == "textarea") {
@@ -781,19 +781,22 @@ export class HTMLFormInputElement extends HTMLElement {
      */
     public setOptions(options: Map<string, any> | string[], timestamp: Date | null = null) {
         this.usingJSList = true
-        if (timestamp != null && timestamp > this.optionsTimestamp) {
+        if (timestamp != null) {
             this.optionsTimestamp = timestamp;
-            if (options instanceof Map) {
-                this.options = options
-            } else {
-                this.options.clear()
-                for (const element of options) {
-                    this.options.set(element, element)
-                }
+            if(timestamp <= this.optionsTimestamp) {
+                return
             }
-            this.removeAttribute("list")
-            this.renderList()
         }
+        if (options instanceof Map) {
+            this.options = options
+        } else {
+            this.options.clear()
+            for (const element of options) {
+                this.options.set(element, element)
+            }
+        }
+        this.removeAttribute("list")
+        this.renderList()
     }
 
     public getIsCaseSensitiveList(): boolean {

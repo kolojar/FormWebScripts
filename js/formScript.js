@@ -366,11 +366,11 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     renderList() {
         //console.log("Render list");
+        //console.log(this.options);
         if (this.options.size == 0 || !this.areOptionsVisible) {
             //console.log("Render list cancel");
             return;
         }
-        //console.log(this.options);
         this.listHolder.style.display = "";
         //Clear list
         while (this.listHolder.lastChild != null) {
@@ -731,20 +731,23 @@ export class HTMLFormInputElement extends HTMLElement {
      */
     setOptions(options, timestamp = null) {
         this.usingJSList = true;
-        if (timestamp != null && timestamp > this.optionsTimestamp) {
+        if (timestamp != null) {
             this.optionsTimestamp = timestamp;
-            if (options instanceof Map) {
-                this.options = options;
+            if (timestamp <= this.optionsTimestamp) {
+                return;
             }
-            else {
-                this.options.clear();
-                for (const element of options) {
-                    this.options.set(element, element);
-                }
-            }
-            this.removeAttribute("list");
-            this.renderList();
         }
+        if (options instanceof Map) {
+            this.options = options;
+        }
+        else {
+            this.options.clear();
+            for (const element of options) {
+                this.options.set(element, element);
+            }
+        }
+        this.removeAttribute("list");
+        this.renderList();
     }
     getIsCaseSensitiveList() {
         return this.isCaseSensitiveList;
