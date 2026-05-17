@@ -398,6 +398,7 @@ export class FormDialogManager {
         }
         //Open dialog
         dialog.element.showModal()
+        dialog.element.scroll({top: 0, behavior: "instant"})
         return true
     }
 
