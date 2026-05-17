@@ -765,10 +765,6 @@ formrow p:first-child {
     text-align: center;
 }
 
-.formButtonBoxTable>* {
-    margin-right: 4px;
-}
-
 .formButtonBoxTable> :last-child {
     margin-right: 0px;
 }
