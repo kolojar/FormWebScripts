@@ -449,7 +449,7 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent((dialog.inputElement as HTMLFormInputElement).getValue()[1] as T)
+                    onCloseEvent((dialog.inputElement as HTMLFormInputElement).getValue() as T)
                     return
                 }
                 onCloseEvent(value)
