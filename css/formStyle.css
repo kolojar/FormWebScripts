@@ -721,7 +721,7 @@ formrow p:first-child {
     border-radius: 10px;
     box-shadow: 10px 10px 10px black;
     font-size: large;
-    overflow: hidden;
+    overflow: auto;
     margin: 0;
     left: 50%;
     top: 50%;
