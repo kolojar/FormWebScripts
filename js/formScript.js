@@ -6,9 +6,14 @@ Disables element and all subelements without attribute disableRecursiveDisable
 export function RecursiveDisabler(target, disabled) {
     for (let index = 0; index < target.children.length; index++) {
         const element = target.children[index];
-        RecursiveDisabler(element, disabled);
+        if ((target instanceof HTMLFormInputElement)) {
+            target.disable(disabled);
+        }
+        else {
+            RecursiveDisabler(element, disabled);
+        }
     }
-    if (!target.hasAttribute("disableRecursiveDisable")) {
+    if (!target.hasAttribute("disableRecursiveDisable") && !(target instanceof HTMLFormInputElement)) {
         target.setAttribute("disabled", String(disabled));
         if (!disabled) {
             target.removeAttribute("disabled");
@@ -550,6 +555,9 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == 'raw-value') {
             this.setValueRaw(newValue, true);
         }
+    }
+    disable(disabled) {
+        this.input.disabled = disabled;
     }
     async validate() {
         this.setAttribute("value", this.getValueRaw());

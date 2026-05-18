@@ -8,9 +8,13 @@ Disables element and all subelements without attribute disableRecursiveDisable
 export function RecursiveDisabler(target: HTMLElement, disabled: boolean) {
     for (let index = 0; index < target.children.length; index++) {
         const element = target.children[index] as HTMLElement;
-        RecursiveDisabler(element, disabled)
+        if ((target instanceof HTMLFormInputElement)) {
+            target.disable(disabled);
+        } else {
+            RecursiveDisabler(element, disabled)
+        }
     }
-    if (!target.hasAttribute("disableRecursiveDisable")) {
+    if (!target.hasAttribute("disableRecursiveDisable") && !(target instanceof HTMLFormInputElement)) {
         target.setAttribute("disabled", String(disabled))
         if (!disabled) {
             target.removeAttribute("disabled")
@@ -586,6 +590,10 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
 
+    public disable(disabled: boolean) {
+        this.input.disabled = disabled;
+    }
+
     public async validate(): Promise<[changed: boolean, isValid: boolean]> {
         this.setAttribute("value", this.getValueRaw())
         //Check for changes
@@ -782,7 +790,7 @@ export class HTMLFormInputElement extends HTMLElement {
     public setOptions(options: Map<string, any> | string[], timestamp: Date | null = null) {
         this.usingJSList = true
         if (timestamp != null) {
-            if(timestamp <= this.optionsTimestamp) {
+            if (timestamp <= this.optionsTimestamp) {
                 return
             }
             this.optionsTimestamp = timestamp;
@@ -1164,6 +1172,5 @@ SetupRows()
 //SetupToggles()
 SetupToasts()
 customElements.define("form-box", HTMLFormBoxElement)
-customElements.define("form-status-message", HTMLFormBoxElement)
 customElements.define("form-toggle", HTMLFormToggleElement)
 customElements.define("form-input", HTMLFormInputElement)
