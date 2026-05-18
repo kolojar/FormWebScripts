@@ -1091,6 +1091,7 @@ SetupRows();
 //SetupTextInputs()
 //SetupToggles()
 SetupToasts();
+customElements.define("form-box", HTMLFormBoxElement);
 customElements.define("form-toggle", HTMLFormToggleElement);
 customElements.define("form-input", HTMLFormInputElement);
 //# sourceMappingURL=formScript.js.map

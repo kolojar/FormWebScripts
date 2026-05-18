@@ -105,7 +105,7 @@ form-input {
     height: 40%;
 }
 
-.formBox {
+form-box {
     background-color: var(--background-color);
     color: var(--color);
     border-radius: 10px;
