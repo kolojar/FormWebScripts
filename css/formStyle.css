@@ -91,40 +91,12 @@ ol {
     margin-bottom: 0px;
 }
 
-button {
-    --color: white;
-    background-color: var(--background-color);
-    cursor: pointer;
-    text-align: center;
-    border-radius: 10px;
-    padding: 10px 20px;
-    color: var(--color);
-    font-weight: 700;
-    font-size: 16px;
-    border: none;
-    transition: 0.3s;
-    cursor: pointer;
-    margin: 4px;
-}
-
-button:hover:not(:disabled) {
-    /*background-color: gray;*/
-    transition: 0.5s;
-    filter: saturate(2);
-}
-
-button:disabled {
-    /*background-color: gray;*/
-    cursor: not-allowed;
-    filter: saturate(0.5);
-}
-
 input[type="checkbox"] {
     cursor: pointer;
 }
 
 input[type="checkbox"]:disabled {
-  cursor: not-allowed;
+    cursor: not-allowed;
 }
 
 html.darkMode input[type="date"]::-webkit-calendar-picker-indicator {
@@ -146,7 +118,16 @@ table {
     border-collapse: collapse;
 }
 
-h1,h2,h3,h4,h5,h6 {
+table {
+    margin: 4px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     margin: 0px;
 }
 
@@ -199,6 +180,57 @@ h1,h2,h3,h4,h5,h6 {
 }
 
 
+/*HTML styling = button*/
+button {
+    --btn-color: white;
+    --btn-background-color: black;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: var(--btn-color);
+    background-color: var(--btn-background-color);
+    font-weight: 700;
+    font-size: 16px;
+    border: none;
+    transition: 0.3s;
+    cursor: pointer;
+    margin: 4px;
+}
+
+button[icon] {
+    height: 36px;
+    width: 40px;
+}
+
+button[icon] svg {
+    height: 32px;
+    width: 32px;
+}
+
+button:hover:not(:disabled) {
+    /*background-color: gray;*/
+    transition: 0.5s;
+    filter: saturate(2);
+}
+
+button:disabled {
+    /*background-color: gray;*/
+    cursor: not-allowed;
+    filter: saturate(0.5);
+}
+
+.formButtonInline {
+    width: auto;
+    height: 1.5rem;
+    vertical-align: text-top;
+    margin-right: 0.25rem;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 2px;
+}
+
+
 /*Custom object = form-input*/
 form-input {
     min-height: 34px;
@@ -238,7 +270,7 @@ form-input>div>select {
     color: var(--color);
 }
 
-orm-input>div>textarea {
+form-input>div>textarea {
     border: none;
     margin: 4px;
     display: inline-block;
@@ -287,6 +319,10 @@ form-input>div>input[type="color"] {
 }
 
 form-input>div>input:focus {
+    outline: none;
+}
+
+form-input>div>textarea:focus {
     outline: none;
 }
 
@@ -692,16 +728,6 @@ body[form-box-holder] {
     margin-right: auto;
 }
 
-.formButtonInline {
-    width: auto;
-    height: 1.5rem;
-    vertical-align: text-top;
-    margin-right: 0.25rem;
-    border-radius: 4px;
-    padding: 2px 4px;
-    margin: 2px;
-}
-
 .imageAsText {
     width: auto;
     height: 1.5rem;
@@ -742,7 +768,7 @@ body[form-box-holder] {
 }
 
 .flexContainerRow {
-  flex-direction: row;
+    flex-direction: row;
 }
 
 .formProgress {
