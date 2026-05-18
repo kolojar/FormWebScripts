@@ -1,24 +1,9 @@
-html {
-  overflow: hidden;
-  margin: 0;
-
-  --posX: 10vw;
-  --posY: 0px;
-  --width: calc(100% - 15vw - 20px);
-  --height: calc(100% - 20px);
-}
-
-html {
-  --posX: 2px;
-  --posY: 2px;
-}
-
 button {
   margin-top: 4px;
   margin-bottom: 4px;
 }
 
-h2 {
+h1, h2 {
   margin-bottom: 0px;
 }
 

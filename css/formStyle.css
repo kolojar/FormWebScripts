@@ -23,6 +23,11 @@
     -webkit-user-drag: unset;
 }
 
+html {
+    overflow: hidden;
+    margin: 0;
+}
+
 html.darkMode {
     --color: #f4f7fa;
     --color-next-layer: #ccc;
@@ -59,9 +64,20 @@ body {
     margin: 0;
     background-color: var(--background-color);
     color: var(--color);
+    min-width: 100dvw;
+    min-height: 100dvh;
+    max-width: 100dvw;
+    max-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    width: 100dvw;
+    height: 100dvh;
 }
 
-header, footer {
+header,
+footer {
     flex-shrink: 0;
 }
 
@@ -73,20 +89,10 @@ main {
     padding: 4px;
 }
 
-ul,ol {
+ul,
+ol {
     margin-top: 0px;
     margin-bottom: 0px;
-}
-
-.pageHolder {
-    max-width: 100dvw;
-    max-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    overflow: hidden;
-    width: 100dvw;
-    height: 100dvh;
 }
 
 .lineVerticalCenter {
@@ -112,7 +118,6 @@ form-box {
     box-shadow: 4px 4px 4px black;
     padding: 20px;
     padding-bottom: 10px;
-    font-size: large;
     opacity: 0;
     animation: fadeIn 2s forwards;
     margin: 20px;
@@ -125,7 +130,7 @@ form-box {
 
 .formBoxTitle {
     text-align: center;
-    font-size:x-large;
+    font-size: x-large;
     font-weight: bold;
 }
 
