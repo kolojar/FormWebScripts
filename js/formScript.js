@@ -997,12 +997,17 @@ export class DraggableElement {
         this.dragDisabled = false;
         this.dragElement.addEventListener("mousedown", this.dragStartEvent);
         this.movedElement.addEventListener("mouseup", this.dragEndEvent);
+        this.dragElement.addEventListener("touchstart", this.dragStartEvent);
+        this.movedElement.addEventListener("touchend", this.dragEndEvent);
         if (this.dragElement != this.movedElement) {
             this.dragElement.addEventListener("mouseup", this.dragEndEvent);
+            this.dragElement.addEventListener("touchend", this.dragEndEvent);
         }
         this.movedElement.addEventListener("mousemove", this.drag);
+        this.movedElement.addEventListener("touchmove", this.drag);
         if (this.dragElement != this.movedElement) {
             this.dragElement.addEventListener("mousemove", this.drag);
+            this.dragElement.addEventListener("touchmove", this.drag);
         }
     }
     /**
@@ -1045,8 +1050,14 @@ export class DraggableElement {
             this.movedElement.setAttribute("formIsDragged", "true");
             this.movedElement.setAttribute("formDragLastCursor", this.dragElement.style.cursor);
             this.dragElement.style.cursor = "move";
-            this.movedElement.setAttribute("formDragLastX", event.clientX.toString());
-            this.movedElement.setAttribute("formDragLastY", event.clientY.toString());
+            if (event instanceof MouseEvent) {
+                this.movedElement.setAttribute("formDragLastX", event.clientX.toString());
+                this.movedElement.setAttribute("formDragLastY", event.clientY.toString());
+            }
+            else {
+                this.movedElement.setAttribute("formDragLastX", event.touches[0].clientX.toString());
+                this.movedElement.setAttribute("formDragLastY", event.touches[0].clientY.toString());
+            }
         };
         /**
         * Stops moving element based on mouse position
@@ -1071,10 +1082,24 @@ export class DraggableElement {
             if (this.movedElement.getAttribute("formIsDragged") != "true") {
                 return;
             }
-            let posX = Number(this.movedElement.getAttribute("formDragLastX")) - event.clientX;
-            let posY = Number(this.movedElement.getAttribute("formDragLastY")) - event.clientY;
-            this.movedElement.setAttribute("formDragLastX", event.clientX.toString());
-            this.movedElement.setAttribute("formDragLastY", event.clientY.toString());
+            let posX = 0;
+            let posY = 0;
+            if (event instanceof MouseEvent) {
+                posX = Number(this.movedElement.getAttribute("formDragLastX")) - event.clientX;
+                posY = Number(this.movedElement.getAttribute("formDragLastY")) - event.clientY;
+            }
+            else {
+                posX = Number(this.movedElement.getAttribute("formDragLastX")) - event.touches[0].clientX;
+                posY = Number(this.movedElement.getAttribute("formDragLastY")) - event.touches[0].clientY;
+            }
+            if (event instanceof MouseEvent) {
+                this.movedElement.setAttribute("formDragLastX", event.clientX.toString());
+                this.movedElement.setAttribute("formDragLastY", event.clientY.toString());
+            }
+            else {
+                this.movedElement.setAttribute("formDragLastX", event.touches[0].clientX.toString());
+                this.movedElement.setAttribute("formDragLastY", event.touches[0].clientY.toString());
+            }
             this.movedElement.style.left = (this.movedElement.offsetLeft - posX) + "px";
             this.movedElement.style.top = (this.movedElement.offsetTop - posY) + "px";
         };

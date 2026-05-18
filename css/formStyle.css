@@ -508,6 +508,7 @@ body[form-box-holder] {
     transform: translateX(-50%) translateY(-50%);
     width: max-content;
     height: max-content;
+    animation: none;
     /*white-space: ;*/
 }
 
