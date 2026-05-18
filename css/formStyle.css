@@ -55,7 +55,6 @@ a {
     transition: color 0.3s ease;
 }
 
-
 body {
     margin: 0;
     background-color: var(--background-color);
@@ -100,10 +99,17 @@ form-input {
     width: max-content;
 }
 
+.formBackgroundLogo {
+    top: 4px;
+    position: fixed;
+    height: 40%;
+}
+
 .formBox {
-    background-color: var(--color);
+    background-color: var(--background-color);
+    color: var(--color);
     border-radius: 10px;
-    /*box-shadow: 10px 10px 10px black;*/
+    box-shadow: 4px 4px 4px black;
     padding: 20px;
     padding-bottom: 10px;
     font-size: large;
@@ -115,6 +121,12 @@ form-input {
     max-width: calc(100% - 60px);
     max-height: calc(100% - 60px);
     overflow: hidden;
+}
+
+.formBoxTitle {
+    text-align: center;
+    font-size:x-large;
+    font-weight: bold;
 }
 
 /*@media (prefers-color-scheme: dark) {
