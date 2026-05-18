@@ -927,7 +927,7 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
     toast.setAttribute("animationPart", "0")
     toast.addEventListener("click", function () {
         //console.log("click");
-        toast.style.animation = "slideOutToRight 0.5s ease-out forwards"
+        toast.style.animation = "fadeOut 0.5s ease-out forwards"
         toast.setAttribute("animationPart", "2")
     })
     toast.addEventListener("animationend", function () {
@@ -944,7 +944,7 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
     timeout.classList.add("timeout")
     timeout.style.background = "color-mix(in srgb, #000000 20%, " + style.backgroundColor + " 100%)"
     timeout.addEventListener("animationend", function () {
-        toast.style.animation = "slideOutToRight 0.5s ease-out forwards"
+        toast.style.animation = "fadeOut 0.5s ease-out forwards"
     })
     toast.appendChild(timeout)
 
@@ -983,7 +983,7 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
     p.classList.add("contentText")
     p.innerHTML = message
     pHolder.appendChild(p)
-    toast.style.animation = "slideInFromRight 0.5s ease-out forwards"
+    toast.style.animation = "fadeIn 0.5s ease-out forwards"
     colorDiv.remove()
 
     return toastId

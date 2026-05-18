@@ -1,3 +1,4 @@
+/*Global variables */
 :root {
     --background-color: #f4f7fa;
     --color-next-layer: #333;
@@ -9,23 +10,8 @@
     --form-info-color: #008ce8;
     --table-header-color: rgb(0, 200, 0);
     --table-highlight-color: rgb(255, 180, 0);
-}
-
-* {
-    user-select: none;
-    -moz-user-select: none;
-    -webkit-user-drag: none;
-}
-
-.allowSelect {
-    user-select: text;
-    -moz-user-select: text;
-    -webkit-user-drag: unset;
-}
-
-html {
-    overflow: hidden;
-    margin: 0;
+    --link-color: rgb(26, 98, 232);
+    --form-background: linear-gradient(to bottom right, #0099ff 0%, #000066 85%);
 }
 
 html.darkMode {
@@ -33,31 +19,29 @@ html.darkMode {
     --color-next-layer: #ccc;
     --background-color: #1a1a1a;
     --background-color-next-layer: #333;
+    --link-color: cornflowerblue;
 }
 
-html.darkMode input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
+
+/*HTML Overwrites*/
+* {
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
 }
 
-html.darkMode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
+*:disabled {
+    cursor: not-allowed;
 }
 
-html.darkMode input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
+html {
+    overflow: hidden;
+    margin: 0;
 }
 
 html.darkMode html {
     background-color: black;
     color: white;
-}
-
-html.darkMode a {
-    color: cornflowerblue;
-}
-
-a {
-    transition: color 0.3s ease;
 }
 
 body {
@@ -89,275 +73,229 @@ main {
     padding: 4px;
 }
 
+a {
+    color: var(--link-color);
+    transition: color 0.3s ease;
+}
+
+p {
+    margin-top: 4px;
+    margin-left: 4px;
+    margin-bottom: 0px;
+    margin-right: 4px;
+}
+
 ul,
 ol {
     margin-top: 0px;
     margin-bottom: 0px;
 }
 
-.lineVerticalCenter {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-form-input {
-    width: max-content;
-}
-
-.formBackgroundLogo {
-    top: 4px;
-    position: fixed;
-    height: 40%;
-}
-
-form-box {
+button {
+    --color: white;
     background-color: var(--background-color);
-    color: var(--color);
-    border-radius: 10px;
-    box-shadow: 4px 4px 4px black;
-    padding: 20px;
-    padding-bottom: 10px;
-    opacity: 0;
-    animation: fadeIn 2s forwards;
-    margin: 20px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    max-width: calc(100% - 60px);
-    max-height: calc(100% - 60px);
-    overflow: hidden;
-}
-
-.formBoxTitle {
-    text-align: center;
-    font-size: x-large;
-    font-weight: bold;
-}
-
-/*@media (prefers-color-scheme: dark) {
-    .formBox {
-        background-color: black;
-        color: white;
-    }
-}*/
-
-.formBoxScrollContent {
-    overflow: auto;
-    max-width: calc(100%);
-    max-height: calc(100vh - 70px);
-    margin-bottom: 20px;
-}
-
-.formTransitionAnimations {
-    transition: all 1s;
-}
-
-.FadeInAnimation {
-    animation: fadeIn 2s forwards;
-}
-
-.FadeOutAnimation {
-    animation: fadeOut 2s forwards;
-}
-
-@keyframes fadeIn {
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-    }
-}
-
-.puslatingEffectHalf {
-    animation: pulseFadeHalf 2s infinite;
-}
-
-@keyframes pulseFadeHalf {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.75;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-.puslatingEffectFull {
-    animation: pulseFadeFull 2s infinite;
-}
-
-@keyframes pulseFadeFull {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.0;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
-.formBackground {
-    background: linear-gradient(to bottom right, #0099ff 0%, #000066 85%);
-    width: 100vw;
-    height: 100vh;
-    margin: 0;
-}
-
-.formCenter {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.formHeader {
-    font-weight: 700;
-    font-size: larger;
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.formButton {
+    cursor: pointer;
     text-align: center;
     border-radius: 10px;
     padding: 10px 20px;
-    color: white;
+    color: var(--color);
     font-weight: 700;
     font-size: 16px;
     border: none;
     transition: 0.3s;
     cursor: pointer;
+    margin: 4px;
 }
 
-.centerHorizontaly {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.formButton:hover:not(:disabled) {
+button:hover:not(:disabled) {
     /*background-color: gray;*/
     transition: 0.5s;
     filter: saturate(2);
 }
 
-/*.formButton:active {
-    transition: 0.3s;
-    filter: saturate(0.5);
-}*/
-
-.formButton:disabled {
+button:disabled {
     /*background-color: gray;*/
     cursor: not-allowed;
     filter: saturate(0.5);
-}
-
-.formButtonInline {
-    width: auto;
-    height: 1.5rem;
-    vertical-align: text-top;
-    margin-right: 0.25rem;
-    border-radius: 4px;
-    padding: 2px 4px;
-    margin: 2px;
-}
-
-.imageAsText {
-    width: auto;
-    height: 1.5rem;
-    vertical-align: text-top;
-    margin-right: 0.25rem;
-}
-
-button {
-    cursor: pointer;
 }
 
 input[type="checkbox"] {
     cursor: pointer;
 }
 
-*:disabled {
-    cursor: not-allowed;
+input[type="checkbox"]:disabled {
+  cursor: not-allowed;
 }
 
-.formButtonBoxHolder {
-    display: flex;
-    gap: 12px;
+html.darkMode input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+html.darkMode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+html.darkMode input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+td,
+th,
+table {
+    /*Join table borders*/
+    border-collapse: collapse;
+}
+
+h1,h2,h3,h4,h5,h6 {
+    margin: 0px;
+}
+
+
+/*Custom class = styledTable*/
+.styledTable {
+    border: solid var(--color) 3px;
+    white-space-collapse: preserve-spaces;
+}
+
+.styledTable tr {
+    transition: 0.3s;
+}
+
+.styledTable tr:first-child {
+    border-bottom: solid var(--color) 3px;
+}
+
+.styledTable tr:hover {
+    background-color: var(--background-color-next-layer);
+}
+
+.styledTable .trHighlight {
+    background-color: var(--table-highlight-color);
+}
+
+.styledTable th {
+    background-color: var(--table-header-color);
+    border-top: solid var(--color) 2px;
+    border-left: solid var(--color) 2px;
+    text-align: center;
+    font-weight: bold;
+    color: black;
+}
+
+.styledTable th:last-child {
+    border-right: solid var(--color) 2px;
+    border-left: solid var(--color) 2px
+}
+
+.styledTable td {
+    border: solid var(--color) 2px;
+}
+
+.styledTableNoWrap td,
+.styledTableNoWrap th,
+.styledTableNoWrap table {
+    text-wrap-mode: nowrap;
+    white-space: nowrap;
+}
+
+
+/*Custom object = form-input*/
+form-input {
+    min-height: 34px;
     margin: 4px;
+    display: block;
+    width: auto;
 }
 
-.formButtonBox {
+form-input>div {
     display: flex;
-    justify-content: right;
-    width: max-content;
+    flex-flow: row nowrap;
+    align-items: center;
+    transition: border-color 0.5s ease;
+    border-radius: 4px;
+    border: 1px solid var(--color);
+}
+
+form-input>div>img {
+    height: 20px;
+    margin: 2px 0.25rem;
     display: inline;
 }
 
-.formCollapsable {
-    display: grid;
-    grid-template-rows: 1fr;
-    opacity: 1;
-    transition: grid-template-rows 0.4s ease, opacity 0.5s ease, padding 0.5s ease, margin 0.5s ease;
-    visibility: visible;
-    pointer-events: auto;
+html.darkMode form-input img {
+    filter: invert(1)
 }
 
-.formCollapsable>* {
-    overflow: hidden;
+form-input>div>input,
+form-input>div>select {
+    border: none;
+    margin: 0.25rem;
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    width: 100%;
+    background-color: var(--background-color);
+    color: var(--color);
 }
 
-.formCollapsable[collapsed] {
-    grid-template-rows: 0fr;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    pointer-events: none;
-    visibility: collapse;
+orm-input>div>textarea {
+    border: none;
+    margin: 4px;
+    display: inline-block;
+    margin-left: 0px;
+    vertical-align: top;
+    position: relative;
+    width: 100%;
+    background-color: var(--background-color);
+    color: var(--color);
 }
 
-.formButtonBox>* {
-    margin-right: 8px;
+form-input>.listHolder {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: calc(100%-4px);
+    max-height: 100px;
+    flex-direction: column;
+    align-items: start;
+    display: flex;
+    overflow: auto;
+    z-index: 1;
+    border-radius: 4px;
+    margin: 2px;
+    border: none;
+}
+
+form-input>.listHolder>div {
+    width: 100%;
+    cursor: pointer;
+    background-color: var(--background-color-next-layer);
+}
+
+form-input>.listHolder>div:hover {
+    background-color: gray;
+}
+
+form-input>div>p {
+    margin-top: 8px;
+    margin-left: 4px;
+}
+
+form-input>div>input[type="color"] {
     margin-bottom: 8px;
+    height: 26px
 }
 
-.formButtonBox>:last-child {
-    margin-right: 0px;
+form-input>div>input:focus {
+    outline: none;
+}
+
+.formInputFocus {
+    border-color: var(--color-next-layer);
 }
 
 
-.formButtonBox>*>* {
-    margin-bottom: 8px;
-}
-
-
-.formJustifyRight {
-    justify-content: right;
-    margin-left: auto;
-}
-
-.formJustifyLeft {
-    justify-content: left;
-    margin-right: auto;
-}
-
-.formButtonBox:last-of-type {
-    display: block;
-}
-
+/*Custom object = form-toggle*/
 form-toggle .labelBefore {
     display: inline;
     position: relative;
@@ -403,7 +341,7 @@ form-toggle .toggle .slider:before {
     border-radius: 50%;
     left: 4px;
     bottom: 4.5px;
-    background-color: white;
+    background-color: var(--color);
     -webkit-transition: .4s;
     transition: .4s;
 }
@@ -416,185 +354,18 @@ form-toggle .labelAfter {
     margin-left: 4px
 }
 
-/*.formSwitch {
-    position: relative;
-    display: inline;
-    width: 60px;
-    height: 34px;
+
+/*Custom element = form-row*/
+form-row {
     margin: 4px;
-    margin-top: 5px;
 }
 
-.formSwitch input {
-    opacity: 0;
-    width: 0px;
-    height: 0px;
+form-row p:first-child {
+    margin-top: 0px;
 }
 
-.formSwitch span {
-    position: absolute;
-    cursor: pointer;
-    width: 60px;
-    height: 34px;
-    display:inline-block;
-    top: -14px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
 
-.formSwitch span::before {
-    position: absolute;
-    content: "";
-    width: 26px;
-    height: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    -webkit-transition: .4s;
-    transition: .4s;
-}
-
-.formSwitchChecked input:checked,
-.formSwitchChecked span:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(26px);
-}
-
-.formSwitch span {
-    border-radius: 34px;
-}
-
-.formSwitch span:before {
-    border-radius: 50%;
-}*/
-
-.formSwitchOff {
-    background-color: #ccc;
-}
-
-form-input {
-    /*transition: all 1s;*/
-    min-height: 34px;
-    margin: 4px;
-    /*display: inline-block;*/
-    display: block;
-    width: auto;
-}
-
-form-input>div {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    transition: border-color 0.5s ease;
-    border-radius: 4px;
-    border: 1px solid var(--color);
-}
-
-/*.formTextInput holder {
-    display: flex;
-    flex-flow: row nowrap;
-}*/
-
-form-input>div>img {
-    height: 20px;
-    margin: 2px 0.25rem;
-    display: inline;
-}
-
-html.darkMode form-input img {
-    filter: invert(1)
-}
-
-form-input>div>input,
-form-input>div>select {
-    border: none;
-    margin: 0.25rem;
-    display: inline-block;
-    position: relative;
-    vertical-align: middle;
-    width: 100%;
-    background-color: var(--background-color);
-    color: var(--color);
-}
-
-/*@media (prefers-color-scheme: dark) {
-
-    form-input>div>input,
-    form-input>div>select {
-        background-color: black;
-        color: white;
-    }
-}*/
-
-form-input>div>textarea {
-    border: none;
-    margin: 4px;
-    display: inline-block;
-    margin-left: 0px;
-    vertical-align: top;
-    position: relative;
-    width: 100%;
-    background-color: var(--background-color);
-    color: var(--color);
-}
-
-/*@media (prefers-color-scheme: dark) {
-    form-input>div>textarea {
-        background-color: black;
-        color: white;
-    }
-}*/
-
-form-input>.listHolder {
-    position: relative;
-    top: 0px;
-    left: 0px;
-    width: calc(100%-4px);
-    max-height: 100px;
-    flex-direction: column;
-    align-items: start;
-    display: flex;
-    overflow: auto;
-    z-index: 1;
-    border-radius: 4px;
-    margin: 2px;
-    border: none;
-}
-
-form-input>.listHolder>div {
-    width: 100%;
-    cursor: pointer;
-    background-color: var(--background-color-next-layer);
-}
-
-/*@media (prefers-color-scheme: dark) {
-    form-input>.listHolder>div {
-        background-color: #333;
-    }
-}*/
-
-form-input>.listHolder>div:hover {
-    background-color: gray;
-}
-
-form-input>div>p {
-    margin-top: 8px;
-    margin-left: 4px;
-}
-
-form-input>div>input[type="color"] {
-    margin-bottom: 8px;
-    height: 26px
-}
-
-form-input>div>input:focus {
-    outline: none;
-}
-
+/*Custom class = formToast*/
 .formToastHolder {
     gap: 4px;
     position: absolute;
@@ -617,33 +388,7 @@ form-input>div>input:focus {
     width: max-content;
     pointer-events: all;
     color: black;
-}
-
-
-/*@media (prefers-color-scheme: dark) {
-    .formToast {
-        color: black;
-    }
-}*/
-
-@keyframes slideInFromRight {
-    0% {
-        transform: translateX(100%);
-    }
-
-    100% {
-        transform: translateX(0px);
-    }
-}
-
-@keyframes slideOutToRight {
-    0% {
-        transform: translateX(0px);
-    }
-
-    100% {
-        transform: translateX(200%);
-    }
+    transition: all;
 }
 
 .formToast img {
@@ -684,54 +429,72 @@ form-input>div>input:focus {
     margin-bottom: 0px;
 }
 
-
-@keyframes slideInFromLeft {
-    0% {
-        transform: translateX(-100%);
+@keyframes fadeIn {
+    from {
+        opacity: 0;
     }
 
-    100% {
-        transform: translateX(0px);
-    }
-}
-
-@keyframes slideOutToLeft {
-    0% {
-        transform: translateX(0px);
-    }
-
-    100% {
-        transform: translateX(-200%);
+    to {
+        opacity: 1;
     }
 }
 
-p {
-    margin-top: 4px;
-    margin-left: 4px;
-    margin-bottom: 0px;
-    margin-right: 4px;
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }
 
-.formFlexRow {
-    /*Places items next to each other*/
+
+/*Custom element = form-box*/
+form-box {
+    background-color: var(--background-color);
+    color: var(--color);
+    border-radius: 10px;
+    box-shadow: 4px 4px 4px black;
+    padding: 20px;
+    padding-bottom: 10px;
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+    margin: 20px;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+}
+
+body[form-box-holder] {
     display: flex;
-    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    background: var(--form-background);
 }
 
-.formFlexColumn {
-    /*Places items under each other*/
-    display: flex;
-    flex-flow: column nowrap;
+.formBackgroundLogo {
+    top: 4px;
+    position: fixed;
+    height: 40%;
 }
 
-formrow {
-    margin: 4px;
+.formHeader {
+    text-align: center;
+    font-size: x-large;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
-formrow p:first-child {
-    margin-top: 0px;
+.formBoxScrollContent {
+    overflow: auto;
+    max-width: calc(100%);
+    max-height: calc(100vh - 70px);
+    margin-bottom: 20px;
 }
 
+
+/*Custom class = formDialog*/
 .formDialog {
     background-color: var(--background-color);
     color: var(--color);
@@ -769,12 +532,54 @@ formrow p:first-child {
     animation: fadeOut 0.25s forwards;
 }
 
-/*@media (prefers-color-scheme: dark) {
-    .formDialog {
-        background-color: black;
-        color: white;
-    }
-}*/
+.formDialogTitleDrag {
+    background-color: var(--background-color-next-layer);
+    cursor: move;
+}
+
+
+/*Custom classes = formButtonBox*/
+.formButtonBoxHolder {
+    display: flex;
+    gap: 12px;
+    margin: 4px;
+}
+
+.formButtonBox {
+    display: flex;
+    justify-content: right;
+    width: max-content;
+    display: inline;
+}
+
+.formButtonBox>* {
+    margin-right: 8px;
+    margin-bottom: 8px;
+}
+
+.formButtonBox>:last-child {
+    margin-right: 0px;
+}
+
+
+.formButtonBox>*>* {
+    margin-bottom: 8px;
+}
+
+
+.formJustifyRight {
+    justify-content: right;
+    margin-left: auto;
+}
+
+.formJustifyLeft {
+    justify-content: left;
+    margin-right: auto;
+}
+
+.formButtonBox:last-of-type {
+    display: block;
+}
 
 .formButtonBoxTable {
     padding: 2px 4px;
@@ -786,6 +591,159 @@ formrow p:first-child {
     margin-right: 0px;
 }
 
+
+/*Custom class = formCollapsable*/
+.formCollapsable {
+    display: grid;
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transition: grid-template-rows 0.4s ease, opacity 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.formCollapsable>* {
+    overflow: hidden;
+}
+
+.formCollapsable[collapsed] {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    pointer-events: none;
+    visibility: collapse;
+}
+
+
+/*Classes*/
+.allowSelect {
+    user-select: text;
+    -moz-user-select: text;
+    -webkit-user-drag: unset;
+}
+
+.lineVerticalCenter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.formTransitionAnimations {
+    transition: all 1s;
+}
+
+.FadeInAnimation {
+    animation: fadeIn 2s forwards;
+}
+
+.FadeOutAnimation {
+    animation: fadeOut 2s forwards;
+}
+
+.puslatingEffectHalf {
+    animation: pulseFadeHalf 2s infinite;
+}
+
+@keyframes pulseFadeHalf {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.75;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.puslatingEffectFull {
+    animation: pulseFadeFull 2s infinite;
+}
+
+@keyframes pulseFadeFull {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.formCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.centerHorizontaly {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.formButtonInline {
+    width: auto;
+    height: 1.5rem;
+    vertical-align: text-top;
+    margin-right: 0.25rem;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 2px;
+}
+
+.imageAsText {
+    width: auto;
+    height: 1.5rem;
+    vertical-align: text-top;
+    margin-right: 0.25rem;
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(0px);
+    }
+}
+
+@keyframes slideOutToLeft {
+    0% {
+        transform: translateX(0px);
+    }
+
+    100% {
+        transform: translateX(-200%);
+    }
+}
+
+.formFlexRow {
+    /*Places items next to each other*/
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.formFlexColumn {
+    /*Places items under each other*/
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.flexContainerRow {
+  flex-direction: row;
+}
+
 .formProgress {
     height: 32px;
     max-height: 32px;
@@ -793,108 +751,12 @@ formrow p:first-child {
     width: 100%;
 }
 
-.formDialogTitleDrag {
-    background-color: var(--background-color-next-layer);
-    cursor: move;
-}
-
-td,
-th,
-table {
-    /*Join table borders*/
-    border-collapse: collapse;
-}
-
-.styledTable {
-    border: solid var(--color) 3px;
-    white-space-collapse: preserve-spaces;
-}
-
-.styledTable tr {
-    transition: 0.3s;
-}
-
-/*@media (prefers-color-scheme: dark) {
-    .styledTableAuto {
-        border: solid white 3px;
-    }
-}*/
-
-.styledTableNoWrap td,
-th,
-table {
-    text-wrap-mode: nowrap;
-    white-space: nowrap;
-}
-
-.styledTable tr:first-child {
-    border-bottom: solid var(--color) 3px;
-}
-
-.styledTable tr:hover {
-    background-color: var(--background-color-next-layer);
-}
-
-/*@media (prefers-color-scheme: dark) {
-    .styledTableAuto tr:first-child {
-        border-bottom: solid white 3px;
-    }
-
-    .styledTableAuto tr:hover {
-        color: black;
-    }
-}*/
-
-.styledTable .trHighlight {
-    background-color: var(--table-highlight-color);
-}
-
-.styledTable th {
-    background-color: var(--table-header-color);
-    border-top: solid var(--color) 2px;
-    border-left: solid var(--color) 2px;
-    text-align: center;
-    font-weight: bold;
-    color: black;
-}
-
-.styledTable th:last-child {
-    border-right: solid var(--color) 2px;
-    border-left: solid var(--color) 2px
-}
-
-.styledTable td {
-    border: solid var(--color) 2px;
-}
-
-/*@media (prefers-color-scheme: dark) {
-    .styledTableAuto th {
-        border-top: solid white 2px;
-        border-left: solid white 2px;
-        text-align: center;
-        color: black;
-    }
-
-    .styledTableAuto th:last-child {
-        border-right: solid white 2px;
-        border-left: solid white 2px
-    }
-
-    .styledTableAuto td {
-        border: solid white 2px;
-    }
-}*/
-
 .tableScrollHolder {
     overflow: scroll;
 }
 
-/*@media (prefers-color-scheme: dark) {
-    .formDialogTitleDrag {
-        background-color: #333;
-    }
-}*/
 
+/* Classes for colors*/
 .formOkColor {
     background: #02aa42;
 }
@@ -931,13 +793,3 @@ table {
 .formInfoBorderColor {
     border-color: #008ce8;
 }
-
-.formInputFocus {
-    border-color: var(--color-next-layer);
-}
-
-/*@media (prefers-color-scheme: dark) {
-    .formTextInputFocus {
-        border-color: #ccc;
-    }
-}*/
