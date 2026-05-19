@@ -179,6 +179,24 @@ h6 {
     white-space: nowrap;
 }
 
+*[form-icon] {
+    min-height: 40px;
+    min-width: 40px;
+    padding: 4px;
+}
+
+*[form-icon]>* {
+    vertical-align: middle;
+    height: 32px;
+    padding-left: 4px;
+}
+
+*[form-icon] svg,*[form-icon] img {
+    width: 32px;
+    height: 32px;
+    padding-left: 0px;
+}
+
 
 /*HTML styling = button*/
 button {
@@ -196,16 +214,8 @@ button {
     transition: 0.3s;
     cursor: pointer;
     margin: 4px;
-}
-
-button[icon] {
-    height: 36px;
-    width: 40px;
-}
-
-button[icon] svg {
-    height: 32px;
-    width: 32px;
+    vertical-align: middle;
+    display: inline-block;
 }
 
 button:hover:not(:disabled) {
@@ -223,10 +233,9 @@ button:disabled {
 .formButtonInline {
     width: auto;
     height: 1.5rem;
-    vertical-align: text-top;
     margin-right: 0.25rem;
     border-radius: 4px;
-    padding: 2px 4px;
+    padding: 4px;
     margin: 2px;
 }
 
