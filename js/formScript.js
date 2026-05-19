@@ -1120,6 +1120,110 @@ export class DraggableElement {
 export function MakeElementDraggable(movedElement, dragElement) {
     return new DraggableElement(movedElement, dragElement);
 }
+/**
+ * FormIconsDB is map for internal icons, you can use !iconName for automatic translation using this DB.
+ * It loads internal DB file and external specified in meta: <meta name="form-icons-db" content="path">
+ */
+export let formIconsDB = new Map();
+async function SetupFormIcons() {
+    const loadDB = async (dbFile) => {
+        const split = dbFile.split("/");
+        const path = dbFile.substring(0, dbFile.length - split[split.length - 1].length);
+        const request = await fetch(dbFile);
+        if (request.status != 200) {
+            console.error("Missing " + dbFile + " DB!");
+        }
+        else {
+            const db = await request.json();
+            for (const key in db) {
+                formIconsDB.set(key, path + db[key]);
+            }
+        }
+    };
+    //Load DB main
+    const metaElement1 = document.querySelector('meta[name="form-icons-main-db"]');
+    if (metaElement1 != null) {
+        await loadDB(metaElement1.content);
+    }
+    //Load DB meta
+    const metaElement2 = document.querySelector('meta[name="form-icons-db"]');
+    if (metaElement2 != null) {
+        await loadDB(metaElement2.content);
+    }
+    console.log("Registered icons:", formIconsDB);
+    //Setup function
+    const update = (target) => {
+        var _a;
+        const holder = target.querySelector(":scope > [form-icon-holder]");
+        if (!target.hasAttribute("form-icon") || target.getAttribute("form-icon") == "") {
+            //Empty icon = delete
+            if (holder != null) {
+                holder.remove();
+                return;
+            }
+            return;
+        }
+        //Create or update
+        if (holder == null) {
+            //Create element
+            const img = document.createElement("img");
+            img.setAttribute("form-icon-holder", "");
+            img.src = GetFormIconPath(target.getAttribute("form-icon"));
+            if (target instanceof HTMLButtonElement) {
+                if (target.children.length == 0) {
+                    target.appendChild(img);
+                }
+                else {
+                    target.insertBefore(img, target.children.item(0));
+                }
+            }
+            else {
+                (_a = target.parentElement) === null || _a === void 0 ? void 0 : _a.insertBefore(img, target);
+            }
+        }
+        else {
+            holder.src = GetFormIconPath(target.getAttribute("form-icon"));
+        }
+    };
+    //Setup observer
+    const formIconObserver = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'form-icon') {
+                const target = (mutation.target);
+                update(target);
+            }
+        }
+    });
+    formIconObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['form-icon'],
+        subtree: true
+    });
+    //Setup existing
+    const elements = document.querySelectorAll("[form-icon]");
+    for (const element of elements) {
+        update(element);
+    }
+}
+/**
+ * GetFormIcon gets icon
+ * @param path If path starts with !, it will be used as name for DB, else it is used as path
+ * @returns Path for img src
+ */
+function GetFormIconPath(path) {
+    //Get real path  
+    if (path == undefined) {
+        return "";
+    }
+    if (path.startsWith("!")) {
+        path = formIconsDB.get(path.substring(1));
+    }
+    if (path == undefined) {
+        return "";
+    }
+    return path;
+}
+SetupFormIcons();
 SetupRows();
 //SetupTextInputs()
 //SetupToggles()
