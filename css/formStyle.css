@@ -185,6 +185,10 @@ h6 {
     padding: 4px;
 }
 
+button[form-icon] {
+    max-height: 40px;
+}
+
 *[form-icon]>* {
     vertical-align: middle;
     height: 32px;
@@ -598,11 +602,6 @@ body[form-box-holder] {
     display: inline;
 }
 
-.formButtonBox>* {
-    margin-right: 8px;
-    margin-bottom: 8px;
-}
-
 /*.formButtonBoxTable>:last-child, .formButtonBox>:last-child {
     margin-right: 0px;
 }
@@ -610,10 +609,6 @@ body[form-box-holder] {
 .formButtonBoxTable>:first-child, .formButtonBox>:first-child {
     margin-left: 0px;
 }*/
-
-.formButtonBox>*>* {
-    margin-bottom: 8px;
-}
 
 
 .formJustifyRight {
