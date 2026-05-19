@@ -1169,7 +1169,7 @@ async function SetupFormIcons() {
             const img = document.createElement("img");
             img.setAttribute("form-icon-holder", "");
             img.src = GetFormIconPath(target.getAttribute("form-icon"));
-            if (target instanceof HTMLButtonElement) {
+            if (target instanceof HTMLButtonElement || target instanceof HTMLTableCellElement) {
                 if (target.children.length == 0) {
                     target.appendChild(img);
                 }
