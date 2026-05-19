@@ -386,7 +386,7 @@ form-toggle .toggle .slider:before {
     border-radius: 50%;
     left: 4px;
     bottom: 4.5px;
-    background-color: var(--color);
+    background-color: var(--background-color);
     -webkit-transition: .4s;
     transition: .4s;
 }
@@ -603,10 +603,13 @@ body[form-box-holder] {
     margin-bottom: 8px;
 }
 
-.formButtonBox>:last-child {
+/*.formButtonBoxTable>:last-child, .formButtonBox>:last-child {
     margin-right: 0px;
 }
 
+.formButtonBoxTable>:first-child, .formButtonBox>:first-child {
+    margin-left: 0px;
+}*/
 
 .formButtonBox>*>* {
     margin-bottom: 8px;
@@ -631,10 +634,6 @@ body[form-box-holder] {
     padding: 2px 4px;
     justify-content: center;
     text-align: center;
-}
-
-.formButtonBoxTable> :last-child {
-    margin-right: 0px;
 }
 
 
