@@ -509,6 +509,7 @@ export class HTMLFormInputElement extends HTMLElement {
                 this.setAttribute(attribute, this.getAttribute(attribute));
             }
         }
+        this.disable(this.hasAttribute("disabled"));
     }
     attributeChangedCallback(name, oldValue, newValue) {
         //console.log(name, oldValue, newValue);
@@ -560,7 +561,21 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
     disable(disabled) {
+        if (disabled) {
+            this.setAttribute("disabled", "");
+        }
+        else {
+            this.removeAttribute("disabled");
+        }
         this.input.disabled = disabled;
+        if (disabled) {
+            this.img.setAttribute("disabled", "");
+            this.afterImg.setAttribute("disabled", "");
+        }
+        else {
+            this.img.removeAttribute("disabled");
+            this.afterImg.removeAttribute("disabled");
+        }
     }
     async validate() {
         this.setAttribute("value", this.getValueRaw());
@@ -808,7 +823,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.validate();
     }
 }
-HTMLFormInputElement.observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value'];
+HTMLFormInputElement.observedAttributes = ['disabled', 'label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";

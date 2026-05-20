@@ -554,9 +554,10 @@ export class HTMLFormInputElement extends HTMLElement {
         for (const attribute of HTMLFormInputElement.observedAttributes) {
             if (this.hasAttribute(attribute)) { this.setAttribute(attribute, this.getAttribute(attribute) as string) }
         }
+        this.disable(this.hasAttribute("disabled"))
     }
 
-    static observedAttributes = ['label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value']
+    static observedAttributes = ['disabled','label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         //console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
@@ -595,7 +596,19 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     public disable(disabled: boolean) {
+        if(disabled) {
+            this.setAttribute("disabled","")
+        } else {
+            this.removeAttribute("disabled")
+        }
         this.input.disabled = disabled;
+        if(disabled) {
+            this.img.setAttribute("disabled","")
+            this.afterImg.setAttribute("disabled","")
+        } else {
+            this.img.removeAttribute("disabled")
+            this.afterImg.removeAttribute("disabled")
+        }
     }
 
     public async validate(): Promise<[changed: boolean, isValid: boolean]> {
