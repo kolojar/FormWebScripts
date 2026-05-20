@@ -419,7 +419,7 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.afterImg.parentElement == this.holder) {
             this.holder.removeChild(this.afterImg);
         }
-        if (this.img.src != "") {
+        if (this.img.getAttribute("path") != "") {
             this.holder.appendChild(this.img);
         }
         if (this.type == "textarea") {
@@ -711,10 +711,11 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("placeholder", placeholder);
     }
     getIcon() {
-        return this.img.src;
+        return this.img.hasAttribute("path") ? this.img.getAttribute("path") : "";
     }
     setIcon(icon) {
-        this.img.src = icon;
+        this.img.setAttribute("path", icon);
+        this.img.src = GetFormIconPath(icon);
         this.setAttribute("icon", icon);
         this.updateInputType();
     }
@@ -1125,7 +1126,11 @@ export function MakeElementDraggable(movedElement, dragElement) {
  * It loads internal DB file and external specified in meta: <meta name="form-icons-db" content="path">
  */
 export let formIconsDB = new Map();
+let ranSetupFormIcons = false;
 async function SetupFormIcons() {
+    if (ranSetupFormIcons) {
+        return;
+    }
     const loadDB = async (dbFile) => {
         const split = dbFile.split("/");
         const path = dbFile.substring(0, dbFile.length - split[split.length - 1].length);
@@ -1204,6 +1209,12 @@ async function SetupFormIcons() {
     for (const element of elements) {
         update(element);
     }
+    const inputs = document.querySelectorAll("form-input");
+    for (const element of inputs) {
+        const input = element;
+        input.setIcon(input.getIcon());
+    }
+    ranSetupFormIcons = true;
 }
 /**
  * GetFormIcon gets icon

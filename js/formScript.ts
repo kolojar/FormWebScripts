@@ -468,7 +468,7 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.afterImg.parentElement == this.holder) {
             this.holder.removeChild(this.afterImg)
         }
-        if (this.img.src != "") {
+        if (this.img.getAttribute("path") != "") {
             this.holder.appendChild(this.img)
         }
         if (this.type == "textarea") {
@@ -756,11 +756,12 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     public getIcon(): string {
-        return this.img.src
+        return this.img.hasAttribute("path") ? this.img.getAttribute("path") as string : ""
     }
 
     public setIcon(icon: string) {
-        this.img.src = icon
+        this.img.setAttribute("path",icon)
+        this.img.src = GetFormIconPath(icon)
         this.setAttribute("icon", icon)
         this.updateInputType()
     }
@@ -1195,10 +1196,14 @@ export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTM
  */
 export let formIconsDB: Map<string, string> = new Map()
 
+let ranSetupFormIcons = false;
 async function SetupFormIcons() {
+    if (ranSetupFormIcons) {
+        return;
+    }
     const loadDB = async (dbFile: string) => {
         const split = dbFile.split("/")
-        const path = dbFile.substring(0, dbFile.length-split[split.length - 1].length)
+        const path = dbFile.substring(0, dbFile.length - split[split.length - 1].length)
         const request = await fetch(dbFile);
         if (request.status != 200) {
             console.error("Missing " + dbFile + " DB!");
@@ -1276,6 +1281,12 @@ async function SetupFormIcons() {
     for (const element of elements) {
         update(element as HTMLElement)
     }
+    const inputs = document.querySelectorAll("form-input")
+    for (const element of inputs) {
+        const input = element as HTMLFormInputElement
+        input.setIcon(input.getIcon())
+    }
+    ranSetupFormIcons = true;
 }
 
 /**
