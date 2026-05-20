@@ -292,6 +292,7 @@ export class HTMLFormInputElement extends HTMLElement {
     private listId: string = ""
     private isStrictList: boolean = false
     private options: Map<string, any>
+    private optionsReverse: Map<any, string>
     readonly listHolder: HTMLDivElement
     private usingJSList: boolean = false
     private areOptionsVisible: boolean = false;
@@ -310,6 +311,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.listId = listId
         this.isStrictList = strictList
         this.options = new Map()
+        this.optionsReverse = new Map()
         this.optionsTimestamp = new Date(0)
         this.isCaseSensitiveList = true;
 
@@ -396,6 +398,7 @@ export class HTMLFormInputElement extends HTMLElement {
             return
         }
         this.options.clear()
+        this.optionsReverse.clear()
 
         //Updates hint list under the selection
         if (this.listId == "") {
@@ -410,6 +413,7 @@ export class HTMLFormInputElement extends HTMLElement {
             if (child.tagName == "OPTION") {
                 const optionChild = child as HTMLOptionElement
                 this.options.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, optionChild.value)
+                this.optionsReverse.set(optionChild.value, optionChild.label.length != 0 ? optionChild.label : optionChild.value)
             }
         }
         this.renderList()
@@ -714,8 +718,18 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("type", type)
     }
 
-    public getOriginalValueRaw(): string {
-        return this.originalValue
+    public getOriginalValueRaw(): string | null | undefined {
+        const raw = this.getOriginalValue()
+        //Check if is in select options
+        if (this.optionsReverse.has(raw)) {
+            return this.optionsReverse.get(raw)
+        }
+        if (this.isStrictList) {
+            //Strict, but no value found
+            return null
+        }
+        //Normal value
+        return raw;
     }
     public getOriginalValue(): string {
         return this.originalValue
@@ -760,7 +774,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     public setIcon(icon: string) {
-        this.img.setAttribute("path",icon)
+        this.img.setAttribute("path", icon)
         this.img.src = GetFormIconPath(icon)
         this.setAttribute("icon", icon)
         this.updateInputType()

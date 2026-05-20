@@ -269,6 +269,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.listId = listId;
         this.isStrictList = strictList;
         this.options = new Map();
+        this.optionsReverse = new Map();
         this.optionsTimestamp = new Date(0);
         this.isCaseSensitiveList = true;
         //Create elements
@@ -352,6 +353,7 @@ export class HTMLFormInputElement extends HTMLElement {
             return;
         }
         this.options.clear();
+        this.optionsReverse.clear();
         //Updates hint list under the selection
         if (this.listId == "") {
             return;
@@ -365,6 +367,7 @@ export class HTMLFormInputElement extends HTMLElement {
             if (child.tagName == "OPTION") {
                 const optionChild = child;
                 this.options.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, optionChild.value);
+                this.optionsReverse.set(optionChild.value, optionChild.label.length != 0 ? optionChild.label : optionChild.value);
             }
         }
         this.renderList();
@@ -674,7 +677,17 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("type", type);
     }
     getOriginalValueRaw() {
-        return this.originalValue;
+        const raw = this.getOriginalValue();
+        //Check if is in select options
+        if (this.optionsReverse.has(raw)) {
+            return this.optionsReverse.get(raw);
+        }
+        if (this.isStrictList) {
+            //Strict, but no value found
+            return null;
+        }
+        //Normal value
+        return raw;
     }
     getOriginalValue() {
         return this.originalValue;
