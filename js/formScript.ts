@@ -855,7 +855,6 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     public setLabel(label: string) {
         this.label.innerText = label;
-        if (this.input.name != null) this.label.setAttribute("for", this.input.name);
         this.setAttribute("label", label)
     }
     public setMinimum(minimum: string) {
