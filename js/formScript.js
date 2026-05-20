@@ -559,6 +559,9 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == 'raw-value') {
             this.setValueRaw(newValue, true);
         }
+        else if (name == 'name') {
+            this.setName(newValue);
+        }
     }
     disable(disabled) {
         if (disabled) {
@@ -671,6 +674,9 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         }
         this.setValueRaw(value, calledFromProperty);
+    }
+    setName(value) {
+        this.input.name = value;
     }
     setValueRaw(value, calledFromProperty = false) {
         if (this.type == "textarea") {
@@ -799,6 +805,8 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     setLabel(label) {
         this.label.innerText = label;
+        if (this.input.name != null)
+            this.label.setAttribute("for", this.input.name);
         this.setAttribute("label", label);
     }
     setMinimum(minimum) {
@@ -823,7 +831,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.validate();
     }
 }
-HTMLFormInputElement.observedAttributes = ['disabled', 'label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value'];
+HTMLFormInputElement.observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";

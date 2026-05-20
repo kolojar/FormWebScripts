@@ -557,7 +557,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.disable(this.hasAttribute("disabled"))
     }
 
-    static observedAttributes = ['disabled','label', 'type', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value']
+    static observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         //console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
@@ -592,19 +592,21 @@ export class HTMLFormInputElement extends HTMLElement {
             this.setStep(newValue)
         } else if (name == 'raw-value') {
             this.setValueRaw(newValue, true)
+        } else if (name == 'name') {
+            this.setName(newValue)
         }
     }
 
     public disable(disabled: boolean) {
-        if(disabled) {
-            this.setAttribute("disabled","")
+        if (disabled) {
+            this.setAttribute("disabled", "")
         } else {
             this.removeAttribute("disabled")
         }
         this.input.disabled = disabled;
-        if(disabled) {
-            this.img.setAttribute("disabled","")
-            this.afterImg.setAttribute("disabled","")
+        if (disabled) {
+            this.img.setAttribute("disabled", "")
+            this.afterImg.setAttribute("disabled", "")
         } else {
             this.img.removeAttribute("disabled")
             this.afterImg.removeAttribute("disabled")
@@ -708,6 +710,10 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         }
         this.setValueRaw(value as string, calledFromProperty)
+    }
+
+    public setName(value: string) {
+        this.input.name = value;
     }
 
     public setValueRaw(value: string, calledFromProperty: boolean = false) {
@@ -849,6 +855,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     public setLabel(label: string) {
         this.label.innerText = label;
+        if (this.input.name != null) this.label.setAttribute("for", this.input.name);
         this.setAttribute("label", label)
     }
     public setMinimum(minimum: string) {
@@ -953,12 +960,12 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
     //console.log(style.background)
     toast.setAttribute("toastId", String(toastId))
     toast.setAttribute("animationPart", "0")
-    toast.addEventListener("click", function () {
+    toast.addEventListener("click", function() {
         //console.log("click");
         toast.style.animation = "fadeOut 0.5s ease-out forwards"
         toast.setAttribute("animationPart", "2")
     })
-    toast.addEventListener("animationend", function () {
+    toast.addEventListener("animationend", function() {
         if (toast.getAttribute("animationPart") == "0" || toast.getAttribute("animationPart") == "1") {
             toast.setAttribute("animationPart", String(Number(toast.getAttribute("animationPart")) + 1))
         } else {
@@ -971,7 +978,7 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
     const timeout = document.createElement("div")
     timeout.classList.add("timeout")
     timeout.style.background = "color-mix(in srgb, #000000 20%, " + style.backgroundColor + " 100%)"
-    timeout.addEventListener("animationend", function () {
+    timeout.addEventListener("animationend", function() {
         toast.style.animation = "fadeOut 0.5s ease-out forwards"
     })
     toast.appendChild(timeout)
