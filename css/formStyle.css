@@ -63,13 +63,26 @@ body {
 header,
 footer {
     flex-shrink: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+header {
+        margin-top: 0px;
+    padding-top: 1px;
+    padding-bottom: 0px;
+}
+
+footer {
+    margin-bottom: 0px;
+    padding-bottom: 1px;
+    padding-top: 1px;
 }
 
 main {
     flex: 1;
     overflow: auto;
     /*scrollbar-gutter: stable;*/
-    padding: 4px;
     padding: 4px;
 }
 
@@ -191,7 +204,8 @@ h6 {
     padding-left: 4px;
 }
 
-*[form-icon] svg,*[form-icon] img {
+*[form-icon] svg,
+*[form-icon] img {
     width: 32px;
     height: 32px;
     padding-left: 0px;
