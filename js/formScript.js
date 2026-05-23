@@ -871,10 +871,22 @@ function SetupToasts() {
     //head.appendChild(createPreloadLink("/images/checkCircle32.svg"))
 }
 let toastCounter = 0;
-export function SendToast(title, message, type) {
+/**
+ * Shows Toast based on parameters
+ * @param title Title of Toast
+ * @param message Content HTML message for Toast
+ * @param type Type (color) of Toast
+ * @param timeout Timeout for showing in seconds (10 = stays on screen for 10 seconds), set it to negative for letters per second (-7 for 7 letters per second)
+ * @returns Id of Toast
+ */
+export function SendToast(title, message, type, timeout = -7) {
     var _a;
     toastCounter++;
     let toastId = toastCounter;
+    if (timeout < 0) {
+        timeout = Math.ceil((title.length + message.length) / (-timeout));
+    }
+    timeout = Math.max(timeout, 10);
     //Get target color
     const colorDiv = document.createElement("div");
     if (type == "ok") {
@@ -910,7 +922,7 @@ export function SendToast(title, message, type) {
     toast.setAttribute("animationPart", "0");
     toast.addEventListener("click", function () {
         //console.log("click");
-        toast.style.animation = "fadeOut 0.5s ease-out forwards";
+        toast.classList.add("remove");
         toast.setAttribute("animationPart", "2");
     });
     toast.addEventListener("animationend", function () {
@@ -921,15 +933,28 @@ export function SendToast(title, message, type) {
             toast.remove();
         }
     });
-    document.getElementsByClassName("formToastHolder")[0].appendChild(toast);
+    const toastHolder = document.getElementsByClassName("formToastHolder")[0];
+    if (toastHolder.children.length == 0) {
+        toastHolder.appendChild(toast);
+    }
+    else {
+        const before = toastHolder.children.item(0);
+        if (before == null) {
+            toastHolder.appendChild(toast);
+        }
+        else {
+            toastHolder.insertBefore(toast, before);
+        }
+    }
     //Timeout
-    const timeout = document.createElement("div");
-    timeout.classList.add("timeout");
-    timeout.style.background = "color-mix(in srgb, #000000 20%, " + style.backgroundColor + " 100%)";
-    timeout.addEventListener("animationend", function () {
-        toast.style.animation = "fadeOut 0.5s ease-out forwards";
+    const timeoutElement = document.createElement("div");
+    timeoutElement.classList.add("timeout");
+    timeoutElement.style.background = "color-mix(in srgb, #000000 20%, " + style.backgroundColor + " 100%)";
+    timeoutElement.style.animationDuration = timeout + "s";
+    timeoutElement.addEventListener("animationend", function () {
+        toast.classList.add("remove");
     });
-    toast.appendChild(timeout);
+    toast.appendChild(timeoutElement);
     //Title
     const titleEl = document.createElement("p");
     titleEl.classList.add("formHeader");
@@ -961,7 +986,6 @@ export function SendToast(title, message, type) {
     p.classList.add("contentText");
     p.innerHTML = message;
     pHolder.appendChild(p);
-    toast.style.animation = "fadeIn 0.5s ease-out forwards";
     colorDiv.remove();
     return toastId;
 }

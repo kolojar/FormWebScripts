@@ -68,7 +68,7 @@ footer {
 }
 
 header {
-        margin-top: 0px;
+    margin-top: 0px;
     padding-top: 1px;
     padding-bottom: 0px;
 }
@@ -426,20 +426,25 @@ form-row p:first-child {
 
 /*Custom class = formToast*/
 .formToastHolder {
-    gap: 4px;
+    gap: 8px;
     position: absolute;
-    top: 8px;
-    right: 8px;
-    bottom: 8px;
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
     flex-direction: column;
     float: right;
     display: flex;
     z-index: 10;
     pointer-events: none;
+    align-items: end;
+    justify-content: end;
 }
 
 .formToast {
     margin-left: auto;
+    margin-top: 0px;
+    margin-bottom: 0px;
     background-color: var(--background-color);
     border-radius: 4px;
     padding: 4px;
@@ -448,6 +453,12 @@ form-row p:first-child {
     pointer-events: all;
     color: black;
     transition: all;
+    box-shadow: 4px 4px 4px black;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.formToast.remove {
+    animation: fadeOut 0.5s ease-out forwards;
 }
 
 .formToast img {
