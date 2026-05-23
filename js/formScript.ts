@@ -448,6 +448,7 @@ export class HTMLFormInputElement extends HTMLElement {
                     this.setValueRaw(value[0])
                     this.areOptionsVisible = false
                     this.listHolder.style.display = "none"
+                    this.validate()
                     //this.renderList()
                     //console.log(this.listHolder.style.display);
                 })
