@@ -985,14 +985,14 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
         }
     })
     const toastHolder = document.getElementsByClassName("formToastHolder")[0]
-    if(toastHolder.children.length == 0) {
+    if (toastHolder.children.length == 0) {
         toastHolder.appendChild(toast)
     } else {
         const before = toastHolder.children.item(0)
-        if(before == null)  {
+        if (before == null) {
             toastHolder.appendChild(toast)
         } else {
-            toastHolder.insertBefore(toast,before)
+            toastHolder.insertBefore(toast, before)
         }
     }
 
@@ -1363,11 +1363,11 @@ function GetFormIconPath(path: string | undefined): string {
     return path;
 }
 
-SetupFormIcons()
-SetupRows()
 //SetupTextInputs()
 //SetupToggles()
-SetupToasts()
 customElements.define("form-box", HTMLFormBoxElement)
 customElements.define("form-toggle", HTMLFormToggleElement)
 customElements.define("form-input", HTMLFormInputElement)
+SetupFormIcons()
+SetupToasts()
+SetupRows()

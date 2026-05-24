@@ -1293,7 +1293,6 @@ function GetFormIconPath(path) {
     }
     return path;
 }
-SetupFormIcons();
 SetupRows();
 //SetupTextInputs()
 //SetupToggles()
@@ -1301,4 +1300,5 @@ SetupToasts();
 customElements.define("form-box", HTMLFormBoxElement);
 customElements.define("form-toggle", HTMLFormToggleElement);
 customElements.define("form-input", HTMLFormInputElement);
+SetupFormIcons();
 //# sourceMappingURL=formScript.js.map
