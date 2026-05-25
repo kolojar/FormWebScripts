@@ -1046,6 +1046,10 @@ export class DraggableElement {
         if (this.dragElement != this.movedElement) {
             this.dragElement.removeEventListener("mousemove", this.drag);
         }
+        if (this.moveAtBody) {
+            document.body.removeEventListener("mousemove", this.drag);
+            document.body.removeEventListener("touchmove", this.drag);
+        }
     }
     /**
     * Enables dragging from selected element(s)
@@ -1068,6 +1072,10 @@ export class DraggableElement {
         if (this.dragElement != this.movedElement) {
             this.dragElement.addEventListener("mousemove", this.drag);
             this.dragElement.addEventListener("touchmove", this.drag);
+        }
+        if (this.moveAtBody) {
+            document.body.addEventListener("mousemove", this.drag);
+            document.body.addEventListener("touchmove", this.drag);
         }
     }
     /**
@@ -1097,7 +1105,7 @@ export class DraggableElement {
         }
         this.EnableDrag();
     }
-    constructor(movedElement, dragElement) {
+    constructor(movedElement, dragElement, moveAtBody = false) {
         /**
          * Starts moving element based on mouse position
          * @param event Mouse event
@@ -1164,11 +1172,12 @@ export class DraggableElement {
             this.movedElement.style.top = (this.movedElement.offsetTop - posY) + "px";
         };
         this.movedElement = movedElement;
+        this.moveAtBody = moveAtBody;
         if (dragElement == null) {
             dragElement = movedElement;
         }
         this.dragElement = dragElement;
-        this.dragDisabled = false;
+        this.dragDisabled = true;
         this.EnableDrag();
     }
 }
@@ -1177,8 +1186,8 @@ export class DraggableElement {
  * @param movedElement Moved element
  * @param dragElement Element that acts as dragger (topbar of window, ...)
  */
-export function MakeElementDraggable(movedElement, dragElement) {
-    return new DraggableElement(movedElement, dragElement);
+export function MakeElementDraggable(movedElement, dragElement, moveAtBody = false) {
+    return new DraggableElement(movedElement, dragElement, moveAtBody);
 }
 /**
  * FormIconsDB is map for internal icons, you can use !iconName for automatic translation using this DB.

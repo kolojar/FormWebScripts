@@ -1084,6 +1084,7 @@ export class DraggableElement {
     private dragDisabled: boolean
     private movedElement: HTMLElement
     private dragElement: HTMLElement
+    private moveAtBody: boolean
 
     /**
      * Starts moving element based on mouse position
@@ -1171,6 +1172,10 @@ export class DraggableElement {
         if (this.dragElement != this.movedElement) {
             this.dragElement.removeEventListener("mousemove", this.drag)
         }
+        if(this.moveAtBody) {
+            document.body.removeEventListener("mousemove", this.drag)
+            document.body.removeEventListener("touchmove", this.drag)
+        }
     }
 
     /**
@@ -1194,6 +1199,10 @@ export class DraggableElement {
         if (this.dragElement != this.movedElement) {
             this.dragElement.addEventListener("mousemove", this.drag)
             this.dragElement.addEventListener("touchmove", this.drag)
+        }
+        if(this.moveAtBody) {
+            document.body.addEventListener("mousemove", this.drag)
+            document.body.addEventListener("touchmove", this.drag)
         }
     }
 
@@ -1225,13 +1234,14 @@ export class DraggableElement {
         this.EnableDrag()
     }
 
-    constructor(movedElement: HTMLElement, dragElement: HTMLElement | null) {
+    constructor(movedElement: HTMLElement, dragElement: HTMLElement | null,moveAtBody: boolean = false) {
         this.movedElement = movedElement;
+        this.moveAtBody = moveAtBody;
         if (dragElement == null) {
             dragElement = movedElement
         }
         this.dragElement = dragElement;
-        this.dragDisabled = false;
+        this.dragDisabled = true;
         this.EnableDrag()
     }
 }
@@ -1241,8 +1251,8 @@ export class DraggableElement {
  * @param movedElement Moved element
  * @param dragElement Element that acts as dragger (topbar of window, ...)
  */
-export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTMLElement | null): DraggableElement {
-    return new DraggableElement(movedElement, dragElement)
+export function MakeElementDraggable(movedElement: HTMLElement, dragElement: HTMLElement | null, moveAtBody: boolean = false): DraggableElement {
+    return new DraggableElement(movedElement, dragElement, moveAtBody)
 }
 
 /**
