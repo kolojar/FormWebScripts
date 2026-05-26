@@ -1,4 +1,4 @@
-import { HTMLFormInputElement, MakeElementDraggable } from "./formScript.js";
+import { HTMLFormInputElement, MakeElementDraggable, SendToast } from "./formScript.js";
 import { LanguageManager } from "./languageManager.js";
 export var FormDialogStyle;
 (function (FormDialogStyle) {
@@ -267,15 +267,15 @@ export class FormDialogManager {
         buttonBoxRight.classList.add("formButtonBox", "formJustifyRight");
         buttonBoxHolder.appendChild(buttonBoxRight);
         //Close animation
-        const manager = this;
-        async function closeDialog(isCancel) {
+        const closeDialog = async (isCancel) => {
             if (dialog == null || dialog == undefined) {
-                return true;
+                return Promise.resolve(true);
             }
             if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
                 const [_, valid] = await dialog.inputElement.validate();
                 if (!valid) {
-                    return false;
+                    SendToast(dialog.template.title, "Pole obsahuje neplatnou hodnotu.", "error");
+                    return Promise.resolve(false);
                 }
             }
             dialog.element.classList.add("is-hidden");
@@ -285,23 +285,23 @@ export class FormDialogManager {
                     dialog.element.close();
                     dialog.element.remove();
                     if (dialog.template.blockOpenOver) {
-                        manager.blockedOpenOver = false;
+                        this.blockedOpenOver = false;
                     }
-                    manager.opened = manager.opened.filter(item => item != dialog);
+                    this.opened = this.opened.filter(item => item != dialog);
                     //Open next dialog
                     let tryOpen = true;
                     while (tryOpen) {
-                        tryOpen = !manager.ShowDialog(manager.dialogs.pop());
-                        if (manager.dialogs.length == 0) {
+                        tryOpen = !this.ShowDialog(this.dialogs.pop());
+                        if (this.dialogs.length == 0) {
                             tryOpen = false;
                         }
                     }
                 }
             });
-            return true;
-        }
+            return Promise.resolve(true);
+        };
         //ESC key press
-        dialog.element.addEventListener('cancel', (event) => {
+        dialog.element.addEventListener('cancel', async (event) => {
             event.preventDefault();
             if (dialog.template.style == FormDialogStyle.Wait) {
                 dialog.element.classList.remove("formDialogFadeIn");
@@ -309,7 +309,7 @@ export class FormDialogManager {
                 dialog.element.showModal();
                 return;
             }
-            if (!closeDialog(true)) {
+            if (!await closeDialog(true)) {
                 return;
             }
             if (dialog.template.onCloseEvent != null) {
@@ -317,9 +317,9 @@ export class FormDialogManager {
             }
         });
         //Close using close function
-        dialog.element.addEventListener('force-cancel', (event) => {
+        dialog.element.addEventListener('force-cancel', async (event) => {
             event.preventDefault();
-            if (!closeDialog(true)) {
+            if (!await closeDialog(true)) {
                 return;
             }
             if (dialog.template.onCloseEvent != null) {
@@ -349,9 +349,9 @@ export class FormDialogManager {
                 else if (((_h = dialog.template.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "black") {
                     button.classList.add("formBlackColor");
                 }
-                button.onclick = () => {
+                button.onclick = async () => {
                     var _c;
-                    if (!closeDialog(dialog.template.buttons[i].isCancel)) {
+                    if (!await closeDialog(dialog.template.buttons[i].isCancel)) {
                         return;
                     }
                     if (dialog.template.onCloseEvent != null) {
