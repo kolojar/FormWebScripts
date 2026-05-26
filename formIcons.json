@@ -1,5 +1,9 @@
 {
     "key": "./images/key32.svg",
     "eye": "./images/visibility32.svg",
-    "eyeOff": "./images/visibilityOff32.svg"
+    "eyeOff": "./images/visibilityOff32.svg",
+    "statusOk": "./images/checkCircle32.svg",
+    "statusInfo": "./images/info32.svg",
+    "statusWarn": "./images/warning32.svg",
+    "statusError": "./images/report32.svg"
 }

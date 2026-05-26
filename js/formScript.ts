@@ -899,25 +899,25 @@ export function GenerateRandomColor(): string {
 //    return link
 //}
 
-const toastImages = new Map<string, HTMLImageElement>()
+//const toastImages = new Map<string, HTMLImageElement>()
 function SetupToasts() {
     const holder = document.createElement("div")
     holder.classList.add("formToastHolder")
     document.getElementsByTagName("body")[0].appendChild(holder)
 
     //Preload images
-    const imgOk = new Image()
-    imgOk.src = "/formWebScripts/images/checkCircle32.svg"
-    toastImages.set("ok", imgOk)
-    const imgInfo = new Image()
-    imgInfo.src = "/formWebScripts/images/info32.svg"
-    toastImages.set("info", imgInfo)
-    const imgWarn = new Image()
-    imgWarn.src = "/formWebScripts/images/warning32.svg"
-    toastImages.set("warn", imgWarn)
-    const imgError = new Image()
-    imgError.src = "/formWebScripts/images/report32.svg"
-    toastImages.set("error", imgError)
+    //const imgOk = new Image()
+    //imgOk.src = "/formWebScripts/images/checkCircle32.svg"
+    //toastImages.set("ok", imgOk)
+    //const imgInfo = new Image()
+    //imgInfo.src = "/formWebScripts/images/info32.svg"
+    //toastImages.set("info", imgInfo)
+    //const imgWarn = new Image()
+    //imgWarn.src = "/formWebScripts/images/warning32.svg"
+    //toastImages.set("warn", imgWarn)
+    //const imgError = new Image()
+    //imgError.src = "/formWebScripts/images/report32.svg"
+    //toastImages.set("error", imgError)
     //const head = document.getElementsByTagName("head")[0] as HTMLHeadElement
     //head.appendChild(createPreloadLink("/images/info32.svg"))
     //head.appendChild(createPreloadLink("/images/warning32.svg"))
@@ -1028,7 +1028,7 @@ export function SendToast(title: string, message: string, type: "ok" | "warn" | 
         //colorDiv.classList.add("formBlackColor")
         console.error("Undefined icon!");
     } else {
-        img.src = toastImages.get(type)?.src as string
+        img.src = GetFormIconPath("!status" + type[0].toUpperCase() + type.substring(1))
     }
     imgHolder.appendChild(img)
 

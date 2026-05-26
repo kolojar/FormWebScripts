@@ -847,24 +847,24 @@ export function GenerateRandomColor() {
 //    link.crossOrigin = "anonymous"
 //    return link
 //}
-const toastImages = new Map();
+//const toastImages = new Map<string, HTMLImageElement>()
 function SetupToasts() {
     const holder = document.createElement("div");
     holder.classList.add("formToastHolder");
     document.getElementsByTagName("body")[0].appendChild(holder);
     //Preload images
-    const imgOk = new Image();
-    imgOk.src = "/formWebScripts/images/checkCircle32.svg";
-    toastImages.set("ok", imgOk);
-    const imgInfo = new Image();
-    imgInfo.src = "/formWebScripts/images/info32.svg";
-    toastImages.set("info", imgInfo);
-    const imgWarn = new Image();
-    imgWarn.src = "/formWebScripts/images/warning32.svg";
-    toastImages.set("warn", imgWarn);
-    const imgError = new Image();
-    imgError.src = "/formWebScripts/images/report32.svg";
-    toastImages.set("error", imgError);
+    //const imgOk = new Image()
+    //imgOk.src = "/formWebScripts/images/checkCircle32.svg"
+    //toastImages.set("ok", imgOk)
+    //const imgInfo = new Image()
+    //imgInfo.src = "/formWebScripts/images/info32.svg"
+    //toastImages.set("info", imgInfo)
+    //const imgWarn = new Image()
+    //imgWarn.src = "/formWebScripts/images/warning32.svg"
+    //toastImages.set("warn", imgWarn)
+    //const imgError = new Image()
+    //imgError.src = "/formWebScripts/images/report32.svg"
+    //toastImages.set("error", imgError)
     //const head = document.getElementsByTagName("head")[0] as HTMLHeadElement
     //head.appendChild(createPreloadLink("/images/info32.svg"))
     //head.appendChild(createPreloadLink("/images/warning32.svg"))
@@ -881,7 +881,6 @@ let toastCounter = 0;
  * @returns Id of Toast
  */
 export function SendToast(title, message, type, timeout = -7) {
-    var _a;
     toastCounter++;
     let toastId = toastCounter;
     if (timeout < 0) {
@@ -976,7 +975,7 @@ export function SendToast(title, message, type, timeout = -7) {
         console.error("Undefined icon!");
     }
     else {
-        img.src = (_a = toastImages.get(type)) === null || _a === void 0 ? void 0 : _a.src;
+        img.src = GetFormIconPath("!status" + type[0].toUpperCase() + type.substring(1));
     }
     imgHolder.appendChild(img);
     //Text holder
