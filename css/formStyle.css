@@ -32,6 +32,8 @@ html.darkMode {
 
 *:disabled {
     cursor: not-allowed;
+    opacity: 0.6;
+    filter: grayscale(100%);
 }
 
 html {
@@ -65,6 +67,8 @@ footer {
     flex-shrink: 0;
     padding-left: 4px;
     padding-right: 4px;
+    overflow: auto;
+    max-height: 25dvh;
 }
 
 header {
@@ -77,6 +81,7 @@ footer {
     margin-bottom: 0px;
     padding-bottom: 1px;
     padding-top: 1px;
+    max-height: 25dvh;
 }
 
 main {
@@ -253,6 +258,7 @@ button:hover:not(:disabled) {
 button:disabled {
     /*background-color: gray;*/
     cursor: not-allowed;
+    opacity: 1;
     filter: saturate(0.5);
 }
 
@@ -629,10 +635,11 @@ body[form-box-holder] {
 }
 
 .formButtonBox {
-    display: flex;
-    justify-content: right;
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
     width: max-content;
-    display: inline;
+    gap: 0px;
 }
 
 .formButtonBox>:last-child {
@@ -654,9 +661,9 @@ body[form-box-holder] {
     margin-right: auto;
 }
 
-.formButtonBox:last-of-type {
+/*.formButtonBox:last-of-type {
     display: block;
-}
+}*/
 
 .formButtonBoxTable {
     padding: 2px 4px;

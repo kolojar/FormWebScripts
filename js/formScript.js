@@ -1111,20 +1111,20 @@ export class DraggableElement {
          * @param event Mouse event
          */
         this.dragStartEvent = (event) => {
-            if (this.movedElement.getAttribute("formIsDragged") == "true") {
+            if (this.isDragging) {
                 return;
             }
             //Start drag
-            this.movedElement.setAttribute("formIsDragged", "true");
-            this.movedElement.setAttribute("formDragLastCursor", this.dragElement.style.cursor);
+            this.isDragging = true;
+            this.lastCursor = this.dragElement.style.cursor;
             this.dragElement.style.cursor = "move";
             if (event instanceof MouseEvent) {
-                this.movedElement.setAttribute("formDragLastX", event.clientX.toString());
-                this.movedElement.setAttribute("formDragLastY", event.clientY.toString());
+                this.lastDragX = event.clientX;
+                this.lastDragY = event.clientY;
             }
             else {
-                this.movedElement.setAttribute("formDragLastX", event.touches[0].clientX.toString());
-                this.movedElement.setAttribute("formDragLastY", event.touches[0].clientY.toString());
+                this.lastDragX = event.touches[0].clientX;
+                this.lastDragY = event.touches[0].clientY;
             }
         };
         /**
@@ -1133,13 +1133,13 @@ export class DraggableElement {
         */
         this.dragEndEvent = (event) => {
             //End drag
-            this.movedElement.removeAttribute("formIsDragged");
+            this.isDragging = false;
             if (this.dragElement != null) {
-                this.dragElement.style.cursor = this.movedElement.getAttribute("formDragLastCursor");
+                this.dragElement.style.cursor = this.lastCursor;
             }
-            this.movedElement.removeAttribute("formDragLastCursor");
-            this.movedElement.removeAttribute("formDragLastX");
-            this.movedElement.removeAttribute("formDragLastY");
+            this.lastDragX = 0;
+            this.lastDragY = 0;
+            this.lastCursor = "";
         };
         /**
          * Sets position of element based on mouse cursor position
@@ -1147,26 +1147,26 @@ export class DraggableElement {
          */
         this.drag = (event) => {
             //Drag
-            if (this.movedElement.getAttribute("formIsDragged") != "true") {
+            if (!this.isDragging) {
                 return;
             }
             let posX = 0;
             let posY = 0;
             if (event instanceof MouseEvent) {
-                posX = Number(this.movedElement.getAttribute("formDragLastX")) - event.clientX;
-                posY = Number(this.movedElement.getAttribute("formDragLastY")) - event.clientY;
+                posX = this.lastDragX - event.clientX;
+                posY = this.lastDragY - event.clientY;
             }
             else {
-                posX = Number(this.movedElement.getAttribute("formDragLastX")) - event.touches[0].clientX;
-                posY = Number(this.movedElement.getAttribute("formDragLastY")) - event.touches[0].clientY;
+                posX = this.lastDragX - event.touches[0].clientX;
+                posY = this.lastDragY - event.touches[0].clientY;
             }
             if (event instanceof MouseEvent) {
-                this.movedElement.setAttribute("formDragLastX", event.clientX.toString());
-                this.movedElement.setAttribute("formDragLastY", event.clientY.toString());
+                this.lastDragX = event.clientX;
+                this.lastDragY = event.clientY;
             }
             else {
-                this.movedElement.setAttribute("formDragLastX", event.touches[0].clientX.toString());
-                this.movedElement.setAttribute("formDragLastY", event.touches[0].clientY.toString());
+                this.lastDragX = event.touches[0].clientX;
+                this.lastDragY = event.touches[0].clientY;
             }
             this.movedElement.style.left = (this.movedElement.offsetLeft - posX) + "px";
             this.movedElement.style.top = (this.movedElement.offsetTop - posY) + "px";
@@ -1178,6 +1178,10 @@ export class DraggableElement {
         }
         this.dragElement = dragElement;
         this.dragDisabled = true;
+        this.isDragging = false;
+        this.lastCursor = "";
+        this.lastDragX = 0;
+        this.lastDragY = 0;
         this.EnableDrag();
     }
 }
