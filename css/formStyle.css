@@ -699,7 +699,7 @@ body[form-box-holder] {
 
 
 /*Classes*/
-.allowSelect {
+.allowSelect, .allowSelect * {
     user-select: text;
     -moz-user-select: text;
     -webkit-user-drag: unset;
