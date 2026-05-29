@@ -1,5 +1,4 @@
-import { HTMLFormInputElement, MakeElementDraggable, SendToast } from "./formScript.js";
-import { LanguageManager } from "./languageManager.js";
+import { GlobalLanguageManager, HTMLFormInputElement, MakeElementDraggable, SendToast } from "./formScript.js";
 export var FormDialogStyle;
 (function (FormDialogStyle) {
     FormDialogStyle[FormDialogStyle["Normal"] = 0] = "Normal";
@@ -76,16 +75,16 @@ export class FormDialog {
         if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
             this.inputElement = new HTMLFormInputElement("", null);
-            this.inputElement.setPlaceHolder(template.placeholder);
+            this.inputElement.placeholder = template.placeholder;
             this.inputElement.addEventListener("mousedown", (ev) => {
                 ev.stopImmediatePropagation();
             });
             if (template.style == FormDialogStyle.Entry) {
-                this.inputElement.setType(this.template.entryType);
+                this.inputElement.type = this.template.entryType;
             }
             else {
-                this.inputElement.setType("select");
-                this.inputElement.setIsScrictList(true);
+                this.inputElement.type = "select";
+                this.inputElement.isStrictList = true;
                 this.inputElement.setOptions(template.selectValues);
             }
             let image = "";
@@ -107,7 +106,7 @@ export class FormDialog {
                     break;
                 }
             }
-            this.inputElement.setIcon("/formWebScripts/images/" + image);
+            this.inputElement.icon = "/formWebScripts/images/" + image;
         }
         if (template.style == FormDialogStyle.Progress) {
             //Setup progress
@@ -171,7 +170,6 @@ export class FormDialogManager {
         this.dialogs = [];
         this.opened = [];
         this.blockedOpenOver = false;
-        this.languageManager = new LanguageManager("/formWebScripts/locales", "", false);
         const dialogHolder = document.createElement("div");
         dialogHolder.id = "formDialogHolder";
         document.body.appendChild(dialogHolder);
@@ -386,13 +384,13 @@ export class FormDialogManager {
             var _c;
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent((_c = dialog.inputElement) === null || _c === void 0 ? void 0 : _c.getValue());
+                    onCloseEvent((_c = dialog.inputElement) === null || _c === void 0 ? void 0 : _c.value);
                     return;
                 }
                 onCloseEvent(value);
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
-            new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Entry, openOverOthers, blockedOpenOver);
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Entry, openOverOthers, blockedOpenOver);
         template.entryType = entryType;
         template.placeholder = placeholder;
         dialog = this.ShowTemplate(template);
@@ -403,28 +401,28 @@ export class FormDialogManager {
             if (onCloseEvent != null) {
                 onCloseEvent();
             }
-        }, [new FormDialogButton("center", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver));
+        }, [new FormDialogButton("center", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver));
     }
     ShowConfirm(title, content, onCloseEvent, openOverOthers = true, blockedOpenOver = true) {
         return this.ShowTemplate(new FormDialogTemplate(title, content, false, (_, value) => {
             if (!onCloseEvent != null) {
                 onCloseEvent(value);
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false, true),
-            new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver));
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnNo", "No"), false, true),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver));
     }
     ShowSelect(title, content, cancelValue, onCloseEvent, selectValues, openOverOthers = true, blockedOpenOver = true) {
         let dialog;
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.inputElement.getValue());
+                    onCloseEvent(dialog.inputElement.value);
                     return;
                 }
                 onCloseEvent(value);
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-            new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Select, openOverOthers, blockedOpenOver);
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Select, openOverOthers, blockedOpenOver);
         template.selectValues = selectValues;
         dialog = this.ShowTemplate(template);
         return dialog;
@@ -438,7 +436,7 @@ export class FormDialogManager {
                     return;
                 }
             }
-        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
+        }, [allowCancel ? new FormDialogButton("center", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined], FormDialogStyle.Progress, openOverOthers, blockedOpenOver);
         template.progressLines = progressLines;
         dialog = this.ShowTemplate(template);
         return dialog;

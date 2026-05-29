@@ -1,15 +1,16 @@
 export class LanguageManager {
     private languageData: any = {}
-    readonly localesFolderPath: string
+    readonly localesFolderPathMain: string | null
+    readonly localesFolderPathApp: string | null
     private language: string = ""
 
-    Translate(key: string, fallbackText: string): string {
+    Translate(key: string, fallbackText: string | null = null): string {
         if (this.languageData == null) {
-            return fallbackText
+            return fallbackText == null ? key : fallbackText
         }
         const text = this.languageData[key]
         if (text == null) {
-            return fallbackText
+            return fallbackText == null ? key : fallbackText
         }
         return text
     }
@@ -42,9 +43,25 @@ export class LanguageManager {
         })
     }
 
-    constructor(localesFolderPath: string, fallbackLanguage: string = "", forceSetFallbackLanguage: boolean = false) {
+    constructor(fallbackLanguage: string = "", forceSetFallbackLanguage: boolean = false) {
+        //Load langpath main
+        const metaElement1 = document.querySelector('meta[name="form-locales-main"]')
+        if (metaElement1 != null) {
+            this.localesFolderPathMain = (metaElement1 as HTMLMetaElement).content
+        } else {
+            console.warn("No FormWebScripts locales provided!");
+            this.localesFolderPathMain = null;
+        }
+
+        //Load langpath
+        const metaElement2 = document.querySelector('meta[name="form-locales"]')
+        if (metaElement2 != null) {
+            this.localesFolderPathApp = (metaElement2 as HTMLMetaElement).content
+        } else {
+            this.localesFolderPathApp = null
+        }
+
         //Set language
-        this.localesFolderPath = localesFolderPath
         const lang = localStorage.getItem("formLanguage")
         let setLang = async () => {
             if (forceSetFallbackLanguage == true) {
@@ -78,20 +95,42 @@ export class LanguageManager {
      * Changes language for manager and translates current page
      */
     async ChangeLanguage(language: string, silent = false): Promise<boolean> {
+        //Ignore null language
         if (language == null) { return false }
-        const responce = await fetch(this.localesFolderPath + "/" + language + ".json")
-        if (responce.status != 200) {
-            return false
+
+        //Load main languages
+        if (this.localesFolderPathMain != null) {
+            const responce = await fetch(this.localesFolderPathMain + "./" + language + ".json")
+            if (responce.status != 200) {
+                return false
+            }
+            try {
+                this.languageData = await responce.json()
+            } catch (ex) {
+                console.error(ex);
+                return false;
+            }
         }
-        try {
-            this.languageData = await responce.json()
-        } catch (ex) {
-            console.error(ex);
-            return false;
+
+        //Load main languages
+        if (this.localesFolderPathApp != null) {
+            const responce2 = await fetch(this.localesFolderPathMain + "./" + language + ".json")
+            if (responce2.status != 200) {
+                return false
+            }
+            try {
+                this.languageData = { ...this.languageData, ...await responce2.json() }
+            } catch (ex) {
+                console.error(ex);
+                return false;
+            }
         }
+
+        //Set language
         this.language = language
         localStorage.setItem("formLanguage", language)
 
+        //Do first translation
         this.TranslateElements()
         if (!silent) {
             alert("Language changed, it is recomended do reload the site.")

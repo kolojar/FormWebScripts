@@ -11,5 +11,8 @@
     "dialog.btnYes": "Ano",
     "dialog.btnNo": "Ne",
     "dialog.btnOK": "OK",
-    "dialog.btnCancel": "Zrušit"
+    "dialog.btnCancel": "Zrušit",
+    "formToggle.min": "Musíte vybrat minimálně {x} pole.",
+    "formToggle.max": "Můžete vybrat maximálně {x} pole.",
+    "formInput.invalidValue": "Neplatná hodnota"
 }

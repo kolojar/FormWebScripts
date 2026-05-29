@@ -30,10 +30,16 @@ html.darkMode {
     -webkit-user-drag: none;
 }
 
-*:disabled {
+*:disabled,
+*[disabled] {
     cursor: not-allowed;
     opacity: 0.6;
     filter: grayscale(100%);
+}
+
+*:disabled *,
+*[disabled] * {
+    cursor: not-allowed;
 }
 
 html {
@@ -381,15 +387,19 @@ form-toggle .labelBefore {
 
 form-toggle {
     margin: 4px;
-    display: inline-flex;
+    display: inline-block;
     align-items: center;
+    --toggle-off: var(--form-error-color);
+    --toggle-indeterminate: var(--form-warn-color);
+    --toggle-on: var(--form-ok-color);
 }
 
 form-toggle .toggle {
+    cursor: pointer;
     position: relative;
     display: inline-block;
-    width: 60px;
-    height: 34px;
+    width: 4ch;
+    height: 1lh;
 }
 
 form-toggle .toggle input {
@@ -400,7 +410,6 @@ form-toggle .toggle input {
 
 form-toggle .toggle .slider {
     position: absolute;
-    cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
@@ -408,29 +417,73 @@ form-toggle .toggle .slider {
     border-radius: 20px;
     -webkit-transition: .4s;
     transition: .4s;
+    background-color: var(--toggle-off);
 }
 
 form-toggle .toggle .slider:before {
     position: absolute;
     content: "";
-    width: 25px;
-    height: 25px;
+    width: 0.5lh;
+    height: 0.5lh;
     border-radius: 50%;
+    top: 50%;
     left: 4px;
-    bottom: 4.5px;
+    transform: translate(0%, -50%);
     background-color: var(--background-color);
     -webkit-transition: .4s;
     transition: .4s;
 }
 
+form-toggle .formSwitchChecked .slider {
+    background-color: var(--toggle-on);
+}
+
 form-toggle .formSwitchChecked .slider:before {
-    transform: translateX(27px);
+    transform: translateX(2ch) translateY(-50%);
+}
+
+form-toggle[indeterminate] * .slider:before {
+    transform: translateX(1ch) translateY(-50%);
+}
+
+form-toggle[indeterminate] * .slider {
+    background-color: var(--toggle-indeterminate);
+}
+
+form-toggle[is-radio] .toggle {
+    width: 1lh;
+    height: 1lh;
+}
+
+form-toggle[is-radio] .toggle .slider {
+    border-radius: 50%;
+}
+
+form-toggle[is-radio] .toggle .slider:before {
+    border-radius: 50%;
+    opacity: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+form-toggle[is-radio] .formSwitchChecked .slider:before {
+    transform: translateX(-50%) translateY(-50%);
+    opacity: 1;
+}
+
+form-toggle[indeterminate][is-radio] * .slider:before {
+    transform: translateX(-50%) translateY(-50%);
+    opacity: 0.5;
 }
 
 form-toggle .labelAfter {
     margin-left: 4px
 }
 
+/*form-toggle:disabled, form-toggle[disabled], form-toggle:disabled *, form-toggle[disabled] * {
+    cursor: not-allowed;
+    filter: grayscale(100);
+}*/
 
 /*Custom element = form-row*/
 form-row {
@@ -699,7 +752,8 @@ body[form-box-holder] {
 
 
 /*Classes*/
-.allowSelect, .allowSelect * {
+.allowSelect,
+.allowSelect * {
     user-select: text;
     -moz-user-select: text;
     -webkit-user-drag: unset;

@@ -32,7 +32,7 @@ export class KeyValuePair {
         this.key = key;
         this.value = value;
     }
-    GetValue() {
+    getValue() {
         return this.value;
     }
 }

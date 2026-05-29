@@ -1,5 +1,4 @@
-import { DraggableElement, HTMLFormInputElement, HTMLFormInputType, MakeElementDraggable, SendToast } from "./formScript.js"
-import { LanguageManager } from "./languageManager.js"
+import { DraggableElement, GlobalLanguageManager, HTMLFormInputElement, HTMLFormInputType, MakeElementDraggable, SendToast } from "./formScript.js"
 import { KeyValuePair } from "./sharedScripts.js"
 
 export enum FormDialogStyle {
@@ -108,15 +107,15 @@ export class FormDialog<T> {
         if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
             //Setup entry
             this.inputElement = new HTMLFormInputElement("", null)
-            this.inputElement.setPlaceHolder(template.placeholder)
+            this.inputElement.placeholder = template.placeholder
             this.inputElement.addEventListener("mousedown",(ev: MouseEvent) => {
                 ev.stopImmediatePropagation()
             })
             if (template.style == FormDialogStyle.Entry) {
-                this.inputElement.setType(this.template.entryType)
+                this.inputElement.type = this.template.entryType
             } else {
-                this.inputElement.setType("select")
-                this.inputElement.setIsScrictList(true)
+                this.inputElement.type = "select"
+                this.inputElement.isStrictList = true
                 this.inputElement.setOptions(template.selectValues)
             }
             let image = ""
@@ -126,7 +125,7 @@ export class FormDialog<T> {
                 case "password": { image = "key32.svg"; break }
                 default: { image = "textfields32.svg"; break }
             }
-            this.inputElement.setIcon("/formWebScripts/images/" + image)
+            this.inputElement.icon = "/formWebScripts/images/" + image
         }
         if (template.style == FormDialogStyle.Progress) {
             //Setup progress
@@ -190,12 +189,10 @@ export class FormDialogManager {
     dialogs: FormDialog<any>[]
     blockedOpenOver: boolean
     opened: FormDialog<any>[]
-    private readonly languageManager: LanguageManager
     constructor() {
         this.dialogs = []
         this.opened = []
         this.blockedOpenOver = false
-        this.languageManager = new LanguageManager("/formWebScripts/locales", "", false)
 
         const dialogHolder = document.createElement("div")
         dialogHolder.id = "formDialogHolder"
@@ -413,13 +410,13 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.inputElement?.getValue() as unknown as T)
+                    onCloseEvent(dialog.inputElement?.value as unknown as T)
                     return
                 }
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
-        new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)],
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)],
             FormDialogStyle.Entry, openOverOthers, blockedOpenOver)
         template.entryType = entryType
         template.placeholder = placeholder
@@ -432,7 +429,7 @@ export class FormDialogManager {
             if (onCloseEvent != null) {
                 onCloseEvent()
             }
-        }, [new FormDialogButton("center", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<null>
+        }, [new FormDialogButton("center", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<null>
     }
 
     ShowConfirm(title: string, content: string, onCloseEvent: (value: boolean) => void | Promise<void>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
@@ -440,8 +437,8 @@ export class FormDialogManager {
             if (!onCloseEvent != null) {
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnNo", "No"), false, true),
-        new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<boolean>
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnNo", "No"), false, true),
+        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<boolean>
     }
 
     ShowSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
@@ -449,13 +446,13 @@ export class FormDialogManager {
         const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent((dialog.inputElement as HTMLFormInputElement).getValue() as T)
+                    onCloseEvent((dialog.inputElement as HTMLFormInputElement).value as T)
                     return
                 }
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-        new FormDialogButton("right", "ok", this.languageManager.Translate("dialog.btnOK", "OK"), null)],
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
+        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)],
             FormDialogStyle.Select, openOverOthers, blockedOpenOver)
         template.selectValues = selectValues
         dialog = this.ShowTemplate(template) as FormDialog<T>
@@ -471,7 +468,7 @@ export class FormDialogManager {
                     return
                 }
             }
-        }, [allowCancel ? new FormDialogButton("center", "error", this.languageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined],
+        }, [allowCancel ? new FormDialogButton("center", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined],
             FormDialogStyle.Progress, openOverOthers, blockedOpenOver)
         template.progressLines = progressLines;
         dialog = this.ShowTemplate(template) as FormDialog<boolean>

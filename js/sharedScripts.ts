@@ -38,7 +38,7 @@ export class KeyValuePair<K, V> {
         this.key = key
         this.value = value
     }
-    public GetValue(): V {
+    public getValue(): V {
         return this.value
     }
 }
