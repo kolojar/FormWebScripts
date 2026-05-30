@@ -393,6 +393,7 @@ export class HTMLFormToggleElement extends HTMLElement {
 
     public set name(name: string) {
         this.input.name = name
+        this.setAttribute("name",name)
     }
 
     public get isRadio(): boolean {

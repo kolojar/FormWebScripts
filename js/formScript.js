@@ -370,6 +370,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     }
     set name(name) {
         this.input.name = name;
+        this.setAttribute("name", name);
     }
     get isRadio() {
         return this.isRadioLocal;
