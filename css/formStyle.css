@@ -665,6 +665,11 @@ body[form-box-holder] {
      overflow: auto;
 }
 
+.formDialog>div>div {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
 .formDialogFadeIn {
     opacity: 0;
     animation: fadeIn 0.25s forwards;

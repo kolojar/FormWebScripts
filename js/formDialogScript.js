@@ -143,7 +143,7 @@ export class FormDialogManager {
         }
     }
     RenderDialog(dialog) {
-        var _c, _d, _e, _f, _g, _h, _j, _k;
+        var _c, _d, _e, _f, _g, _h, _j, _k, _l;
         //Check if dialog is valid
         if (dialog == null || dialog == undefined) {
             return false;
@@ -178,23 +178,22 @@ export class FormDialogManager {
         if (dialog.style == FormDialogStyle.Wait) {
             dialog.element.style.cursor = "wait";
         }
-        const holder = document.createElement("div");
-        dialog.element.appendChild(holder);
+        dialog.holder = document.createElement("div");
+        dialog.element.appendChild(dialog.holder);
         this.dialogHolder.appendChild(dialog.element);
         //Title
         dialog.titleElement = document.createElement("p");
         dialog.titleElement.classList.add("formHeader");
         dialog.titleElement.innerText = dialog.title;
-        holder.appendChild(dialog.titleElement);
-        dialog.draggableElement = MakeElementDraggable(dialog.element, dialog.titleElement);
-        dialog.AllowSelect(false);
+        dialog.holder.appendChild(dialog.titleElement);
+        dialog.draggableElement = MakeElementDraggable(dialog.element, null);
         //Content
         const content = document.createElement("div");
         if (dialog.style == FormDialogStyle.Wait || dialog.style == FormDialogStyle.Progress) {
             content.classList.add("puslatingEffectFull");
         }
         content.innerHTML = dialog.content;
-        holder.appendChild(content);
+        dialog.holder.appendChild(content);
         //Setup specific styles
         if (dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select) {
             //Setup entry
@@ -237,7 +236,7 @@ export class FormDialogManager {
                 }
             }
             dialog.inputElement.icon = "/formWebScripts/images/" + image;
-            holder.appendChild(dialog.inputElement);
+            dialog.holder.appendChild(dialog.inputElement);
         }
         else if (dialog.style == FormDialogStyle.Progress) {
             //Setup progress
@@ -250,7 +249,7 @@ export class FormDialogManager {
                 progress.classList.add("formProgress");
                 line.appendChild(progress);
                 dialog.progressLines.push(line);
-                holder.appendChild(line);
+                dialog.holder.appendChild(line);
             }
         }
         else if (dialog.style == FormDialogStyle.CheckBoxSelect) {
@@ -267,7 +266,7 @@ export class FormDialogManager {
                     toggle.style.display = ContainsText(toggle.label, (_d = dialog.inputElement) === null || _d === void 0 ? void 0 : _d.value, false, true) ? "" : "none";
                 }
             });
-            holder.appendChild(dialog.inputElement);
+            dialog.holder.appendChild(dialog.inputElement);
             //Setup checkboxes area
             dialog.checkboxesHolder = document.createElement("fieldset");
             dialog.checkboxesHolder.classList.add("checkboxHolder");
@@ -333,17 +332,19 @@ export class FormDialogManager {
                 }
             };
             //Calculate max width
-            holder.appendChild(dialog.checkboxesHolder);
+            dialog.holder.appendChild(dialog.checkboxesHolder);
             const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
             if (lastChild != null) {
                 dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
             }
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled");
         }
+        //Allow select
+        dialog.AllowSelect((_c = dialog.settings.allowSelect) !== null && _c !== void 0 ? _c : false);
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
         buttonBoxHolder.classList.add("formButtonBoxHolder");
-        holder.appendChild(buttonBoxHolder);
+        dialog.holder.appendChild(buttonBoxHolder);
         //Button box left
         const buttonBoxLeft = document.createElement("div");
         buttonBoxLeft.classList.add("formButtonBox", "formJustifyLeft");
@@ -433,19 +434,19 @@ export class FormDialogManager {
                 }
                 const button = document.createElement("button");
                 button.classList.add("formButton");
-                if (((_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.color) == "ok") {
+                if (((_d = dialog.buttons[i]) === null || _d === void 0 ? void 0 : _d.color) == "ok") {
                     button.classList.add("formOkColor");
                 }
-                else if (((_d = dialog.buttons[i]) === null || _d === void 0 ? void 0 : _d.color) == "warn") {
+                else if (((_e = dialog.buttons[i]) === null || _e === void 0 ? void 0 : _e.color) == "warn") {
                     button.classList.add("formWarnColor");
                 }
-                else if (((_e = dialog.buttons[i]) === null || _e === void 0 ? void 0 : _e.color) == "info") {
+                else if (((_f = dialog.buttons[i]) === null || _f === void 0 ? void 0 : _f.color) == "info") {
                     button.classList.add("formInfoColor");
                 }
-                else if (((_f = dialog.buttons[i]) === null || _f === void 0 ? void 0 : _f.color) == "error") {
+                else if (((_g = dialog.buttons[i]) === null || _g === void 0 ? void 0 : _g.color) == "error") {
                     button.classList.add("formErrorColor");
                 }
-                else if (((_g = dialog.buttons[i]) === null || _g === void 0 ? void 0 : _g.color) == "black") {
+                else if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "black") {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = async () => {
@@ -457,13 +458,13 @@ export class FormDialogManager {
                         dialog.onCloseEvent(i, (_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick);
                     }
                 };
-                if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.location) == "left") {
+                if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.location) == "left") {
                     buttonBoxLeft.appendChild(button);
                 }
-                else if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.location) == "center") {
+                else if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.location) == "center") {
                     buttonBoxCenter.appendChild(button);
                 }
-                else if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.location) == "right") {
+                else if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.location) == "right") {
                     buttonBoxRight.appendChild(button);
                 }
                 button.innerText = dialog.buttons[i].text;

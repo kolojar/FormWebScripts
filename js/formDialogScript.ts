@@ -244,17 +244,16 @@ export class FormDialogManager {
         if (dialog.style == FormDialogStyle.Wait) {
             dialog.element.style.cursor = "wait"
         }
-        const holder = document.createElement("div")
-        dialog.element.appendChild(holder)
+        dialog.holder = document.createElement("div")
+        dialog.element.appendChild(dialog.holder)
         this.dialogHolder.appendChild(dialog.element)
 
         //Title
         dialog.titleElement = document.createElement("p")
         dialog.titleElement.classList.add("formHeader")
         dialog.titleElement.innerText = dialog.title
-        holder.appendChild(dialog.titleElement)
-        dialog.draggableElement = MakeElementDraggable(dialog.element, dialog.titleElement)
-        dialog.AllowSelect(false);
+        dialog.holder.appendChild(dialog.titleElement)
+        dialog.draggableElement = MakeElementDraggable(dialog.element, null)
 
         //Content
         const content = document.createElement("div")
@@ -262,7 +261,7 @@ export class FormDialogManager {
             content.classList.add("puslatingEffectFull")
         }
         content.innerHTML = dialog.content
-        holder.appendChild(content)
+        dialog.holder.appendChild(content)
 
         //Setup specific styles
         if (dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select) {
@@ -290,7 +289,7 @@ export class FormDialogManager {
                 default: { image = "textfields32.svg"; break }
             }
             dialog.inputElement.icon = "/formWebScripts/images/" + image
-            holder.appendChild(dialog.inputElement as HTMLFormInputElement)
+            dialog.holder.appendChild(dialog.inputElement as HTMLFormInputElement)
         } else if (dialog.style == FormDialogStyle.Progress) {
             //Setup progress
             for (let i = 0; i < (dialog.settings.progressLines as number); i++) {
@@ -302,7 +301,7 @@ export class FormDialogManager {
                 progress.classList.add("formProgress")
                 line.appendChild(progress)
                 dialog.progressLines.push(line)
-                holder.appendChild(line)
+                dialog.holder.appendChild(line)
             }
         } else if (dialog.style == FormDialogStyle.CheckBoxSelect) {
             //Setup search
@@ -317,7 +316,7 @@ export class FormDialogManager {
                     toggle.style.display = ContainsText(toggle.label, dialog.inputElement?.value, false, true) ? "" : "none";
                 }
             })
-            holder.appendChild(dialog.inputElement as HTMLFormInputElement)
+            dialog.holder.appendChild(dialog.inputElement as HTMLFormInputElement)
 
             //Setup checkboxes area
             dialog.checkboxesHolder = document.createElement("fieldset")
@@ -385,7 +384,7 @@ export class FormDialogManager {
             }
 
             //Calculate max width
-            holder.appendChild(dialog.checkboxesHolder)
+            dialog.holder.appendChild(dialog.checkboxesHolder)
             const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
             if (lastChild != null) {
                 dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
@@ -393,10 +392,13 @@ export class FormDialogManager {
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled")
         }
 
+        //Allow select
+        dialog.AllowSelect(dialog.settings.allowSelect ?? false);
+
         //Button box holder
         const buttonBoxHolder = document.createElement("div")
         buttonBoxHolder.classList.add("formButtonBoxHolder")
-        holder.appendChild(buttonBoxHolder)
+        dialog.holder.appendChild(buttonBoxHolder)
 
         //Button box left
         const buttonBoxLeft = document.createElement("div")
