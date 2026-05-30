@@ -50,7 +50,7 @@ export class HTMLFormBoxElement extends HTMLElement {
      */
     SetStatusMessage(blink, message, cleanAfterMs = 0) {
         //Set message
-        const messageID = GeneratePassword(8, true, true);
+        const messageID = GeneratePassword(8, false, false);
         this.messageID = messageID;
         this.querySelectorAll("form-status-message").forEach(element => {
             let status = element; //TODO: FIX
@@ -598,11 +598,11 @@ export class HTMLFormInputElement extends HTMLElement {
             this.holder.removeChild(this.afterImg);
         }
         //Special img usecases
-        if (this.type == "search-realtime") {
-            this.setIconFromCode++;
-            this.icon = "!filter";
-            this.setIconFromCode--;
-        }
+        //if (this.type == "search-realtime") {
+        //    this.setIconFromCode++;
+        //    this.icon = "!filter"
+        //    this.setIconFromCode--;
+        //}
         if (this.img.getAttribute("path") != "") {
             this.holder.appendChild(this.img);
         }

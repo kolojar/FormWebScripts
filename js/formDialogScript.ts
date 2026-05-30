@@ -30,215 +30,156 @@ export class FormDialogButton {
 }
 
 /**
+ * Settings for dialogs
+ */
+export type FormDialogSettings<T> = {
+    /**
+     * If dialog can open over others
+     */
+    openOverOthers?: boolean
+    /**
+     * If dialog blocks others dialogs from opening over this one
+     */
+    blockOpenOver?: boolean
+    /**
+     * Allow selection of text in dialog
+     */
+    allowSelect?: boolean
+    /**
+     * Minimum count of selectable options, set to undefined for unlimited 
+     */
+    checkboxSelectMinCount?: number
+    /**
+     * Maximum count of selectable options, set to undefined for unlimited
+     */
+    checkboxSelectMaxCount?: number
+    /**
+     * Input field type
+     */
+    entryType?: HTMLFormInputType
+    /**
+     * Values for selection, key is display value, value is returned, can be used for hinting at entry
+     */
+    selectValues?: Map<string, T>
+    /**
+     * Count of progressbars
+     */
+    progressLines?: number
+    /**
+     * Placeholder for entry
+     */
+    placeholder?: string
+}
+
+export class FormDialog<T> {
+    private readonly dialog: FormDialogTemplate<T>
+    /**
+     * Cant be consturcted externally, use dialog manager - ShowDialog function
+     * @param dialog Configuration
+     */
+    constructor(dialog: FormDialogTemplate<T>) {
+        this.dialog = dialog;
+    }
+
+    SetProgress(id: number, value: number, max: number = 100) {
+        if (id >= this.dialog.progressLines.length || id < 0) {
+            return
+        }
+        const element = this.dialog.progressLines[id].children.item(1) as HTMLProgressElement
+        element.max = max
+        element.value = value
+    }
+
+    SetProgressMessage(id: number, message: string) {
+        if (id >= this.dialog.progressLines.length || id < 0) {
+            return
+        }
+        (this.dialog.progressLines[id].children.item(0) as HTMLParagraphElement).innerText = message
+    }
+
+    CloseDialog() {
+        this.dialog.CloseDialog()
+    }
+
+    AllowSelect(allowSelect: boolean) {
+        this.dialog.AllowSelect(allowSelect)
+    }
+
+    GetInputValue(): any {
+        return this.dialog.inputElement?.value
+    }
+
+    GetCheckboxHolderChildren(): Element[] {
+        return [...this.dialog.checkboxesHolder?.children as HTMLCollection]
+    }
+}
+
+/**
  * Dialog template class for creating dialog
  */
-export class FormDialogTemplate<T> {
+class FormDialogTemplate<T> {
+    readonly settings: FormDialogSettings<T>
+    element: HTMLDialogElement | null = null
+    holder: HTMLDivElement | null = null
+    titleElement: HTMLParagraphElement | null = null
+    contentElement: HTMLDivElement | null = null
+    inputElement: HTMLFormInputElement | null = null
+    progressLines: HTMLDivElement[]
+    checkboxesHolder: HTMLFieldSetElement | null = null
+    selectAllCheckbox: HTMLFormToggleElement | null = null
     readonly title: string
     readonly content: string
     readonly escapeCloseValue: T
     readonly onCloseEvent: (clickedButtonID: number, clickedValue: T) => void
     readonly buttons: (FormDialogButton | undefined)[]
-    readonly blockOpenOver: boolean
-    readonly openOverOthers: boolean
-    readonly style: FormDialogStyle
-    placeholder: string
-    entryType: HTMLFormInputType
-    selectValues: Map<string, T>
-    createdDialogs: FormDialog<T>[]
-    progressLines: number
+    readonly style: FormDialogStyle = FormDialogStyle.Normal
+    draggableElement: DraggableElement | null
+    private closed: boolean = false
 
-    /**
-     * Creates new dialog, do not modify any properties of element
-     * @param title Title of dialog
-     * @param content Text content of dialog
-     * @param escapeCloseValue Value sended in onCloseEvent, when Escape key was pressed
-     * @param onCloseEvent Event called when dialog is closed, -1 = Escape key, -2 = Close using function
-     * @param buttons Array of buttons in dialog
-     * @param style Style of dialog
-     * @param openOverOthers Allow opening over other dialogs
-     * @param blockOpenOver Will be the topmost dialog, no other dialog can open over this one
-     */
-    constructor(title: string, content: string, escapeCloseValue: T, onCloseEvent: (clickedButtonID: number, clickedValue: T) => void, buttons: (FormDialogButton | undefined)[], style: FormDialogStyle = FormDialogStyle.Normal, openOverOthers: boolean = false, blockOpenOver: boolean = false) {
+    constructor(title: string, content: string, escapeCloseValue: T, style: FormDialogStyle, onCloseEvent: (clickedButtonID: number, clickedValue: T) => void, buttons: (FormDialogButton | undefined)[], settings: FormDialogSettings<T> = {}) {
+        //Setup default settings
         this.title = title
         this.content = content
-        this.escapeCloseValue = escapeCloseValue
-        this.onCloseEvent = onCloseEvent
-        this.buttons = buttons
-        this.blockOpenOver = blockOpenOver
-        this.openOverOthers = openOverOthers
+        this.escapeCloseValue = escapeCloseValue;
+        this.onCloseEvent = onCloseEvent;
+        this.buttons = buttons;
+        this.settings = settings;
         this.style = style
-        this.placeholder = ""
-        this.entryType = "text"
-        this.selectValues = new Map<string, T>
-        this.createdDialogs = []
-        this.progressLines = 0
-    }
-
-    CloseChildrenDialogs() {
-        for (let dialog of this.createdDialogs) {
-            dialog.CloseDialog()
-        }
-    }
-}
-
-/**
- * Dialog class for creating dialog
- */
-export class FormDialog<T> {
-    readonly template: FormDialogTemplate<T>
-    readonly element: HTMLDialogElement
-    readonly inputElement: HTMLFormInputElement | null = null
-    readonly progressLines: HTMLDivElement[]
-    readonly checkboxesHolder: HTMLFieldSetElement | null = null
-    readonly progressLabels: HTMLSpanElement[] = []
-    readonly selectAllCheckbox: HTMLFormToggleElement | null = null
-    /**
-     * Do not edit externally
-     */
-    public draggableElement: DraggableElement | null
-    closed: boolean = false
-
-    /**
-     * Creates new dialog, do not modify any properties of element
-     * @param template Template of dialog
-     */
-    constructor(template: FormDialogTemplate<T>) {
-        this.template = template
+        this.settings.entryType = this.settings.entryType ?? "text"
+        this.settings.progressLines = this.settings.progressLines ?? 0;
+        this.settings.blockOpenOver = this.settings.blockOpenOver ?? true
+        this.settings.openOverOthers = this.settings.openOverOthers ?? true
+        this.settings.placeholder = this.settings.placeholder ?? ""
+        this.settings.allowSelect = this.settings.allowSelect ?? false
         this.draggableElement = null;
-        this.element = document.createElement("dialog")
         this.progressLines = []
-        if (template.style == FormDialogStyle.Entry || template.style == FormDialogStyle.Select) {
-            //Setup entry
-            this.inputElement = new HTMLFormInputElement("", null)
-            this.inputElement.placeholder = template.placeholder
-            this.inputElement.addEventListener("mousedown", (ev: MouseEvent) => {
-                ev.stopImmediatePropagation()
-            })
-            if (template.style == FormDialogStyle.Entry) {
-                this.inputElement.type = this.template.entryType
-            } else {
-                this.inputElement.type = "select"
-                this.inputElement.isStrictList = true
-                this.inputElement.setOptions(template.selectValues)
-            }
-            let image = ""
-            switch (this.template.entryType.toLowerCase()) {
-                case "text": { image = "textfields32.svg"; break }
-                case "color": { image = "palette32.svg"; break }
-                case "password": { image = "key32.svg"; break }
-                default: { image = "textfields32.svg"; break }
-            }
-            this.inputElement.icon = "/formWebScripts/images/" + image
-        } else if (template.style == FormDialogStyle.Progress) {
-            //Setup progress
-            for (let i = 0; i < template.progressLines; i++) {
-                const line = document.createElement("div")
-                const text = document.createElement("p")
-                text.style.textAlign = "center"
-                line.appendChild(text)
-                const progress = document.createElement("progress")
-                progress.classList.add("formProgress")
-                line.appendChild(progress)
-                this.progressLines.push(line)
-            }
-        } else if (template.style == FormDialogStyle.CheckBoxSelect) {
-            //Setup search
-            this.inputElement = new HTMLFormInputElement("", null)
-            this.inputElement.setOptions([...this.template.selectValues.keys()])
-            this.inputElement.type = "search-realtime";
-            this.inputElement.addEventListener("search", () => {
-                for (const element of this.checkboxesHolder?.children as HTMLCollection) {
-                    const toggle = (element as HTMLFormToggleElement)
-                    toggle.style.display = ContainsText(toggle.label, this.inputElement?.value, false, true) ? "" : "none";
-                }
-            })
-
-            //Setup checkboxes area
-            this.checkboxesHolder = document.createElement("fieldset")
-            this.checkboxesHolder.classList.add("checkboxHolder")
-            const name = "FormDialogToggleGroup-" + GeneratePassword(8, false, false);
-            this.checkboxesHolder.setAttribute("form-toggle-limiter", name)
-            for (const [key, _] of this.template.selectValues) {
-                const input = new HTMLFormToggleElement()
-                input.name = name;
-                input.label = key;
-                input.value = key;
-                input.addEventListener("change", () => {
-                    onChange(input)
-                })
-                this.checkboxesHolder.appendChild(input)
-            }
-
-            //Select all checkbox
-            this.selectAllCheckbox = new HTMLFormToggleElement()
-            this.selectAllCheckbox.addEventListener("change", () => {
-                const checked = this.selectAllCheckbox?.checked == true
-                for (const element of this.checkboxesHolder?.children as HTMLCollection) {
-                    const toggle = (element as HTMLFormToggleElement)
-                    toggle.disableEvents = true;
-                    toggle.checked = checked;
-                    toggle.disableEvents = false;
-                }
-            })
-            this.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
-
-            //On change            
-            const onChange = (checkbox: HTMLFormToggleElement) => {
-                const children = this.checkboxesHolder?.children as HTMLCollection;
-                let checked = 0;
-                for (const element of children) {
-                    if ((element as HTMLFormToggleElement).checked) {
-                        checked++;
-                    }
-                }
-                if (checked == 0) {
-                    (this.selectAllCheckbox as HTMLFormToggleElement).checked = false;
-                } else if (checked == children.length) {
-                    (this.selectAllCheckbox as HTMLFormToggleElement).checked = true;
-                } else {
-                    (this.selectAllCheckbox as HTMLFormToggleElement).indeterminate = true;
-                }
-            }
-        }
-        this.template.createdDialogs.push(this)
     }
 
-    SetProgress(id: number, value: number, max: number = 100) {
-        if (id >= this.progressLines.length) {
-            return
+    AllowSelect(allowSelect: boolean) {
+        let len = this.holder?.children.length;
+        if (len == undefined) { return; }
+        if (allowSelect) {
+            for (let i = 1; i < len; i++) {
+                this.holder?.children.item(i)?.classList.add("allowSelect")
+            }
+            this.draggableElement?.ChangeDragElement(this.titleElement)
+            this.titleElement?.classList.add("formDialogTitleDrag")
+        } else {
+            for (let i = 1; i < len; i++) {
+                this.holder?.children.item(i)?.classList.remove("allowSelect")
+            }
+            this.draggableElement?.ChangeDragElement(null)
+            this.titleElement?.classList.remove("formDialogTitleDrag")
         }
-        const element = this.progressLines[id].children.item(1) as HTMLProgressElement
-        element.max = max
-        element.value = value
     }
-    SetMessage(id: number, message: string) {
-        if (id >= this.progressLines.length) {
-            return
-        }
-        (this.progressLines[id].children.item(0) as HTMLParagraphElement).innerText = message
+
+    GetClosed(): boolean {
+        return this.closed
     }
 
     CloseDialog() {
-        this.element.dispatchEvent(new Event("force-cancel"))
+        this.element?.dispatchEvent(new Event("force-cancel"))
         this.closed = true;
-        this.template.createdDialogs = this.template.createdDialogs.filter(item => item != this)
-    }
-    AllowSelect(allowSelect: boolean) {
-        const holder = this.element.children.item(0) as HTMLElement
-        const title = holder.children.item(0) as HTMLElement
-        if (allowSelect) {
-            for (let i = 1; i < holder.children.length; i++) {
-                holder.children.item(i)?.classList.add("allowSelect")
-            }
-            this.draggableElement?.ChangeDragElement(title)
-            title.classList.add("formDialogTitleDrag")
-        } else {
-            for (let i = 1; i < holder.children.length; i++) {
-                holder.children.item(i)?.classList.remove("allowSelect")
-            }
-            this.draggableElement?.ChangeDragElement(null)
-            title.classList.remove("formDialogTitleDrag")
-        }
     }
 }
 
@@ -246,105 +187,207 @@ export class FormDialog<T> {
  * Class for managing dialogs
  */
 export class FormDialogManager {
-    dialogs: FormDialog<any>[]
-    blockedOpenOver: boolean
-    opened: FormDialog<any>[]
+    dialogs: FormDialogTemplate<any>[]
+    blockOpenOver: boolean
+    opened: FormDialogTemplate<any>[]
+    readonly dialogHolder: HTMLDivElement
     constructor() {
         this.dialogs = []
         this.opened = []
-        this.blockedOpenOver = false
+        this.blockOpenOver = false
 
-        const dialogHolder = document.createElement("div")
-        dialogHolder.id = "formDialogHolder"
-        document.body.appendChild(dialogHolder)
+        this.dialogHolder = document.createElement("div")
+        this.dialogHolder.id = "formDialogHolder"
+        document.body.appendChild(this.dialogHolder)
     }
 
-    ShowTemplate<T>(template: FormDialogTemplate<T>): FormDialog<T> | null {
-        if (template == null) {
-            return null
-        }
-        const dialog = new FormDialog(template)
-        if (this.ShowDialog(dialog)) {
-            return dialog
+    ShowDialog<T>(title: string, content: string, escapeCloseValue: T, style: FormDialogStyle, onCloseEvent: (clickedButtonID: number, clickedValue: T) => void, buttons: (FormDialogButton | undefined)[], settings: FormDialogSettings<T>): FormDialog<T> | null {
+        const dialog = new FormDialogTemplate<T>(title, content, escapeCloseValue, style, onCloseEvent, buttons, settings)
+        if (this.RenderDialog(dialog)) {
+            return new FormDialog(dialog)
         } else {
             return null
         }
     }
 
-    ShowDialog<T>(dialog: FormDialog<T> | undefined): boolean {
+    private RenderDialog<T>(dialog: FormDialogTemplate<T> | undefined): boolean {
         //Check if dialog is valid
-        if (dialog == null || dialog == undefined || dialog.template == null) { return false }
-        dialog = dialog as FormDialog<T>
-        if (dialog.closed) { return false }
-        if ((dialog.template.buttons == null || dialog.template.buttons.length == 0) && dialog.template.style != FormDialogStyle.Wait) {
+        if (dialog == null || dialog == undefined) { return false }
+        dialog = dialog as FormDialogTemplate<T>
+        if (dialog.GetClosed()) { return false }
+        if ((dialog.buttons == null || dialog.buttons.length == 0) && dialog.style != FormDialogStyle.Wait) {
             return false
         }
 
         //Sort out invalid openings
-        if (this.blockedOpenOver) {
+        if (this.blockOpenOver) {
             this.dialogs.push(dialog)
             console.log("Dialog waiting - blocked open over");
             return true
         }
-        if (this.opened.length > 0 && !dialog.template.openOverOthers) {
+        if (this.opened.length > 0 && !dialog.settings.openOverOthers) {
             this.dialogs.push(dialog)
             console.log("Dialog waiting - other opened");
             return true
         }
 
         //Set properties
-        if (dialog.template.blockOpenOver) {
-            this.blockedOpenOver = true
+        if (dialog.settings.blockOpenOver) {
+            this.blockOpenOver = true
         }
         this.opened.push(dialog);
 
-        //Create dialog
-        document.getElementById("formDialogHolder")?.appendChild(dialog.element)
+        //Create dialog element
+        dialog.element = document.createElement("dialog")
         dialog.element.classList.add("formDialog")
         dialog.element.classList.add("formDialogFadeIn")
-        if (dialog.template.style == FormDialogStyle.Wait) {
+        if (dialog.style == FormDialogStyle.Wait) {
             dialog.element.style.cursor = "wait"
         }
-
         const holder = document.createElement("div")
         dialog.element.appendChild(holder)
+        this.dialogHolder.appendChild(dialog.element)
 
         //Title
-        const title = document.createElement("p")
-        title.classList.add("formHeader")
-        title.innerText = dialog.template.title
-        holder.appendChild(title)
-        dialog.draggableElement = MakeElementDraggable(dialog.element, title)
+        dialog.titleElement = document.createElement("p")
+        dialog.titleElement.classList.add("formHeader")
+        dialog.titleElement.innerText = dialog.title
+        holder.appendChild(dialog.titleElement)
+        dialog.draggableElement = MakeElementDraggable(dialog.element, dialog.titleElement)
         dialog.AllowSelect(false);
 
-        //Data
-        const data = document.createElement("div")
-        if (dialog.template.style == FormDialogStyle.Wait || dialog.template.style == FormDialogStyle.Progress) {
-            data.classList.add("puslatingEffectFull")
+        //Content
+        const content = document.createElement("div")
+        if (dialog.style == FormDialogStyle.Wait || dialog.style == FormDialogStyle.Progress) {
+            content.classList.add("puslatingEffectFull")
         }
-        data.innerHTML = dialog.template.content
-        holder.appendChild(data)
+        content.innerHTML = dialog.content
+        holder.appendChild(content)
 
-        //Entry
-        if (dialog.template.style == FormDialogStyle.Entry || dialog.template.style == FormDialogStyle.Select || dialog.template.style == FormDialogStyle.CheckBoxSelect) {
+        //Setup specific styles
+        if (dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select) {
+            //Setup entry
+            dialog.inputElement = new HTMLFormInputElement("", null)
+            dialog.inputElement.placeholder = dialog.settings.placeholder as string
+            dialog.inputElement.addEventListener("mousedown", (ev: MouseEvent) => {
+                ev.stopImmediatePropagation()
+            })
+            if (dialog.style == FormDialogStyle.Entry) {
+                dialog.inputElement.type = dialog.settings.entryType as HTMLFormInputType
+            } else {
+                dialog.inputElement.type = "select"
+                dialog.inputElement.isStrictList = true
+                if (dialog.settings.selectValues != undefined) {
+                    dialog.inputElement.setOptions(dialog.settings.selectValues)
+                }
+            }
+            let image = ""
+            switch (dialog.settings.entryType as HTMLFormInputType) {
+                case "text": { image = "textfields32.svg"; break }
+                case "color": { image = "palette32.svg"; break }
+                case "password": { image = "key32.svg"; break }
+                case "search-realtime": { image = "!filter"; break }
+                default: { image = "textfields32.svg"; break }
+            }
+            dialog.inputElement.icon = "/formWebScripts/images/" + image
             holder.appendChild(dialog.inputElement as HTMLFormInputElement)
-        }
-
-        //Progress
-        if (dialog.template.style == FormDialogStyle.Progress) {
-            for (let i = 0; i < dialog.progressLines.length; i++) {
-                holder.appendChild(dialog.progressLines[i])
+        } else if (dialog.style == FormDialogStyle.Progress) {
+            //Setup progress
+            for (let i = 0; i < (dialog.settings.progressLines as number); i++) {
+                const line = document.createElement("div")
+                const text = document.createElement("p")
+                text.style.textAlign = "center"
+                line.appendChild(text)
+                const progress = document.createElement("progress")
+                progress.classList.add("formProgress")
+                line.appendChild(progress)
+                dialog.progressLines.push(line)
+                holder.appendChild(line)
             }
-        }
+        } else if (dialog.style == FormDialogStyle.CheckBoxSelect) {
+            //Setup search
+            dialog.inputElement = new HTMLFormInputElement("", null)
+            /*if (dialog.settings.selectValues != undefined) {
+                dialog.inputElement.setOptions([...dialog.settings.selectValues.keys()])
+            }*/
+            dialog.inputElement.type = "search-realtime";
+            dialog.inputElement.addEventListener("search", () => {
+                for (const element of dialog.checkboxesHolder?.children as HTMLCollection) {
+                    const toggle = (element as HTMLFormToggleElement)
+                    toggle.style.display = ContainsText(toggle.label, dialog.inputElement?.value, false, true) ? "" : "none";
+                }
+            })
+            holder.appendChild(dialog.inputElement as HTMLFormInputElement)
 
-        //CheckBoxSelect
-        if (dialog.template.style == FormDialogStyle.CheckBoxSelect) {
-            const checkboxes  =dialog.checkboxesHolder as HTMLFieldSetElement;
-            holder.appendChild(checkboxes)
-            const lastChild = checkboxes.children.item(checkboxes.children.length-1);
-            if(lastChild != null) {
-                checkboxes.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - checkboxes.getBoundingClientRect().left + checkboxes.scrollLeft + 20) + "px";
+            //Setup checkboxes area
+            dialog.checkboxesHolder = document.createElement("fieldset")
+            dialog.checkboxesHolder.classList.add("checkboxHolder")
+            const name = "FormDialogToggleGroup-" + GeneratePassword(8, false, false);
+            dialog.checkboxesHolder.setAttribute("form-toggle-limiter", name)
+            dialog.checkboxesHolder.setAttribute("form-toggle-disabled", "")
+
+            //Setup mins and maxes
+            if (dialog.settings.checkboxSelectMinCount != undefined) {
+                dialog.checkboxesHolder.setAttribute("min", dialog.settings.checkboxSelectMinCount.toString())
             }
+            if (dialog.settings.checkboxSelectMaxCount != undefined) {
+                dialog.checkboxesHolder.setAttribute("max", dialog.settings.checkboxSelectMaxCount.toString())
+            }
+            const isRadio = dialog.settings.checkboxSelectMinCount != undefined && dialog.settings.checkboxSelectMaxCount != undefined && dialog.settings.checkboxSelectMinCount == 1 && dialog.settings.checkboxSelectMaxCount == 1
+
+            //Generate HTML elements
+            if (dialog.settings.selectValues != undefined) {
+                for (const [key, _] of dialog.settings.selectValues) {
+                    const input = new HTMLFormToggleElement()
+                    input.name = name;
+                    input.isRadio = isRadio
+                    input.label = key;
+                    input.value = key;
+                    input.addEventListener("change", () => {
+                        onChange(input)
+                    })
+                    dialog.checkboxesHolder.appendChild(input)
+                }
+            }
+
+            //Select all checkbox
+            dialog.selectAllCheckbox = new HTMLFormToggleElement()
+            dialog.selectAllCheckbox.addEventListener("change", () => {
+                const checked = dialog.selectAllCheckbox?.checked == true
+                for (const element of dialog.checkboxesHolder?.children as HTMLCollection) {
+                    const toggle = (element as HTMLFormToggleElement)
+                    toggle.disableEvents = true;
+                    toggle.checked = checked;
+                    toggle.disableEvents = false;
+                }
+            })
+            dialog.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
+
+            //On change            
+            const onChange = (checkbox: HTMLFormToggleElement) => {
+                const children = dialog.checkboxesHolder?.children as HTMLCollection;
+                let checked = 0;
+                for (const element of children) {
+                    if ((element as HTMLFormToggleElement).checked) {
+                        checked++;
+                    }
+                }
+                if (checked == 0) {
+                    (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = false;
+                } else if (checked == children.length) {
+                    (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = true;
+                } else {
+                    (dialog.selectAllCheckbox as HTMLFormToggleElement).indeterminate = true;
+                }
+            }
+
+            //Calculate max width
+            holder.appendChild(dialog.checkboxesHolder)
+            const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
+            if (lastChild != null) {
+                dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
+            }
+            dialog.checkboxesHolder.removeAttribute("form-toggle-disabled")
         }
 
         //Button box holder
@@ -372,29 +415,35 @@ export class FormDialogManager {
             if (dialog == null || dialog == undefined) {
                 return Promise.resolve(true)
             }
-            if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
+            if (dialog.style == FormDialogStyle.Select && !isCancel) {
                 const [_, valid] = await (dialog.inputElement as HTMLFormInputElement).validate()
                 if (!valid) {
-                    SendToast(dialog.template.title, "Pole obsahuje neplatnou hodnotu.", "error")
+                    SendToast(dialog.title, "Pole obsahuje neplatnou hodnotu.", "error")
+                    return Promise.resolve(false)
+                }
+            }
+            if (dialog.style == FormDialogStyle.CheckBoxSelect && !isCancel && dialog.checkboxesHolder?.children.length != 0) {
+                const [_, valid] = await (dialog.checkboxesHolder?.children.item(0) as HTMLFormToggleElement).validate()
+                if (!valid) {
                     return Promise.resolve(false)
                 }
             }
 
-            dialog.element.classList.add("is-hidden")
-            dialog.element.addEventListener("animationend", (event: AnimationEvent) => {
+            dialog.element?.classList.add("is-hidden")
+            dialog.element?.addEventListener("animationend", (event: AnimationEvent) => {
                 if (event.animationName == "fadeOut") {
-                    dialog.element.classList.remove("is-hidden")
-                    dialog.element.close()
-                    dialog.element.remove()
-                    if (dialog.template.blockOpenOver) {
-                        this.blockedOpenOver = false
+                    dialog.element?.classList.remove("is-hidden")
+                    dialog.element?.close()
+                    dialog.element?.remove()
+                    if (dialog.settings.blockOpenOver) {
+                        this.blockOpenOver = false
                     }
                     this.opened = this.opened.filter(item => item != dialog)
 
                     //Open next dialog
                     let tryOpen = true
                     while (tryOpen) {
-                        tryOpen = !this.ShowDialog(this.dialogs.pop())
+                        tryOpen = !this.RenderDialog(this.dialogs.pop())
                         if (this.dialogs.length == 0) { tryOpen = false }
                     }
                 }
@@ -405,15 +454,15 @@ export class FormDialogManager {
         //ESC key press
         dialog.element.addEventListener('cancel', async (event) => {
             event.preventDefault();
-            if (dialog.template.style == FormDialogStyle.Wait) {
-                dialog.element.classList.remove("formDialogFadeIn")
-                dialog.element.close()
-                dialog.element.showModal()
+            if (dialog.style == FormDialogStyle.Wait) {
+                dialog.element?.classList.remove("formDialogFadeIn")
+                dialog.element?.close()
+                dialog.element?.showModal()
                 return
             }
             if (! await closeDialog(true)) { return }
-            if (dialog.template.onCloseEvent != null) {
-                dialog.template.onCloseEvent(-1, dialog.template.escapeCloseValue)
+            if (dialog.onCloseEvent != null) {
+                dialog.onCloseEvent(-1, dialog.escapeCloseValue)
             }
         });
 
@@ -421,46 +470,46 @@ export class FormDialogManager {
         dialog.element.addEventListener('force-cancel', async (event) => {
             event.preventDefault();
             if (! await closeDialog(true)) { return }
-            if (dialog.template.onCloseEvent != null) {
-                dialog.template.onCloseEvent(-2, dialog.template.escapeCloseValue)
+            if (dialog.onCloseEvent != null) {
+                dialog.onCloseEvent(-2, dialog.escapeCloseValue)
             }
         });
 
         //Setup buttons
-        if (dialog.template.buttons != null) {
-            for (let i = 0; i < dialog.template.buttons.length; i++) {
-                if (dialog.template.buttons[i] == undefined) {
+        if (dialog.buttons != null) {
+            for (let i = 0; i < dialog.buttons.length; i++) {
+                if (dialog.buttons[i] == undefined) {
                     continue
                 }
                 const button = document.createElement("button")
                 button.classList.add("formButton")
-                if (dialog.template.buttons[i]?.color == "ok") {
+                if (dialog.buttons[i]?.color == "ok") {
                     button.classList.add("formOkColor")
-                } else if (dialog.template.buttons[i]?.color == "warn") {
+                } else if (dialog.buttons[i]?.color == "warn") {
                     button.classList.add("formWarnColor")
-                } else if (dialog.template.buttons[i]?.color == "info") {
+                } else if (dialog.buttons[i]?.color == "info") {
                     button.classList.add("formInfoColor")
-                } else if (dialog.template.buttons[i]?.color == "error") {
+                } else if (dialog.buttons[i]?.color == "error") {
                     button.classList.add("formErrorColor")
-                } else if (dialog.template.buttons[i]?.color == "black") {
+                } else if (dialog.buttons[i]?.color == "black") {
                     button.classList.add("formBlackColor")
                 }
 
                 button.onclick = async () => {
-                    if (! await closeDialog((dialog.template.buttons[i] as FormDialogButton).isCancel)) { return }
-                    if (dialog.template.onCloseEvent != null) {
-                        dialog.template.onCloseEvent(i, dialog.template.buttons[i]?.valueOnClick)
+                    if (! await closeDialog((dialog.buttons[i] as FormDialogButton).isCancel)) { return }
+                    if (dialog.onCloseEvent != null) {
+                        dialog.onCloseEvent(i, dialog.buttons[i]?.valueOnClick)
                     }
                 }
 
-                if (dialog.template.buttons[i]?.location == "left") {
+                if (dialog.buttons[i]?.location == "left") {
                     buttonBoxLeft.appendChild(button)
-                } else if (dialog.template.buttons[i]?.location == "center") {
+                } else if (dialog.buttons[i]?.location == "center") {
                     buttonBoxCenter.appendChild(button)
-                } else if (dialog.template.buttons[i]?.location == "right") {
+                } else if (dialog.buttons[i]?.location == "right") {
                     buttonBoxRight.appendChild(button)
                 }
-                button.innerText = (dialog.template.buttons[i] as FormDialogButton).text
+                button.innerText = (dialog.buttons[i] as FormDialogButton).text
             }
         }
         //Open dialog
@@ -475,148 +524,287 @@ export class FormDialogManager {
         }
     }
 
-    ShowPrompt<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
-        let dialog: FormDialog<T>
-        const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
+    /**
+     * Shows prompt (asking for user input - text, number, ...)
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param entryType Input field type, overwrites settings.entryType
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @argument settings.selectValues Hinting values for entry, key is display value, value is returned
+     * @returns Dialog or null 
+     */
+    ShowPrompt<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, entryType: HTMLFormInputType = "text", settings: FormDialogSettings<T> = {}): FormDialog<T> | null {
+        settings.entryType = entryType;
+        const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.Entry, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent(dialog.inputElement?.value as unknown as T)
+                    onCloseEvent(dialog?.GetInputValue() as unknown as T)
                     return
                 }
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
-        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)],
-            FormDialogStyle.Entry, openOverOthers, blockedOpenOver)
-        template.entryType = entryType
-        template.placeholder = placeholder
-        dialog = this.ShowTemplate(template) as FormDialog<T>
+        }, [
+            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+        ], settings)
         return dialog;
     }
 
-    ShowAlert(title: string, content: string, onCloseEvent: () => void, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<null> {
-        return this.ShowTemplate<null>(new FormDialogTemplate(title, content, null, (_a, _b) => {
+    /**
+     * Shows alert (informing about problem - only OK button)
+     * @param title Title of dialog
+     * @param content Content HTML of information
+     * @param onCloseEvent Event fired on close
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Dialog or null
+     */
+    ShowAlert(title: string, content: string, onCloseEvent: () => void, settings: FormDialogSettings<null> = {}): FormDialog<null> | null {
+        return this.ShowDialog<null>(title, content, null, FormDialogStyle.Normal, (_a, _b) => {
             if (onCloseEvent != null) {
                 onCloseEvent()
             }
-        }, [new FormDialogButton("center", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<null>
+        }, [
+            new FormDialogButton("center", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+        ], settings)
     }
 
-    ShowConfirm(title: string, content: string, onCloseEvent: (value: boolean) => void | Promise<void>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
-        return this.ShowTemplate(new FormDialogTemplate(title, content, false, (_, value) => {
+    /**
+     * Opens confirm (asking for user yes or no)
+     * @param title Title of dialog
+     * @param content Content HTML of information
+     * @param onCloseEvent Event fired on close
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Dialog or null 
+     */
+    ShowConfirm(title: string, content: string, onCloseEvent: (value: boolean) => void | Promise<void>, settings: FormDialogSettings<boolean> = {}): FormDialog<boolean> | null {
+        return this.ShowDialog(title, content, false, FormDialogStyle.Normal, (_, value) => {
             if (!onCloseEvent != null) {
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnNo", "No"), false, true),
-        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnYes", "Yes"), true)], FormDialogStyle.Normal, openOverOthers, blockedOpenOver)) as FormDialog<boolean>
+        }, [
+            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnNo", "No"), false, true),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnYes", "Yes"), true)
+        ], settings)
     }
 
-    ShowSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
-        let dialog: FormDialog<T>
-        const template = new FormDialogTemplate(title, content, cancelValue, (btn, value) => {
+    /**
+     * Opens select dialog (asking for user choice of value)
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry (searchbar)
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Dialog or null 
+     */
+    ShowSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (value: T) => void, selectValues: Map<string, T>, settings: FormDialogSettings<T> = {}): FormDialog<T> | null {
+        settings.selectValues = selectValues;
+        const dialog = this.ShowDialog<T>(title, content, cancelValue, FormDialogStyle.Select, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    onCloseEvent((dialog.inputElement as HTMLFormInputElement).value as T)
+                    onCloseEvent(dialog?.GetInputValue() as unknown as T)
                     return
                 }
                 onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)],
-            FormDialogStyle.Select, openOverOthers, blockedOpenOver)
-        template.selectValues = selectValues
-        dialog = this.ShowTemplate(template) as FormDialog<T>
+        }, [
+            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+        ], settings)
         return dialog;
     }
 
-    ShowProgress(title: string, content: string, onCancelEvent: () => void, progressLines: number, allowCancel: boolean = true, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<boolean> {
-        let dialog: FormDialog<boolean>
-        const template = new FormDialogTemplate(title, content, false, (btn, value) => {
+    /**
+     * Opens progress (please wait dialogs or progress)
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param onCloseEvent Event fired on close
+     * @param progressLines Count of progressbars, overwrites settings.progressLines
+     * @param allowCancel If you can cancel the progress dialog
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Dialog or null 
+     */
+    ShowProgress(title: string, content: string, onCancelEvent: () => void, progressLines: number, allowCancel: boolean, settings: FormDialogSettings<false> = {}): FormDialog<false> | null {
+        settings.progressLines = progressLines;
+        const dialog = this.ShowDialog(title, content, false, FormDialogStyle.Progress, (btn, value) => {
             if (onCancelEvent != null) {
                 if (btn != -2) {
                     onCancelEvent()
                     return
                 }
             }
-        }, [allowCancel ? new FormDialogButton("center", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined],
-            FormDialogStyle.Progress, openOverOthers, blockedOpenOver)
-        template.progressLines = progressLines;
-        dialog = this.ShowTemplate(template) as FormDialog<boolean>
+        }, [
+            allowCancel ? new FormDialogButton("center", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined
+        ], settings)
         return dialog;
     }
 
-    ShowCheckboxSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (values: T[]) => void, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
-        let dialog: FormDialog<T>
-        const template = new FormDialogTemplate<T>(title, content, cancelValue, (btn, value) => {
+    /**
+     * Opens checkbox select (allowing multiselect using checkboxes), if minimum and maximum argument set to 1, it will switch to radio buttons instead
+     * @param title Title of dialog
+     * @param content Content HTML before select field
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param settings More settings, not required:
+     * @argument settings.checkboxSelectMinCount Minimum count of selectable options, set to undefined for unlimited 
+     * @argument settings.checkboxSelectMaxCount Maximum count of selectable options, set to undefined for unlimited
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry (searchbar)
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Dialog or null
+     */
+    ShowCheckboxSelect<T>(title: string, content: string, cancelValue: T | T[], onCloseEvent: (values: T[] | T) => void, selectValues: Map<string, T>, settings: FormDialogSettings<T> = {}): FormDialog<T | T[]> | null {
+        settings.selectValues = selectValues
+        const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.CheckBoxSelect, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
-                    const values: T[] = [];
-                    for (const element of [...dialog.checkboxesHolder?.children as HTMLCollection]) {
-                        const toggle = element as HTMLFormToggleElement
-                        if (toggle.checked) {
-                            values.push(selectValues.get(toggle.value) as T)
+                    const children = dialog?.GetCheckboxHolderChildren()
+                    if (children != undefined) {
+                        const values: T[] = [];
+                        for (const element of children) {
+                            const toggle = element as HTMLFormToggleElement
+                            if (toggle.checked) {
+                                values.push(selectValues.get(toggle.value) as T)
+                            }
                         }
+                        onCloseEvent(values)
+                        return
                     }
-                    onCloseEvent(values)
-                    return
                 }
-                onCloseEvent([value])
+                onCloseEvent(value)
             }
-        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)],
-            FormDialogStyle.CheckBoxSelect, openOverOthers, blockedOpenOver)
-        template.selectValues = selectValues
-        dialog = this.ShowTemplate(template) as FormDialog<T>
+        }, [
+            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+        ], settings)
         return dialog;
     }
 
-    ShowPromptAsync<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    /**
+     * Shows prompt (asking for user input - text, number, ...)
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param entryType Input field type, overwrites settings.entryType
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @argument settings.selectValues Hinting values for entry, key is display value, value is returned
+     * @returns Result value
+     */
+    ShowPromptAsync<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", settings: FormDialogSettings<T> = {}): Promise<T | null> {
         return new Promise(resolve => {
-            this.ShowPrompt(title, content, cancelValue, (value: T) => { resolve(value) }, entryType, placeholder, openOverOthers, blockedOpenOver)
+            if (this.ShowPrompt(title, content, cancelValue, (value: T) => { resolve(value) }, entryType, settings) == null) {
+                resolve(null)
+            }
         })
     }
 
-    ShowAlertAsync(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<any> {
+    /**
+     * Shows alert (informing about problem - only OK button)
+     * @param title Title of dialog
+     * @param content Content HTML of information
+     * @param onCloseEvent Event fired on close
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns True or null on failure
+     */
+    ShowAlertAsync(title: string, content: string, settings: FormDialogSettings<any> = {}): Promise<null | true> {
         return new Promise(resolve => {
-            this.ShowAlert(title, content, () => { resolve(null) }, openOverOthers, blockedOpenOver)
+            if (this.ShowAlert(title, content, () => { resolve(true) }, settings) == null) {
+                resolve(null)
+            }
         })
     }
 
-    ShowConfirmAsync(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
+    /**
+    * Opens confirm (asking for user yes or no)
+    * @param title Title of dialog
+    * @param content Content HTML of information
+    * @param onCloseEvent Event fired on close
+    * @param settings More settings, not required:
+    * @argument settings.openOverOthers If dialog can open over others
+    * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+    * @argument settings.allowSelect Allow selection of text in dialog
+    * @returns True or false or null on failure
+    */
+    ShowConfirmAsync(title: string, content: string, settings: FormDialogSettings<boolean> = {}): Promise<boolean | null> {
         return new Promise(resolve => {
-            this.ShowConfirm(title, content, (value: boolean) => { resolve(value) }, openOverOthers, blockedOpenOver)
+            if (this.ShowConfirm(title, content, (value: boolean) => { resolve(value) }, settings) == null) {
+                resolve(null)
+            }
         })
     }
 
-    ShowSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    /**
+     * Opens select dialog (asking for user choice of value)
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry (searchbar)
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Returns selected value or null on failure
+     */
+    ShowSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, settings: FormDialogSettings<T> = {}): Promise<T | null> {
         return new Promise(resolve => {
-            this.ShowSelect(title, content, cancelValue, (value: T) => { resolve(value) }, selectValues, openOverOthers, blockedOpenOver)
+            if (this.ShowSelect(title, content, cancelValue, (value: T) => { resolve(value) }, selectValues, settings) == null) {
+                resolve(null)
+            }
         })
     }
 
-    ShowCheckboxSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T[]> {
+    /**
+     * Opens checkbox select (allowing multiselect using checkboxes), if minimum and maximum arguments are set to 1, it will switch to radio buttons instead
+     * @param title Title of dialog
+     * @param content Content HTML before select field
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param settings More settings, not required:
+     * @argument settings.checkboxSelectMinCount Minimum count of selectable options, set to undefined for unlimited 
+     * @argument settings.checkboxSelectMaxCount Maximum count of selectable options, set to undefined for unlimited
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry (searchbar)
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Array of values, one (cancel) value or null on failure
+     */
+    ShowCheckboxSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, settings: FormDialogSettings<T> = {}): Promise<T[] | T | null> {
         return new Promise(resolve => {
-            this.ShowCheckboxSelect(title, content, cancelValue, (value: T[]) => { resolve(value) }, selectValues, openOverOthers, blockedOpenOver)
+            if (this.ShowCheckboxSelect(title, content, cancelValue, (value: T[] | T) => { resolve(value) }, selectValues, settings) == null) {
+                resolve(null)
+            }
         })
-    }
-
-    OpenPrompt<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
-        return this.ShowPromptAsync<T>(title, content, cancelValue, entryType, placeholder, openOverOthers, blockedOpenOver)
-    }
-
-    OpenAlert(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<any> {
-        return this.ShowAlertAsync(title, content, openOverOthers, blockedOpenOver)
-    }
-
-    OpenConfirm(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
-        return this.ShowConfirmAsync(title, content, openOverOthers, blockedOpenOver)
-    }
-
-    OpenSelect<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
-        return this.ShowSelectAsync<T>(title, content, cancelValue, selectValues, openOverOthers, blockedOpenOver)
-    }
-
-    OpenCheckboxSelect<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T[]> {
-        return this.ShowCheckboxSelectAsync<T>(title, content, cancelValue, selectValues, openOverOthers, blockedOpenOver)
     }
 }

@@ -1,4 +1,4 @@
-import { FormDialog, FormDialogButton, FormDialogManager, FormDialogStyle, FormDialogTemplate } from "./formDialogScript.js"
+import { FormDialog, FormDialogButton, FormDialogManager, FormDialogStyle } from "./formDialogScript.js"
 import { GlobalLanguageManager, RemoveWaitStatusForms, SendToast, SetWaitStatusForms } from "./formScript.js"
 import { WebSocketConnection, WebSocketConnectionMessageType } from "./serverComunication.js"
 
@@ -9,18 +9,15 @@ Automatically connects to websocket and configures it with toasts and autoconnec
 */
 export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialogManager | null = null, newUrl = "/websocket",): WebSocketConnection {
     const ws = new WebSocketConnection(type, newUrl, GlobalLanguageManager)
+    const connectingDialogs: (null | FormDialog<false>)[] = []
+    const reconnectingDialogs: (null | FormDialog<false>)[] = []
     if (dialogManager != null) {
-        ws.UserParams.connectingDialog = new FormDialogTemplate("Web Socket", GlobalLanguageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."), false,(_a,_b) => {},[], FormDialogStyle.Wait, true, true)
-        let func = async () => {
-        ws.UserParams.reconnectingDialog = new FormDialogTemplate("Web Socket", await GlobalLanguageManager.AsyncTranslate("wsForms.reconnecting", "Reconnecting to Web Socket..."), false,(_a,_b) => {},[], FormDialogStyle.Wait, true, true)
-        }
-        func()
     }
     const listenerToWs = (type: WebSocketConnectionMessageType, data: string) => {
         switch (type) {
             case WebSocketConnectionMessageType.Connecting: {
                 if (dialogManager != null) {
-                    dialogManager.ShowTemplate(ws.UserParams.connectingDialog)
+                    connectingDialogs.push(dialogManager.ShowProgress("Web Socket", GlobalLanguageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."),() => {},0,false))
                 }
                 SetWaitStatusForms(GlobalLanguageManager.Translate("wsForms.connecting", "Connecting to Web Socket..."))
                 break
@@ -28,9 +25,11 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
             case WebSocketConnectionMessageType.Open:
                 //WebSocket opened
                 if (dialogManager != null) {
-                    ws.UserParams.connectingDialog.CloseChildrenDialogs()
-                    if ( ws.UserParams.reconnectingDialog != null) {
-                    ws.UserParams.reconnectingDialog.CloseChildrenDialogs()
+                    for (const element of connectingDialogs) {
+                        element?.CloseDialog();
+                    }
+                    for (const element of reconnectingDialogs) {
+                        element?.CloseDialog();
                     }
                 }
                 RemoveWaitStatusForms()
@@ -42,7 +41,7 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                 //WebSocket closed, reconnecting
                 if (data == "false") {
                     if (dialogManager != null) {
-                        dialogManager.ShowTemplate(ws.UserParams.reconnectingDialog)
+                        reconnectingDialogs.push(dialogManager.ShowProgress("Web Socket", GlobalLanguageManager.Translate("wsForms.reconnecting", "Reconnecting to Web Socket..."), () => {}, 0,false))
                     }
                     SetWaitStatusForms(GlobalLanguageManager.Translate("wsForms.disconnectedReconnecting", "Connection lost, reconnecting..."))
                     SendToast("Web Socket", GlobalLanguageManager.Translate("wsForms.disconnected", "Connection to client application closed!"), "error")
@@ -52,15 +51,15 @@ export function SetupWebsocketWithToasts(type: string, dialogManager: FormDialog
                 //WebSocket closed
                 if (dialogManager != null) {
                     ws.UserParams.connectingDialog.CloseChildrenDialogs()
-                    if ( ws.UserParams.reconnectingDialog != null) {
-                    ws.UserParams.reconnectingDialog.CloseChildrenDialogs()
+                    if (ws.UserParams.reconnectingDialog != null) {
+                        ws.UserParams.reconnectingDialog.CloseChildrenDialogs()
                     }
-                    //dialogManager.ShowTemplate(new FormDialogTemplate("Web Socket", GlobalLanguageManager.Translate("wsForms.disconnectedRefresh", "Connection lost! Do you want to reload the page?"), false, (id: number, value: boolean) => { if (value) { window.location.reload() } }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("wsForms.btnNo", "No"), false), new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("wsForms.btnYes", "Yes"), true)], FormDialogStyle.Normal, true, true))'
-                    dialogManager.ShowConfirm("Web Socket",GlobalLanguageManager.Translate("wsForms.disconnectedRefresh"),(value: boolean) => {
-                        if(value) {
+                    //dialogManager.ShowTemplate(new FormDialogTemplate("Web Socket", GlobalLanguageManager.Translate("wsForms.disconnectedRefresh", "Connection lost! Do you want to reload the page?"), false, (id: number, value: boolean) => { if (value) { window.location.reload() } }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("wsForms.btnNo", "No"), false), new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("wsForms.btnYes", "Yes"), true)], FormDialogStyle.Normal))'
+                    dialogManager.ShowConfirm("Web Socket", GlobalLanguageManager.Translate("wsForms.disconnectedRefresh"), (value: boolean) => {
+                        if (value) {
                             window.location.reload()
                         }
-                    },true,true)
+                    })
                 }
                 SetWaitStatusForms(GlobalLanguageManager.Translate("wsForms.connectionLost", "Connection lost!"))
                 SendToast("Web Socket", GlobalLanguageManager.Translate("wsForms.couldNotConnect", "Could not reconnect to Web Socket! Please reload the page."), "error")

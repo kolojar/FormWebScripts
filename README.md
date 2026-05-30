@@ -77,9 +77,9 @@
    + `ShowConfirm` opens confirm dialog, returns value using closeFunction
    + `ShowSelect` opens selection dialog, returns value using closeFunction
    + `ShowProgress` opens dialog with progress reporting
-   + `OpenPrompt` calls `ShowPromt` with await for close
-   + `OpenAlert` calls `ShowAlert` with await for close
-   + `OpenConfirm` calls `ShowConfirm` with await for close
+   + `ShowPromptAsync` calls `ShowPrompt` with await for close
+   + `ShowAlertAsync` calls `ShowAlert` with await for close
+   + `ShowConfirmAsync` calls `ShowConfirm` with await for close
 	  
 # Classes
 ## FormButton
