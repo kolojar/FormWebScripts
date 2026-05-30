@@ -143,7 +143,7 @@ export class FormDialogManager {
         }
     }
     RenderDialog(dialog) {
-        var _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         //Check if dialog is valid
         if (dialog == null || dialog == undefined) {
             return false;
@@ -164,6 +164,13 @@ export class FormDialogManager {
         if (this.opened.length > 0 && !dialog.settings.openOverOthers) {
             this.dialogs.push(dialog);
             console.log("Dialog waiting - other opened");
+            return true;
+        }
+        if (!GlobalLanguageManager.GetIsReady()) {
+            console.log("Dialog waiting - language manager is loading");
+            setTimeout(() => {
+                this.RenderDialog(dialog);
+            }, 10);
             return true;
         }
         //Set properties
@@ -265,6 +272,7 @@ export class FormDialogManager {
                     const toggle = element;
                     toggle.style.display = ContainsText(toggle.label, (_d = dialog.inputElement) === null || _d === void 0 ? void 0 : _d.value, false, true) ? "" : "none";
                 }
+                onChange();
             });
             dialog.holder.appendChild(dialog.inputElement);
             //Setup checkboxes area
@@ -284,20 +292,34 @@ export class FormDialogManager {
             if (isRadio) {
                 dialog.checkboxesHolder.removeAttribute("max");
             }
-            //Generate HTML elements
-            if (dialog.settings.selectValues != undefined) {
-                for (const [key, _] of dialog.settings.selectValues) {
-                    const input = new HTMLFormToggleElement();
-                    input.name = name;
-                    input.isRadio = isRadio;
-                    input.label = key;
-                    input.value = key;
-                    input.addEventListener("change", () => {
-                        onChange(input);
-                    });
-                    dialog.checkboxesHolder.appendChild(input);
+            //On change            
+            const onChange = () => {
+                var _c;
+                console.log("Change");
+                const children = (_c = dialog.checkboxesHolder) === null || _c === void 0 ? void 0 : _c.children;
+                let checked = 0;
+                let childenCount = 0;
+                for (const element of children) {
+                    const toggle = element;
+                    if (toggle.style.display == "none") {
+                        continue;
+                    }
+                    childenCount++;
+                    if (toggle.checked) {
+                        checked++;
+                    }
                 }
-            }
+                console.log(childenCount, checked);
+                if (checked == 0) {
+                    dialog.selectAllCheckbox.checked = false;
+                }
+                else if (checked == childenCount) {
+                    dialog.selectAllCheckbox.checked = true;
+                }
+                else {
+                    dialog.selectAllCheckbox.indeterminate = true;
+                }
+            };
             //Select all checkbox
             dialog.selectAllCheckbox = new HTMLFormToggleElement();
             dialog.selectAllCheckbox.addEventListener("change", () => {
@@ -305,34 +327,37 @@ export class FormDialogManager {
                 const checked = ((_c = dialog.selectAllCheckbox) === null || _c === void 0 ? void 0 : _c.checked) == true;
                 for (const element of (_d = dialog.checkboxesHolder) === null || _d === void 0 ? void 0 : _d.children) {
                     const toggle = element;
+                    if (toggle.style.display == "none") {
+                        continue;
+                    }
                     toggle.disableEvents = true;
                     toggle.checked = checked;
                     toggle.disableEvents = false;
                 }
+                onChange();
             });
             dialog.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll");
-            //On change            
-            const onChange = (checkbox) => {
-                var _c;
-                const children = (_c = dialog.checkboxesHolder) === null || _c === void 0 ? void 0 : _c.children;
-                let checked = 0;
-                for (const element of children) {
-                    if (element.checked) {
-                        checked++;
-                    }
-                }
-                if (checked == 0) {
-                    dialog.selectAllCheckbox.checked = false;
-                }
-                else if (checked == children.length) {
-                    dialog.selectAllCheckbox.checked = true;
-                }
-                else {
-                    dialog.selectAllCheckbox.indeterminate = true;
-                }
-            };
-            //Calculate max width
+            //Generate HTML elements
             dialog.holder.appendChild(dialog.checkboxesHolder);
+            dialog.holder.appendChild(dialog.selectAllCheckbox);
+            if (dialog.settings.checkboxSelectValues != undefined) {
+                for (const [key, val] of dialog.settings.checkboxSelectValues) {
+                    const input = new HTMLFormToggleElement();
+                    input.name = name;
+                    input.isRadio = isRadio;
+                    input.label = key;
+                    input.value = key;
+                    input.addEventListener("change", () => {
+                        onChange();
+                    });
+                    input.silenceValidation++;
+                    input.checked = (_c = val.checked) !== null && _c !== void 0 ? _c : false;
+                    input.silenceValidation--;
+                    dialog.checkboxesHolder.appendChild(input);
+                }
+            }
+            onChange();
+            //Calculate max width
             const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
             if (lastChild != null) {
                 dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
@@ -340,7 +365,7 @@ export class FormDialogManager {
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled");
         }
         //Allow select
-        dialog.AllowSelect((_c = dialog.settings.allowSelect) !== null && _c !== void 0 ? _c : false);
+        dialog.AllowSelect((_d = dialog.settings.allowSelect) !== null && _d !== void 0 ? _d : false);
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
         buttonBoxHolder.classList.add("formButtonBoxHolder");
@@ -434,19 +459,19 @@ export class FormDialogManager {
                 }
                 const button = document.createElement("button");
                 button.classList.add("formButton");
-                if (((_d = dialog.buttons[i]) === null || _d === void 0 ? void 0 : _d.color) == "ok") {
+                if (((_e = dialog.buttons[i]) === null || _e === void 0 ? void 0 : _e.color) == "ok") {
                     button.classList.add("formOkColor");
                 }
-                else if (((_e = dialog.buttons[i]) === null || _e === void 0 ? void 0 : _e.color) == "warn") {
+                else if (((_f = dialog.buttons[i]) === null || _f === void 0 ? void 0 : _f.color) == "warn") {
                     button.classList.add("formWarnColor");
                 }
-                else if (((_f = dialog.buttons[i]) === null || _f === void 0 ? void 0 : _f.color) == "info") {
+                else if (((_g = dialog.buttons[i]) === null || _g === void 0 ? void 0 : _g.color) == "info") {
                     button.classList.add("formInfoColor");
                 }
-                else if (((_g = dialog.buttons[i]) === null || _g === void 0 ? void 0 : _g.color) == "error") {
+                else if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "error") {
                     button.classList.add("formErrorColor");
                 }
-                else if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "black") {
+                else if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.color) == "black") {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = async () => {
@@ -458,16 +483,22 @@ export class FormDialogManager {
                         dialog.onCloseEvent(i, (_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick);
                     }
                 };
-                if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.location) == "left") {
+                if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.location) == "left") {
                     buttonBoxLeft.appendChild(button);
                 }
-                else if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.location) == "center") {
+                else if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.location) == "center") {
                     buttonBoxCenter.appendChild(button);
                 }
-                else if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.location) == "right") {
+                else if (((_m = dialog.buttons[i]) === null || _m === void 0 ? void 0 : _m.location) == "right") {
                     buttonBoxRight.appendChild(button);
                 }
-                button.innerText = dialog.buttons[i].text;
+                const text = dialog.buttons[i].text;
+                if (typeof text == "string") {
+                    button.innerText = text;
+                }
+                else {
+                    button.innerHTML = text();
+                }
             }
         }
         //Open dialog
@@ -548,8 +579,8 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnNo", "No"), false, true),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnYes", "Yes"), true)
+            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnNo", "No"); }, false, true),
+            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnYes", "Yes"); }, true)
         ], settings);
     }
     /**
@@ -577,8 +608,8 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"); }, cancelValue, true),
+            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnOK", "OK"); }, null)
         ], settings);
         return dialog;
     }
@@ -605,7 +636,7 @@ export class FormDialogManager {
                 }
             }
         }, [
-            allowCancel ? new FormDialogButton("center", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined
+            allowCancel ? new FormDialogButton("center", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"); }, false, true) : undefined
         ], settings);
         return dialog;
     }
@@ -615,7 +646,7 @@ export class FormDialogManager {
      * @param content Content HTML before select field
      * @param cancelValue Value returned on cancel
      * @param onCloseEvent Event fired on close
-     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param checkboxSelectValues Values for selection, key is display value, value is returned, overwrites settings.checkboxSelectValues
      * @param settings More settings, not required:
      * @argument settings.checkboxSelectMinCount Minimum count of selectable options, set to undefined for unlimited
      * @argument settings.checkboxSelectMaxCount Maximum count of selectable options, set to undefined for unlimited
@@ -625,9 +656,10 @@ export class FormDialogManager {
      * @argument settings.allowSelect Allow selection of text in dialog
      * @returns Dialog or null
      */
-    ShowCheckboxSelect(title, content, cancelValue, onCloseEvent, selectValues, settings = {}) {
-        settings.selectValues = selectValues;
+    ShowCheckboxSelect(title, content, cancelValue, onCloseEvent, checkboxSelectValues, settings = {}) {
+        settings.checkboxSelectValues = checkboxSelectValues;
         const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.CheckBoxSelect, (btn, value) => {
+            var _c;
             if (!onCloseEvent != null) {
                 if (btn == 1) {
                     const children = dialog === null || dialog === void 0 ? void 0 : dialog.GetCheckboxHolderChildren();
@@ -636,7 +668,7 @@ export class FormDialogManager {
                         for (const element of children) {
                             const toggle = element;
                             if (toggle.checked) {
-                                values.push(selectValues.get(toggle.value));
+                                values.push((_c = checkboxSelectValues.get(toggle.value)) === null || _c === void 0 ? void 0 : _c.value);
                             }
                         }
                         onCloseEvent(values);
@@ -646,8 +678,8 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"); }, cancelValue, true),
+            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnOK", "OK"); }, null)
         ], settings);
         return dialog;
     }
@@ -736,7 +768,7 @@ export class FormDialogManager {
      * @param content Content HTML before select field
      * @param cancelValue Value returned on cancel
      * @param onCloseEvent Event fired on close
-     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param checkboxSelectValues Values for selection, key is display value, value is returned, overwrites settings.checkboxSelectValues
      * @param settings More settings, not required:
      * @argument settings.checkboxSelectMinCount Minimum count of selectable options, set to undefined for unlimited
      * @argument settings.checkboxSelectMaxCount Maximum count of selectable options, set to undefined for unlimited
@@ -746,9 +778,9 @@ export class FormDialogManager {
      * @argument settings.allowSelect Allow selection of text in dialog
      * @returns Array of values, one (cancel) value or null on failure
      */
-    ShowCheckboxSelectAsync(title, content, cancelValue, selectValues, settings = {}) {
+    ShowCheckboxSelectAsync(title, content, cancelValue, checkboxSelectValues, settings = {}) {
         return new Promise(resolve => {
-            if (this.ShowCheckboxSelect(title, content, cancelValue, (value) => { resolve(value); }, selectValues, settings) == null) {
+            if (this.ShowCheckboxSelect(title, content, cancelValue, (value) => { resolve(value); }, checkboxSelectValues, settings) == null) {
                 resolve(null);
             }
         });

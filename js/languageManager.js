@@ -38,7 +38,10 @@ export class LanguageManager {
     constructor(fallbackLanguage = "", forceSetFallbackLanguage = false) {
         this.languageData = {};
         this.language = "";
+        this.isReady = false;
+        this.isReadyLoad = false;
         //Load langpath main
+        this.isReadyLoad = false;
         const metaElement1 = document.querySelector('meta[name="form-locales-main"]');
         if (metaElement1 != null) {
             this.localesFolderPathMain = metaElement1.content;
@@ -74,6 +77,8 @@ export class LanguageManager {
                     }
                 }
             }
+            console.log("Language manager loaded.");
+            this.isReadyLoad = true;
         };
         setLang();
         //Listen for language changes
@@ -93,6 +98,7 @@ export class LanguageManager {
             return false;
         }
         //Load main languages
+        this.isReady = false;
         if (this.localesFolderPathMain != null) {
             const responce = await fetch(this.localesFolderPathMain + "./" + language + ".json");
             if (responce.status != 200) {
@@ -103,6 +109,7 @@ export class LanguageManager {
             }
             catch (ex) {
                 console.error(ex);
+                this.isReady = true;
                 return false;
             }
         }
@@ -117,6 +124,7 @@ export class LanguageManager {
             }
             catch (ex) {
                 console.error(ex);
+                this.isReady = true;
                 return false;
             }
         }
@@ -128,7 +136,21 @@ export class LanguageManager {
         if (!silent) {
             alert("Language changed, it is recomended do reload the site.");
         }
+        this.isReady = true;
         return true;
+    }
+    GetIsReady() {
+        return this.isReady && this.isReadyLoad;
+    }
+    async GetIsReadyAsync() {
+        return new Promise(resolve => {
+            if (this.GetIsReady()) {
+                resolve(this.GetIsReady());
+            }
+            setTimeout(async () => {
+                resolve(await this.GetIsReadyAsync());
+            }, 100);
+        });
     }
 }
 //# sourceMappingURL=languageManager.js.map

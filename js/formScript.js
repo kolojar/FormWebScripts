@@ -129,6 +129,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     constructor() {
         super();
         this.silentValidation = 0;
+        this.silenceValidation = 0;
         this.isRadioLocal = false;
         this.disableEvents = false;
         //Create elements
@@ -182,9 +183,11 @@ export class HTMLFormToggleElement extends HTMLElement {
                 this.attributeChangedCallback(attribute, "", this.getAttribute(attribute));
             }
         }
+        const indeterminate = this.indeterminate;
         this.originalChecked = this.getAttribute("original-value") == "true";
         this.checked = this.hasAttribute("checked");
         this.isRadio = (this.getAttribute("type") == "radio" || this.hasAttribute("is-radio"));
+        this.indeterminate = indeterminate;
     }
     updateSwitch() {
         //Switch color and do the animation
@@ -246,11 +249,11 @@ export class HTMLFormToggleElement extends HTMLElement {
         return this.input.checked;
     }
     set checked(checked) {
+        this.indeterminate = false;
         if (checked == this.checked) {
             return;
         }
         //this.input.checked = checked;
-        this.indeterminate = false;
         if (this.isRadio) {
             let someChecked = false;
             for (const element of document.querySelectorAll('[name="' + this.name + '"][is-radio]')) {
@@ -309,7 +312,9 @@ export class HTMLFormToggleElement extends HTMLElement {
                     if (min != null) {
                         const minNum = parseInt(min);
                         if (minNum > checked.length) {
-                            SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString()), "error");
+                            if (this.silenceValidation == 0) {
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString()), "error");
+                            }
                             valid = false;
                         }
                     }
@@ -321,7 +326,9 @@ export class HTMLFormToggleElement extends HTMLElement {
                             }
                         }
                         if (maxNum < checked.length) {
-                            SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString()), "error");
+                            if (this.silenceValidation == 0) {
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString()), "error");
+                            }
                             valid = false;
                         }
                     }

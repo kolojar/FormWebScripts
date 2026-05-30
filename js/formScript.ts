@@ -144,6 +144,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     private isRadioLocal: boolean
     private silentValidation: number = 0;
     public disableEvents: boolean;
+    public silenceValidation: number = 0;
     //public activeValue: any
     //public notActiveValue: any
     constructor() {
@@ -202,9 +203,11 @@ export class HTMLFormToggleElement extends HTMLElement {
                 this.attributeChangedCallback(attribute, "", this.getAttribute(attribute) as string)
             }
         }
+        const indeterminate = this.indeterminate;
         this.originalChecked = this.getAttribute("original-value") as string == "true"
         this.checked = this.hasAttribute("checked")
         this.isRadio = (this.getAttribute("type") == "radio" || this.hasAttribute("is-radio"));
+        this.indeterminate = indeterminate
     }
 
     updateSwitch() {
@@ -264,9 +267,9 @@ export class HTMLFormToggleElement extends HTMLElement {
     }
 
     public set checked(checked: boolean) {
+        this.indeterminate = false;
         if (checked == this.checked) { return }
         //this.input.checked = checked;
-        this.indeterminate = false;
         if (this.isRadio) {
             let someChecked = false;
             for (const element of document.querySelectorAll('[name="' + this.name + '"][is-radio]')) {
@@ -323,7 +326,9 @@ export class HTMLFormToggleElement extends HTMLElement {
                     if (min != null) {
                         const minNum = parseInt(min)
                         if (minNum > checked.length) {
-                            SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString()), "error")
+                            if(this.silenceValidation == 0) {
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString()), "error")
+                            }
                             valid = false;
                         }
                     }
@@ -335,7 +340,9 @@ export class HTMLFormToggleElement extends HTMLElement {
                             }
                         }
                         if (maxNum < checked.length) {
-                            SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString()), "error")
+                            if(this.silenceValidation == 0) {
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString()), "error")
+                            }
                             valid = false;
                         }
                     }

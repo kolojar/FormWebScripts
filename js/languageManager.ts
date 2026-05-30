@@ -3,6 +3,8 @@ export class LanguageManager {
     readonly localesFolderPathMain: string | null
     readonly localesFolderPathApp: string | null
     private language: string = ""
+    private isReady: boolean = false;
+    private isReadyLoad: boolean = false;
 
     Translate(key: string, fallbackText: string | null = null): string {
         if (this.languageData == null) {
@@ -45,6 +47,7 @@ export class LanguageManager {
 
     constructor(fallbackLanguage: string = "", forceSetFallbackLanguage: boolean = false) {
         //Load langpath main
+        this.isReadyLoad = false;
         const metaElement1 = document.querySelector('meta[name="form-locales-main"]')
         if (metaElement1 != null) {
             this.localesFolderPathMain = (metaElement1 as HTMLMetaElement).content
@@ -79,6 +82,8 @@ export class LanguageManager {
                     }
                 }
             }
+            console.log("Language manager loaded.");
+            this.isReadyLoad = true;
         }
         setLang()
 
@@ -99,6 +104,7 @@ export class LanguageManager {
         if (language == null) { return false }
 
         //Load main languages
+        this.isReady = false;
         if (this.localesFolderPathMain != null) {
             const responce = await fetch(this.localesFolderPathMain + "./" + language + ".json")
             if (responce.status != 200) {
@@ -108,6 +114,7 @@ export class LanguageManager {
                 this.languageData = await responce.json()
             } catch (ex) {
                 console.error(ex);
+                this.isReady = true;
                 return false;
             }
         }
@@ -122,6 +129,7 @@ export class LanguageManager {
                 this.languageData = { ...this.languageData, ...await responce2.json() }
             } catch (ex) {
                 console.error(ex);
+                this.isReady = true;
                 return false;
             }
         }
@@ -135,6 +143,22 @@ export class LanguageManager {
         if (!silent) {
             alert("Language changed, it is recomended do reload the site.")
         }
+        this.isReady = true;
         return true
+    }
+
+    public GetIsReady(): boolean {
+        return this.isReady && this.isReadyLoad;
+    }
+
+    public async GetIsReadyAsync(): Promise<boolean> {
+        return new Promise(resolve => {
+            if(this.GetIsReady()) {
+                resolve(this.GetIsReady())
+            }
+            setTimeout( async () => {
+                resolve(await this.GetIsReadyAsync())
+            },100)
+        })
     }
 }

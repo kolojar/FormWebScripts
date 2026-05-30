@@ -16,17 +16,22 @@ export enum FormDialogStyle {
 export class FormDialogButton {
     location: "left" | "center" | "right"
     color: "ok" | "warn" | "info" | "error" | "black"
-    text: string
+    text: string | (() => string)
     valueOnClick: any
     isCancel: boolean = false
 
-    constructor(location: "left" | "center" | "right", color: "ok" | "warn" | "info" | "error" | "black", text: string, valueOnClick: any, isCancel: boolean = false) {
+    constructor(location: "left" | "center" | "right", color: "ok" | "warn" | "info" | "error" | "black", text: string | (() => string), valueOnClick: any, isCancel: boolean = false) {
         this.location = location
         this.color = color
         this.valueOnClick = valueOnClick
         this.text = text
         this.isCancel = isCancel
     }
+}
+
+export type FormDialogCheckboxSelectData<T> = {
+    value: T
+    checked?: boolean
 }
 
 /**
@@ -61,6 +66,10 @@ export type FormDialogSettings<T> = {
      * Values for selection, key is display value, value is returned, can be used for hinting at entry
      */
     selectValues?: Map<string, T>
+    /**
+     * Values for checkbox selection, key is display value, value contains {value = returned value, checked = if checkbox is checked from start}
+     */
+    checkboxSelectValues?: Map<string, FormDialogCheckboxSelectData<T>>
     /**
      * Count of progressbars
      */
@@ -230,6 +239,13 @@ export class FormDialogManager {
             console.log("Dialog waiting - other opened");
             return true
         }
+        if (!GlobalLanguageManager.GetIsReady()) {
+            console.log("Dialog waiting - language manager is loading");
+            setTimeout(() => {
+                this.RenderDialog(dialog)
+            }, 10)
+            return true
+        }
 
         //Set properties
         if (dialog.settings.blockOpenOver) {
@@ -315,6 +331,7 @@ export class FormDialogManager {
                     const toggle = (element as HTMLFormToggleElement)
                     toggle.style.display = ContainsText(toggle.label, dialog.inputElement?.value, false, true) ? "" : "none";
                 }
+                onChange()
             })
             dialog.holder.appendChild(dialog.inputElement as HTMLFormInputElement)
 
@@ -333,23 +350,32 @@ export class FormDialogManager {
                 dialog.checkboxesHolder.setAttribute("max", dialog.settings.checkboxSelectMaxCount.toString())
             }
             const isRadio = dialog.settings.checkboxSelectMinCount != undefined && dialog.settings.checkboxSelectMaxCount != undefined && dialog.settings.checkboxSelectMinCount == 1 && dialog.settings.checkboxSelectMaxCount == 1
-            if(isRadio) {
+            if (isRadio) {
                 dialog.checkboxesHolder.removeAttribute("max")
             }
 
-            //Generate HTML elements
-            if (dialog.settings.selectValues != undefined) {
-                for (const [key, _] of dialog.settings.selectValues) {
-                    const input = new HTMLFormToggleElement()
-                    input.name = name;
-                    input.isRadio = isRadio
-                    input.label = key;
-                    input.value = key;
-                    input.addEventListener("change", () => {
-                        onChange(input)
-                    })
-                    dialog.checkboxesHolder.appendChild(input)
+            //On change            
+            const onChange = () => {
+                console.log("Change");
+                const children = dialog.checkboxesHolder?.children as HTMLCollection;
+                let checked = 0;
+                let childenCount = 0;
+                for (const element of children) {
+                    const toggle = (element as HTMLFormToggleElement)
+                    if(toggle.style.display == "none") {continue}
+                    childenCount++;
+                    if (toggle.checked) {
+                        checked++;
+                    }
                 }
+                console.log(childenCount,checked);
+                if (checked == 0) {
+                    (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = false;
+                } else if (checked == childenCount) {
+                    (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = true;
+                } else {
+                    (dialog.selectAllCheckbox as HTMLFormToggleElement).indeterminate = true;
+                }               
             }
 
             //Select all checkbox
@@ -358,33 +384,37 @@ export class FormDialogManager {
                 const checked = dialog.selectAllCheckbox?.checked == true
                 for (const element of dialog.checkboxesHolder?.children as HTMLCollection) {
                     const toggle = (element as HTMLFormToggleElement)
+                    if(toggle.style.display == "none") {continue}
                     toggle.disableEvents = true;
                     toggle.checked = checked;
                     toggle.disableEvents = false;
                 }
+                onChange()
             })
             dialog.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
 
-            //On change            
-            const onChange = (checkbox: HTMLFormToggleElement) => {
-                const children = dialog.checkboxesHolder?.children as HTMLCollection;
-                let checked = 0;
-                for (const element of children) {
-                    if ((element as HTMLFormToggleElement).checked) {
-                        checked++;
-                    }
-                }
-                if (checked == 0) {
-                    (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = false;
-                } else if (checked == children.length) {
-                    (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = true;
-                } else {
-                    (dialog.selectAllCheckbox as HTMLFormToggleElement).indeterminate = true;
+            //Generate HTML elements
+            dialog.holder.appendChild(dialog.checkboxesHolder)
+            dialog.holder.appendChild(dialog.selectAllCheckbox)
+            if (dialog.settings.checkboxSelectValues != undefined) {
+                for (const [key, val] of dialog.settings.checkboxSelectValues) {
+                    const input = new HTMLFormToggleElement()
+                    input.name = name;
+                    input.isRadio = isRadio
+                    input.label = key;
+                    input.value = key;
+                    input.addEventListener("change", () => {
+                        onChange()
+                    })
+                    input.silenceValidation++;
+                    input.checked = val.checked ?? false;
+                    input.silenceValidation--;
+                    dialog.checkboxesHolder.appendChild(input)
                 }
             }
+            onChange()
 
             //Calculate max width
-            dialog.holder.appendChild(dialog.checkboxesHolder)
             const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
             if (lastChild != null) {
                 dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
@@ -514,7 +544,12 @@ export class FormDialogManager {
                 } else if (dialog.buttons[i]?.location == "right") {
                     buttonBoxRight.appendChild(button)
                 }
-                button.innerText = (dialog.buttons[i] as FormDialogButton).text
+                const text = (dialog.buttons[i] as FormDialogButton).text
+                if (typeof text == "string") {
+                    button.innerText = text
+                } else {
+                    button.innerHTML = text();
+                }
             }
         }
         //Open dialog
@@ -599,8 +634,8 @@ export class FormDialogManager {
                 onCloseEvent(value)
             }
         }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnNo", "No"), false, true),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnYes", "Yes"), true)
+            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnNo", "No") }, false, true),
+            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnYes", "Yes") }, true)
         ], settings)
     }
 
@@ -629,8 +664,8 @@ export class FormDialogManager {
                 onCloseEvent(value)
             }
         }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel") }, cancelValue, true),
+            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnOK", "OK") }, null)
         ], settings)
         return dialog;
     }
@@ -658,7 +693,7 @@ export class FormDialogManager {
                 }
             }
         }, [
-            allowCancel ? new FormDialogButton("center", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), false, true) : undefined
+            allowCancel ? new FormDialogButton("center", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel") }, false, true) : undefined
         ], settings)
         return dialog;
     }
@@ -669,7 +704,7 @@ export class FormDialogManager {
      * @param content Content HTML before select field
      * @param cancelValue Value returned on cancel
      * @param onCloseEvent Event fired on close
-     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param checkboxSelectValues Values for selection, key is display value, value is returned, overwrites settings.checkboxSelectValues
      * @param settings More settings, not required:
      * @argument settings.checkboxSelectMinCount Minimum count of selectable options, set to undefined for unlimited 
      * @argument settings.checkboxSelectMaxCount Maximum count of selectable options, set to undefined for unlimited
@@ -679,8 +714,8 @@ export class FormDialogManager {
      * @argument settings.allowSelect Allow selection of text in dialog
      * @returns Dialog or null
      */
-    ShowCheckboxSelect<T>(title: string, content: string, cancelValue: T | T[], onCloseEvent: (values: T[] | T) => void, selectValues: Map<string, T>, settings: FormDialogSettings<T> = {}): FormDialog<T | T[]> | null {
-        settings.selectValues = selectValues
+    ShowCheckboxSelect<T>(title: string, content: string, cancelValue: T | T[], onCloseEvent: (values: T[] | T) => void, checkboxSelectValues: Map<string, FormDialogCheckboxSelectData<T>>, settings: FormDialogSettings<T> = {}): FormDialog<T | T[]> | null {
+        settings.checkboxSelectValues = checkboxSelectValues
         const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.CheckBoxSelect, (btn, value) => {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
@@ -690,7 +725,7 @@ export class FormDialogManager {
                         for (const element of children) {
                             const toggle = element as HTMLFormToggleElement
                             if (toggle.checked) {
-                                values.push(selectValues.get(toggle.value) as T)
+                                values.push(checkboxSelectValues.get(toggle.value)?.value as T)
                             }
                         }
                         onCloseEvent(values)
@@ -700,8 +735,8 @@ export class FormDialogManager {
                 onCloseEvent(value)
             }
         }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
+            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel") }, cancelValue, true),
+            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnOK", "OK") }, null)
         ], settings)
         return dialog;
     }
@@ -795,7 +830,7 @@ export class FormDialogManager {
      * @param content Content HTML before select field
      * @param cancelValue Value returned on cancel
      * @param onCloseEvent Event fired on close
-     * @param selectValues Values for selection, key is display value, value is returned, overwrites settings.selectValues
+     * @param checkboxSelectValues Values for selection, key is display value, value is returned, overwrites settings.checkboxSelectValues
      * @param settings More settings, not required:
      * @argument settings.checkboxSelectMinCount Minimum count of selectable options, set to undefined for unlimited 
      * @argument settings.checkboxSelectMaxCount Maximum count of selectable options, set to undefined for unlimited
@@ -805,9 +840,9 @@ export class FormDialogManager {
      * @argument settings.allowSelect Allow selection of text in dialog
      * @returns Array of values, one (cancel) value or null on failure
      */
-    ShowCheckboxSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, settings: FormDialogSettings<T> = {}): Promise<T[] | T | null> {
+    ShowCheckboxSelectAsync<T>(title: string, content: string, cancelValue: T, checkboxSelectValues: Map<string, FormDialogCheckboxSelectData<T>>, settings: FormDialogSettings<T> = {}): Promise<T[] | T | null> {
         return new Promise(resolve => {
-            if (this.ShowCheckboxSelect(title, content, cancelValue, (value: T[] | T) => { resolve(value) }, selectValues, settings) == null) {
+            if (this.ShowCheckboxSelect(title, content, cancelValue, (value: T[] | T) => { resolve(value) }, checkboxSelectValues, settings) == null) {
                 resolve(null)
             }
         })
