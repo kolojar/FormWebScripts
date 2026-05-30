@@ -283,7 +283,7 @@ export class FormDialogManager {
             }
             const isRadio = dialog.settings.checkboxSelectMinCount != undefined && dialog.settings.checkboxSelectMaxCount != undefined && dialog.settings.checkboxSelectMinCount == 1 && dialog.settings.checkboxSelectMaxCount == 1;
             if (isRadio) {
-                dialog.checkboxesHolder.removeAttribute("max", dialog.settings.checkboxSelectMaxCount.toString());
+                dialog.checkboxesHolder.removeAttribute("max");
             }
             //Generate HTML elements
             if (dialog.settings.selectValues != undefined) {
