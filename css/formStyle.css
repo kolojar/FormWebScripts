@@ -654,13 +654,15 @@ body[form-box-holder] {
     flex-grow: 1;
     max-width: 90dvw;
     max-height: 90dvh;
+    overflow: hidden;
     /*white-space: ;*/
 }
 
 .formDialog>div {
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
+     max-width: 90dvw;
+     overflow: auto;
 }
 
 .formDialogFadeIn {
@@ -692,16 +694,19 @@ body[form-box-holder] {
 .formDialog .checkboxHolder {
     min-height: 100px;
     min-width: 100px;
+    max-width: stretch;
     padding: 4px;
     overflow: auto;
     display: flex;
     flex-flow: column wrap;
     flex-shrink: 1;
-    flex-grow: 1;
+    flex-grow: 0;
+    margin: 4px;
 }
 
 .formDialog .checkboxHolder>* {
     display: inline;
+    width: fit-content;
 }
 
 /*Custom classes = formButtonBox*/

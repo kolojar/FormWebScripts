@@ -339,7 +339,12 @@ export class FormDialogManager {
 
         //CheckBoxSelect
         if (dialog.template.style == FormDialogStyle.CheckBoxSelect) {
-            holder.appendChild(dialog.checkboxesHolder as HTMLFieldSetElement)
+            const checkboxes  =dialog.checkboxesHolder as HTMLFieldSetElement;
+            holder.appendChild(checkboxes)
+            const lastChild = checkboxes.children.item(checkboxes.children.length-1);
+            if(lastChild != null) {
+                checkboxes.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - checkboxes.getBoundingClientRect().left + checkboxes.scrollLeft + 20) + "px";
+            }
         }
 
         //Button box holder
