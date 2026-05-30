@@ -12,6 +12,7 @@
     "dialog.btnNo": "No",
     "dialog.btnOK": "OK",
     "dialog.btnCancel": "Cancel",
+    "dialog.selectAll": "Select all",
     "formToggle.min": "You have to choose at least {x} option(s).",
     "formToggle.max": "You can choose up to {x} option(s).",
     "formInput.invalidValue": "Invalid value"

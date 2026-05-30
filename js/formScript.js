@@ -1,6 +1,6 @@
 //Do not forget to add formStyle.css and tableStyle.css
 import { LanguageManager } from "./languageManager.js";
-import { GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, GeneratePassword } from "./sharedScripts.js";
 export const GlobalLanguageManager = new LanguageManager();
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
@@ -130,6 +130,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         super();
         this.silentValidation = 0;
         this.isRadioLocal = false;
+        this.disableEvents = false;
         //Create elements
         this.labelBeforeElement = document.createElement("label");
         this.holder = document.createElement("label");
@@ -176,8 +177,11 @@ export class HTMLFormToggleElement extends HTMLElement {
         //})
     }
     connectedCallback() {
-        this.labelBeforeElement.innerText = this.getAttribute("label-before");
-        this.labelAfterElement.innerText = this.getAttribute("label-after");
+        for (const attribute of HTMLFormInputElement.observedAttributes) {
+            if (this.hasAttribute(attribute)) {
+                this.attributeChangedCallback(attribute, "", this.getAttribute(attribute));
+            }
+        }
         this.originalChecked = this.getAttribute("original-value") == "true";
         this.checked = this.hasAttribute("checked");
         this.isRadio = (this.getAttribute("type") == "radio" || this.hasAttribute("is-radio"));
@@ -214,10 +218,10 @@ export class HTMLFormToggleElement extends HTMLElement {
             return;
         }
         if (name == "label-before") {
-            this.labelBeforeElement.innerText = newValue;
+            this.labelBefore = newValue;
         }
-        else if (name == "label-after") {
-            this.labelAfterElement.innerText = newValue;
+        else if (name == "label") {
+            this.label = newValue;
         }
         else if (name == "original-checked") {
             this.originalChecked = newValue == "true";
@@ -234,6 +238,9 @@ export class HTMLFormToggleElement extends HTMLElement {
         else if (name == "value") {
             this.value = newValue;
         }
+        else if (name == "indeterminate") {
+            this.indeterminate = this.hasAttribute("indeterminate");
+        }
     }
     get checked() {
         return this.input.checked;
@@ -243,7 +250,7 @@ export class HTMLFormToggleElement extends HTMLElement {
             return;
         }
         //this.input.checked = checked;
-        this.removeAttribute("indeterminate");
+        this.indeterminate = false;
         if (this.isRadio) {
             let someChecked = false;
             for (const element of document.querySelectorAll('[name="' + this.name + '"][is-radio]')) {
@@ -269,8 +276,10 @@ export class HTMLFormToggleElement extends HTMLElement {
         else {
             this.removeAttribute("checked");
         }
-        this.input.dispatchEvent(new Event("change"));
-        this.dispatchEvent(new Event("change"));
+        if (!this.disableEvents) {
+            this.input.dispatchEvent(new Event("change"));
+            this.dispatchEvent(new Event("change"));
+        }
         this.updateSwitch();
         this.validate();
     }
@@ -391,8 +400,19 @@ export class HTMLFormToggleElement extends HTMLElement {
         }
         this.input.value = value;
     }
+    get indeterminate() {
+        return this.hasAttribute("indeterminate");
+    }
+    set indeterminate(indeterminate) {
+        if (indeterminate) {
+            this.setAttribute("indeterminate", "");
+        }
+        else {
+            this.removeAttribute("indeterminate");
+        }
+    }
 }
-HTMLFormToggleElement.observedAttributes = ['label-before', 'label-after', 'original-checked', 'checked', 'name', 'is-radio', 'value'];
+HTMLFormToggleElement.observedAttributes = ['label-before', 'label', 'original-checked', 'checked', 'name', 'is-radio', 'value', 'indeterminate'];
 /**
  * HTMLFormInputElement element defition.
  * Sends event validation-done on complete validation.
@@ -404,6 +424,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.invalidBorderClass = "formErrorBorderColor";
         this.usingJSList = false;
         this.areOptionsVisible = false;
+        this.setIconFromCode = 0;
         //this.internals = this.attachInternals();
         this.onEnterPressClickElementId = onEnterPressClickElementId;
         this.typ = "text";
@@ -416,6 +437,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.optionsTimestamp = new Date(0);
         this.listId = listId;
         this.isCaseSensitiveList = false;
+        this.realtimeSearchTimeout = -1;
         //Create elements
         this.holder = document.createElement("div");
         this.img = document.createElement("img");
@@ -538,9 +560,8 @@ export class HTMLFormInputElement extends HTMLElement {
         //Update list
         //console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.optionsLocal) {
-            const contains = (this.isCaseSensitiveList ? value[0] : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.valueRaw.toString() : this.valueRaw.toString().toLocaleLowerCase()));
             //console.log(value, contains);
-            if (contains) {
+            if (ContainsText(this.valueRaw.toString(), value[0], this.isCaseSensitiveList, true)) {
                 const optionDiv = document.createElement("div");
                 const option = document.createElement("p");
                 option.innerText = value[0];
@@ -559,7 +580,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
     updateInputType() {
-        //Select input element based on type
+        //Clear parents
         const focused = this.classList.contains("formInputFocus");
         if (this.img.parentElement == this.holder) {
             this.holder.removeChild(this.img);
@@ -576,9 +597,16 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.afterImg.parentElement == this.holder) {
             this.holder.removeChild(this.afterImg);
         }
+        //Special img usecases
+        if (this.type == "search-realtime") {
+            this.setIconFromCode++;
+            this.icon = "!filter";
+            this.setIconFromCode--;
+        }
         if (this.img.getAttribute("path") != "") {
             this.holder.appendChild(this.img);
         }
+        //Select input element based on type
         if (this.type == "textarea") {
             this.holder.appendChild(this.textArea);
             if (focused) {
@@ -602,7 +630,22 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.type == "select") {
             this.isStrictList = true;
         }
-        //Add specific use cases
+        //Add specific use cases for inputs
+        const realtimeSeachEvent = () => {
+            if (this.realtimeSearchTimeout) {
+                clearTimeout(this.realtimeSearchTimeout);
+            }
+            this.realtimeSearchTimeout = setTimeout(() => {
+                this.dispatchEvent(new Event("search"));
+            }, 100);
+        };
+        if (this.type == "search-realtime") {
+            this.addEventListener("input", realtimeSeachEvent);
+        }
+        else {
+            this.removeEventListener("input", realtimeSeachEvent);
+        }
+        //Add specific use cases for afterImg
         if (this.type == "password") {
             //Make password eye
             const updatePasswordEye = () => {
@@ -971,7 +1014,9 @@ export class HTMLFormInputElement extends HTMLElement {
         this.img.setAttribute("path", icon);
         this.img.src = GetFormIconPath(icon);
         this.setAttribute("icon", icon);
-        this.updateInputType();
+        if (this.setIconFromCode == 0) {
+            this.updateInputType();
+        }
     }
     get isStrictList() {
         return this.hasAttribute("is-strict-list");

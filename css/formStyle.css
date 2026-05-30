@@ -280,7 +280,7 @@ button:disabled {
 
 /*Custom object = form-input*/
 form-input {
-    min-height: 34px;
+    min-height: 1.2lh;
     margin: 4px;
     display: block;
     width: auto;
@@ -642,7 +642,6 @@ body[form-box-holder] {
     border-radius: 10px;
     box-shadow: 10px 10px 10px black;
     font-size: large;
-    overflow: auto;
     margin: 0;
     left: 50%;
     top: 50%;
@@ -650,7 +649,18 @@ body[form-box-holder] {
     width: max-content;
     height: max-content;
     animation: none;
+    padding: 8px;
+    display: flex;
+    flex-grow: 1;
+    max-width: 90dvw;
+    max-height: 90dvh;
     /*white-space: ;*/
+}
+
+.formDialog>div {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .formDialogFadeIn {
@@ -679,6 +689,20 @@ body[form-box-holder] {
     cursor: move;
 }
 
+.formDialog .checkboxHolder {
+    min-height: 100px;
+    min-width: 100px;
+    padding: 4px;
+    overflow: auto;
+    display: flex;
+    flex-flow: column wrap;
+    flex-shrink: 1;
+    flex-grow: 1;
+}
+
+.formDialog .checkboxHolder>* {
+    display: inline;
+}
 
 /*Custom classes = formButtonBox*/
 .formButtonBoxHolder {

@@ -5,5 +5,6 @@
     "statusOk": "./images/checkCircle32.svg",
     "statusInfo": "./images/info32.svg",
     "statusWarn": "./images/warning32.svg",
-    "statusError": "./images/report32.svg"
+    "statusError": "./images/report32.svg",
+    "filter": "./images/filterAlt32.svg"
 }

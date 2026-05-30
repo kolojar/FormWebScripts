@@ -64,4 +64,30 @@ export function DisableDragAndDrop(element) {
         ev.preventDefault();
     });
 }
+export function ContainsText(text, searched, isCaseSensitive, seachWords) {
+    //Sort invalid cases
+    if (searched.length == 0) {
+        return true;
+    }
+    else if (text.length == 0) {
+        return false;
+    }
+    //Case sensitive
+    text = isCaseSensitive ? text : text.toLocaleLowerCase();
+    searched = isCaseSensitive ? searched : searched.toLocaleLowerCase();
+    //Split to words
+    const words = seachWords ? searched.split(" ") : [searched];
+    //Do checks
+    let validChecks = 0;
+    for (const word of words) {
+        if (word.length == 0) {
+            continue;
+        }
+        validChecks++;
+        if (!text.includes(word)) {
+            return false;
+        }
+    }
+    return validChecks > 0;
+}
 //# sourceMappingURL=sharedScripts.js.map

@@ -1,12 +1,13 @@
-import { DraggableElement, GlobalLanguageManager, HTMLFormInputElement, HTMLFormInputType, MakeElementDraggable, SendToast } from "./formScript.js"
-import { KeyValuePair } from "./sharedScripts.js"
+import { DraggableElement, GlobalLanguageManager, HTMLFormInputElement, HTMLFormInputType, HTMLFormToggleElement, MakeElementDraggable, SendToast } from "./formScript.js"
+import { ContainsText, GeneratePassword, KeyValuePair } from "./sharedScripts.js"
 
 export enum FormDialogStyle {
     Normal = 0,
     Wait = 1,
     Entry = 2,
     Select = 3,
-    Progress = 4
+    Progress = 4,
+    CheckBoxSelect = 5
 }
 
 /**
@@ -88,11 +89,13 @@ export class FormDialog<T> {
     readonly element: HTMLDialogElement
     readonly inputElement: HTMLFormInputElement | null = null
     readonly progressLines: HTMLDivElement[]
+    readonly checkboxesHolder: HTMLFieldSetElement | null = null
     readonly progressLabels: HTMLSpanElement[] = []
+    readonly selectAllCheckbox: HTMLFormToggleElement | null = null
     /**
      * Do not edit externally
      */
-    public draggableElement: DraggableElement |null
+    public draggableElement: DraggableElement | null
     closed: boolean = false
 
     /**
@@ -108,7 +111,7 @@ export class FormDialog<T> {
             //Setup entry
             this.inputElement = new HTMLFormInputElement("", null)
             this.inputElement.placeholder = template.placeholder
-            this.inputElement.addEventListener("mousedown",(ev: MouseEvent) => {
+            this.inputElement.addEventListener("mousedown", (ev: MouseEvent) => {
                 ev.stopImmediatePropagation()
             })
             if (template.style == FormDialogStyle.Entry) {
@@ -126,8 +129,7 @@ export class FormDialog<T> {
                 default: { image = "textfields32.svg"; break }
             }
             this.inputElement.icon = "/formWebScripts/images/" + image
-        }
-        if (template.style == FormDialogStyle.Progress) {
+        } else if (template.style == FormDialogStyle.Progress) {
             //Setup progress
             for (let i = 0; i < template.progressLines; i++) {
                 const line = document.createElement("div")
@@ -138,6 +140,64 @@ export class FormDialog<T> {
                 progress.classList.add("formProgress")
                 line.appendChild(progress)
                 this.progressLines.push(line)
+            }
+        } else if (template.style == FormDialogStyle.CheckBoxSelect) {
+            //Setup search
+            this.inputElement = new HTMLFormInputElement("", null)
+            this.inputElement.setOptions([...this.template.selectValues.keys()])
+            this.inputElement.type = "search-realtime";
+            this.inputElement.addEventListener("search", () => {
+                for (const element of this.checkboxesHolder?.children as HTMLCollection) {
+                    const toggle = (element as HTMLFormToggleElement)
+                    toggle.style.display = ContainsText(toggle.label, this.inputElement?.value, false, true) ? "" : "none";
+                }
+            })
+
+            //Setup checkboxes area
+            this.checkboxesHolder = document.createElement("fieldset")
+            this.checkboxesHolder.classList.add("checkboxHolder")
+            const name = "FormDialogToggleGroup-" + GeneratePassword(8, false, false);
+            this.checkboxesHolder.setAttribute("form-toggle-limiter", name)
+            for (const [key, _] of this.template.selectValues) {
+                const input = new HTMLFormToggleElement()
+                input.name = name;
+                input.label = key;
+                input.value = key;
+                input.addEventListener("change", () => {
+                    onChange(input)
+                })
+                this.checkboxesHolder.appendChild(input)
+            }
+
+            //Select all checkbox
+            this.selectAllCheckbox = new HTMLFormToggleElement()
+            this.selectAllCheckbox.addEventListener("change", () => {
+                const checked = this.selectAllCheckbox?.checked == true
+                for (const element of this.checkboxesHolder?.children as HTMLCollection) {
+                    const toggle = (element as HTMLFormToggleElement)
+                    toggle.disableEvents = true;
+                    toggle.checked = checked;
+                    toggle.disableEvents = false;
+                }
+            })
+            this.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
+
+            //On change            
+            const onChange = (checkbox: HTMLFormToggleElement) => {
+                const children = this.checkboxesHolder?.children as HTMLCollection;
+                let checked = 0;
+                for (const element of children) {
+                    if ((element as HTMLFormToggleElement).checked) {
+                        checked++;
+                    }
+                }
+                if (checked == 0) {
+                    (this.selectAllCheckbox as HTMLFormToggleElement).checked = false;
+                } else if (checked == children.length) {
+                    (this.selectAllCheckbox as HTMLFormToggleElement).checked = true;
+                } else {
+                    (this.selectAllCheckbox as HTMLFormToggleElement).indeterminate = true;
+                }
             }
         }
         this.template.createdDialogs.push(this)
@@ -266,7 +326,7 @@ export class FormDialogManager {
         holder.appendChild(data)
 
         //Entry
-        if (dialog.template.style == FormDialogStyle.Entry || dialog.template.style == FormDialogStyle.Select) {
+        if (dialog.template.style == FormDialogStyle.Entry || dialog.template.style == FormDialogStyle.Select || dialog.template.style == FormDialogStyle.CheckBoxSelect) {
             holder.appendChild(dialog.inputElement as HTMLFormInputElement)
         }
 
@@ -275,6 +335,11 @@ export class FormDialogManager {
             for (let i = 0; i < dialog.progressLines.length; i++) {
                 holder.appendChild(dialog.progressLines[i])
             }
+        }
+
+        //CheckBoxSelect
+        if (dialog.template.style == FormDialogStyle.CheckBoxSelect) {
+            holder.appendChild(dialog.checkboxesHolder as HTMLFieldSetElement)
         }
 
         //Button box holder
@@ -305,7 +370,7 @@ export class FormDialogManager {
             if (dialog.template.style == FormDialogStyle.Select && !isCancel) {
                 const [_, valid] = await (dialog.inputElement as HTMLFormInputElement).validate()
                 if (!valid) {
-                    SendToast(dialog.template.title,"Pole obsahuje neplatnou hodnotu.","error")
+                    SendToast(dialog.template.title, "Pole obsahuje neplatnou hodnotu.", "error")
                     return Promise.resolve(false)
                 }
             }
@@ -395,7 +460,7 @@ export class FormDialogManager {
         }
         //Open dialog
         dialog.element.showModal()
-        dialog.element.scroll({top: 0, behavior: "instant"})
+        dialog.element.scroll({ top: 0, behavior: "instant" })
         return true
     }
 
@@ -475,27 +540,78 @@ export class FormDialogManager {
         return dialog;
     }
 
-    OpenPrompt<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    ShowCheckboxSelect<T>(title: string, content: string, cancelValue: T, onCloseEvent: (values: T[]) => void, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): FormDialog<T> {
+        let dialog: FormDialog<T>
+        const template = new FormDialogTemplate<T>(title, content, cancelValue, (btn, value) => {
+            if (!onCloseEvent != null) {
+                if (btn == 1) {
+                    const values: T[] = [];
+                    for (const element of [...dialog.selectAllCheckbox?.children as HTMLCollection]) {
+                        const toggle = element as HTMLFormToggleElement
+                        if (toggle.checked) {
+                            values.push(selectValues.get(toggle.value) as T)
+                        }
+                    }
+                    onCloseEvent(values)
+                    return
+                }
+                onCloseEvent([value])
+            }
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue, true),
+        new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)],
+            FormDialogStyle.CheckBoxSelect, openOverOthers, blockedOpenOver)
+        template.selectValues = selectValues
+        dialog = this.ShowTemplate(template) as FormDialog<T>
+        return dialog;
+    }
+
+    ShowPromptAsync<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
         return new Promise(resolve => {
             this.ShowPrompt(title, content, cancelValue, (value: T) => { resolve(value) }, entryType, placeholder, openOverOthers, blockedOpenOver)
         })
     }
 
-    OpenAlert(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<any> {
+    ShowAlertAsync(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<any> {
         return new Promise(resolve => {
             this.ShowAlert(title, content, () => { resolve(null) }, openOverOthers, blockedOpenOver)
         })
     }
 
-    OpenConfirm(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
+    ShowConfirmAsync(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
         return new Promise(resolve => {
             this.ShowConfirm(title, content, (value: boolean) => { resolve(value) }, openOverOthers, blockedOpenOver)
         })
     }
 
-    OpenSelect<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+    ShowSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
         return new Promise(resolve => {
             this.ShowSelect(title, content, cancelValue, (value: T) => { resolve(value) }, selectValues, openOverOthers, blockedOpenOver)
         })
+    }
+
+    ShowCheckboxSelectAsync<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T[]> {
+        return new Promise(resolve => {
+            this.ShowCheckboxSelect(title, content, cancelValue, (value: T[]) => { resolve(value) }, selectValues, openOverOthers, blockedOpenOver)
+        })
+    }
+
+    OpenPrompt<T>(title: string, content: string, cancelValue: T, entryType: HTMLFormInputType = "text", placeholder: string = "", openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+        return this.ShowPromptAsync<T>(title, content, cancelValue, entryType, placeholder, openOverOthers, blockedOpenOver)
+    }
+
+    OpenAlert(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<any> {
+        return this.ShowAlertAsync(title, content, openOverOthers, blockedOpenOver)
+    }
+
+    OpenConfirm(title: string, content: string, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<boolean> {
+        return this.ShowConfirmAsync(title, content, openOverOthers, blockedOpenOver)
+    }
+
+    OpenSelect<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T> {
+        return this.ShowSelectAsync<T>(title, content, cancelValue, selectValues, openOverOthers, blockedOpenOver)
+    }
+
+    OpenCheckboxSelect<T>(title: string, content: string, cancelValue: T, selectValues: Map<string, T>, openOverOthers: boolean = true, blockedOpenOver: boolean = true): Promise<T[]> {
+        return this.ShowCheckboxSelectAsync<T>(title, content, cancelValue, selectValues, openOverOthers, blockedOpenOver)
     }
 }

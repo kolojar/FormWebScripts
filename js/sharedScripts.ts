@@ -44,29 +44,29 @@ export class KeyValuePair<K, V> {
 }
 
 export function FormatFileSize(fileSizeBytes: number): string {
-  // Approximate to the closest prefixed unit
-  const units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
-  const exponent = Math.min(
-    Math.floor(Math.log(fileSizeBytes) / Math.log(1024)),
-    units.length - 1,
-  );
-  const approx = fileSizeBytes / 1024 ** exponent;
-  return exponent === 0 ? `${fileSizeBytes} bytes` : `${approx.toFixed(3)} ${units[exponent]}`;
+    // Approximate to the closest prefixed unit
+    const units = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+    const exponent = Math.min(
+        Math.floor(Math.log(fileSizeBytes) / Math.log(1024)),
+        units.length - 1,
+    );
+    const approx = fileSizeBytes / 1024 ** exponent;
+    return exponent === 0 ? `${fileSizeBytes} bytes` : `${approx.toFixed(3)} ${units[exponent]}`;
 }
 
 export function DisableDragAndDrop(element: HTMLElement) {
     element.addEventListener("dragenter", (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
-        if ( ev.dataTransfer != null) {
-        ev.dataTransfer.dropEffect = "none"
+        if (ev.dataTransfer != null) {
+            ev.dataTransfer.dropEffect = "none"
         }
     })
     element.addEventListener("dragover", (ev) => {
         ev.stopPropagation();
         ev.preventDefault();
-        if ( ev.dataTransfer != null) {
-        ev.dataTransfer.dropEffect = "none"
+        if (ev.dataTransfer != null) {
+            ev.dataTransfer.dropEffect = "none"
         }
     })
     element.addEventListener("drop", (ev) => {
@@ -74,4 +74,31 @@ export function DisableDragAndDrop(element: HTMLElement) {
         ev.stopPropagation();
         ev.preventDefault();
     })
+}
+
+export function ContainsText(text: string, searched: string, isCaseSensitive: boolean, seachWords: boolean): boolean {
+    //Sort invalid cases
+    if(searched.length == 0) {
+        return true;
+    } else if(text.length == 0) {
+        return false;
+    }
+    
+    //Case sensitive
+    text = isCaseSensitive ? text : text.toLocaleLowerCase();
+    searched = isCaseSensitive ? searched : searched.toLocaleLowerCase();
+
+    //Split to words
+    const words = seachWords ? searched.split(" ") : [searched]
+
+    //Do checks
+    let validChecks = 0;
+    for (const word of words) {
+        if (word.length == 0) { continue }
+        validChecks++;
+        if (!text.includes(word)) {
+            return false;
+        }
+    }
+    return validChecks > 0;
 }

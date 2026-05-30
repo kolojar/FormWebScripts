@@ -1,7 +1,7 @@
 //Do not forget to add formStyle.css and tableStyle.css
 
 import { LanguageManager } from "./languageManager.js";
-import { GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, GeneratePassword } from "./sharedScripts.js";
 export const GlobalLanguageManager = new LanguageManager()
 
 /*
@@ -142,12 +142,14 @@ export class HTMLFormToggleElement extends HTMLElement {
     readonly slider: HTMLSpanElement
     readonly labelAfterElement: HTMLLabelElement
     private isRadioLocal: boolean
-    public silentValidation: number = 0;
+    private silentValidation: number = 0;
+    public disableEvents: boolean;
     //public activeValue: any
     //public notActiveValue: any
     constructor() {
         super()
         this.isRadioLocal = false
+        this.disableEvents = false;
 
         //Create elements
         this.labelBeforeElement = document.createElement("label")
@@ -195,8 +197,11 @@ export class HTMLFormToggleElement extends HTMLElement {
     }
 
     connectedCallback() {
-        this.labelBeforeElement.innerText = this.getAttribute("label-before") as string
-        this.labelAfterElement.innerText = this.getAttribute("label-after") as string
+        for (const attribute of HTMLFormInputElement.observedAttributes) {
+            if (this.hasAttribute(attribute)) {
+                this.attributeChangedCallback(attribute, "", this.getAttribute(attribute) as string)
+            }
+        }
         this.originalChecked = this.getAttribute("original-value") as string == "true"
         this.checked = this.hasAttribute("checked")
         this.isRadio = (this.getAttribute("type") == "radio" || this.hasAttribute("is-radio"));
@@ -229,16 +234,16 @@ export class HTMLFormToggleElement extends HTMLElement {
         //this.checked = this.input.checked
     }
 
-    static observedAttributes = ['label-before', 'label-after', 'original-checked', 'checked', 'name', 'is-radio', 'value']
+    static observedAttributes = ['label-before', 'label', 'original-checked', 'checked', 'name', 'is-radio', 'value', 'indeterminate']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         //console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
             return
         }
         if (name == "label-before") {
-            this.labelBeforeElement.innerText = newValue
-        } else if (name == "label-after") {
-            this.labelAfterElement.innerText = newValue
+            this.labelBefore = newValue
+        } else if (name == "label") {
+            this.label = newValue
         } else if (name == "original-checked") {
             this.originalChecked = (newValue as string) == "true"
         } else if (name == "checked") {
@@ -249,6 +254,8 @@ export class HTMLFormToggleElement extends HTMLElement {
             this.isRadio = this.hasAttribute("is-radio")
         } else if (name == "value") {
             this.value = newValue;
+        } else if (name == "indeterminate") {
+            this.indeterminate = this.hasAttribute("indeterminate")
         }
     }
 
@@ -259,7 +266,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     public set checked(checked: boolean) {
         if (checked == this.checked) { return }
         //this.input.checked = checked;
-        this.removeAttribute("indeterminate")
+        this.indeterminate = false;
         if (this.isRadio) {
             let someChecked = false;
             for (const element of document.querySelectorAll('[name="' + this.name + '"][is-radio]')) {
@@ -283,8 +290,10 @@ export class HTMLFormToggleElement extends HTMLElement {
         } else {
             this.removeAttribute("checked")
         }
-        this.input.dispatchEvent(new Event("change"))
-        this.dispatchEvent(new Event("change"))
+        if (!this.disableEvents) {
+            this.input.dispatchEvent(new Event("change"))
+            this.dispatchEvent(new Event("change"))
+        }
         this.updateSwitch()
         this.validate()
     }
@@ -415,9 +424,21 @@ export class HTMLFormToggleElement extends HTMLElement {
         }
         this.input.value = value;
     }
+
+    public get indeterminate(): boolean {
+        return this.hasAttribute("indeterminate")
+    }
+
+    public set indeterminate(indeterminate: boolean) {
+        if (indeterminate) {
+            this.setAttribute("indeterminate", "")
+        } else {
+            this.removeAttribute("indeterminate")
+        }
+    }
 }
 
-export type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "select" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
+export type HTMLFormInputType = "button" | "checkbox" | "color" | "datetime-local" | "email" | "file" | "hidden" | "image" | "month" | "number" | "password" | "radio" | "range" | "reset" | "search" | "search-realtime" | "select" | "submit" | "tel" | "text" | "textarea" | "time" | "url" | "week"
 export type HTMLFormInputValidationFunc = (value: string | boolean) => Promise<boolean>
 /**
  * HTMLFormInputElement element defition.
@@ -445,6 +466,8 @@ export class HTMLFormInputElement extends HTMLElement {
     private usingJSList: boolean = false
     private areOptionsVisible: boolean = false;
     private optionsTimestamp: Date
+    private realtimeSearchTimeout: number
+    private setIconFromCode: number = 0;
 
     constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null, listId: string = "", strictList: boolean = false, doChangeCheck: boolean = false, originalValue: string = "", changeBorderClass: string = "formWarnBorderColor", invalidBorderClass: string = "formErrorBorderColor") {
         super()
@@ -460,6 +483,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.optionsTimestamp = new Date(0)
         this.listId = listId
         this.isCaseSensitiveList = false;
+        this.realtimeSearchTimeout = -1;
 
         //Create elements
         this.holder = document.createElement("div")
@@ -588,9 +612,8 @@ export class HTMLFormInputElement extends HTMLElement {
         //Update list
         //console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.optionsLocal) {
-            const contains = (this.isCaseSensitiveList ? value[0] : value[0].toLowerCase()).includes((this.isCaseSensitiveList ? this.valueRaw.toString() : this.valueRaw.toString().toLocaleLowerCase()))
             //console.log(value, contains);
-            if (contains) {
+            if (ContainsText(this.valueRaw.toString(), value[0], this.isCaseSensitiveList, true)) {
                 const optionDiv = document.createElement("div")
                 const option = document.createElement("p")
                 option.innerText = value[0]
@@ -610,7 +633,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     updateInputType() {
-        //Select input element based on type
+        //Clear parents
         const focused = this.classList.contains("formInputFocus")
         if (this.img.parentElement == this.holder) {
             this.holder.removeChild(this.img)
@@ -627,9 +650,18 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.afterImg.parentElement == this.holder) {
             this.holder.removeChild(this.afterImg)
         }
+
+        //Special img usecases
+        if (this.type == "search-realtime") {
+            this.setIconFromCode++;
+            this.icon = "!filter"
+            this.setIconFromCode--;
+        }
         if (this.img.getAttribute("path") != "") {
             this.holder.appendChild(this.img)
         }
+
+        //Select input element based on type
         if (this.type == "textarea") {
             this.holder.appendChild(this.textArea)
             if (focused) {
@@ -652,7 +684,22 @@ export class HTMLFormInputElement extends HTMLElement {
             this.isStrictList = true
         }
 
-        //Add specific use cases
+        //Add specific use cases for inputs
+        const realtimeSeachEvent = () => {
+            if (this.realtimeSearchTimeout) {
+                clearTimeout(this.realtimeSearchTimeout)
+            }
+            this.realtimeSearchTimeout = setTimeout(() => {
+                this.dispatchEvent(new Event("search"))
+            }, 100)
+        }
+        if (this.type == "search-realtime") {
+            this.addEventListener("input", realtimeSeachEvent)
+        } else {
+            this.removeEventListener("input", realtimeSeachEvent)
+        }
+
+        //Add specific use cases for afterImg
         if (this.type == "password") {
             //Make password eye
             const updatePasswordEye = () => {
@@ -709,11 +756,11 @@ export class HTMLFormInputElement extends HTMLElement {
         //    this.setIsScrictList(this.getAttribute("isStrictList") == "true")
         //}
         this.updateInputType()
-         this.doChangeCheck = this.hasAttribute("do-change-check")
+        this.doChangeCheck = this.hasAttribute("do-change-check")
         for (const attribute of HTMLFormInputElement.observedAttributes) {
-            if (this.hasAttribute(attribute)) { 
-                this.attributeChangedCallback(attribute, "",this.getAttribute(attribute) as string)
-             }
+            if (this.hasAttribute(attribute)) {
+                this.attributeChangedCallback(attribute, "", this.getAttribute(attribute) as string)
+            }
         }
         this.disabled = this.hasAttribute("disabled")
     }
@@ -1012,7 +1059,9 @@ export class HTMLFormInputElement extends HTMLElement {
         this.img.setAttribute("path", icon)
         this.img.src = GetFormIconPath(icon)
         this.setAttribute("icon", icon)
-        this.updateInputType()
+        if (this.setIconFromCode == 0) {
+            this.updateInputType()
+        }
     }
 
     public get isStrictList(): boolean {
