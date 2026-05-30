@@ -551,7 +551,7 @@ export class FormDialogManager {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
                     const values: T[] = [];
-                    for (const element of [...dialog.selectAllCheckbox?.children as HTMLCollection]) {
+                    for (const element of [...dialog.checkboxesHolder?.children as HTMLCollection]) {
                         const toggle = element as HTMLFormToggleElement
                         if (toggle.checked) {
                             values.push(selectValues.get(toggle.value) as T)

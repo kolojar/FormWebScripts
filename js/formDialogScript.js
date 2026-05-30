@@ -522,7 +522,7 @@ export class FormDialogManager {
             if (!onCloseEvent != null) {
                 if (btn == 1) {
                     const values = [];
-                    for (const element of [...(_c = dialog.selectAllCheckbox) === null || _c === void 0 ? void 0 : _c.children]) {
+                    for (const element of [...(_c = dialog.checkboxesHolder) === null || _c === void 0 ? void 0 : _c.children]) {
                         const toggle = element;
                         if (toggle.checked) {
                             values.push(selectValues.get(toggle.value));
