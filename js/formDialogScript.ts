@@ -159,7 +159,6 @@ class FormDialogTemplate<T> {
         this.settings.blockOpenOver = this.settings.blockOpenOver ?? true
         this.settings.openOverOthers = this.settings.openOverOthers ?? true
         this.settings.placeholder = this.settings.placeholder ?? ""
-        this.settings.allowSelect = this.settings.allowSelect ?? false
         this.draggableElement = null;
         this.progressLines = []
     }
@@ -356,46 +355,61 @@ export class FormDialogManager {
 
             //On change            
             const onChange = () => {
-                console.log("Change");
+                if(isRadio) {return}
                 const children = dialog.checkboxesHolder?.children as HTMLCollection;
                 let checked = 0;
                 let childenCount = 0;
                 for (const element of children) {
                     const toggle = (element as HTMLFormToggleElement)
-                    if(toggle.style.display == "none") {continue}
+                    if (toggle.style.display == "none") { continue }
                     childenCount++;
                     if (toggle.checked) {
                         checked++;
                     }
                 }
-                console.log(childenCount,checked);
                 if (checked == 0) {
                     (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = false;
                 } else if (checked == childenCount) {
                     (dialog.selectAllCheckbox as HTMLFormToggleElement).checked = true;
                 } else {
                     (dialog.selectAllCheckbox as HTMLFormToggleElement).indeterminate = true;
-                }               
+                }
             }
 
             //Select all checkbox
-            dialog.selectAllCheckbox = new HTMLFormToggleElement()
-            dialog.selectAllCheckbox.addEventListener("change", () => {
-                const checked = dialog.selectAllCheckbox?.checked == true
-                for (const element of dialog.checkboxesHolder?.children as HTMLCollection) {
-                    const toggle = (element as HTMLFormToggleElement)
-                    if(toggle.style.display == "none") {continue}
-                    toggle.disableEvents = true;
-                    toggle.checked = checked;
-                    toggle.disableEvents = false;
-                }
-                onChange()
-            })
-            dialog.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
-
+            if (!isRadio) {
+                dialog.selectAllCheckbox = new HTMLFormToggleElement()
+                dialog.selectAllCheckbox.addEventListener("change", () => {
+                    //if (dialog.settings.checkboxSelectMaxCount != undefined) {
+                    //    if(dialog.settings.checkboxSelectMaxCount < (dialog.checkboxesHolder?.children.length as number)) {
+                    //        if(dialog.selectAllCheckbox != null) {
+                    //            dialog.selectAllCheckbox.checked = false;
+                    //        }
+                    //    }
+                    //}
+                    const checked = dialog.selectAllCheckbox?.checked == true
+                    for (const element of dialog.checkboxesHolder?.children as HTMLCollection) {
+                        const toggle = (element as HTMLFormToggleElement)
+                        if (toggle.style.display == "none") { continue }
+                        toggle.disableEvents = true;
+                        toggle.silenceValidation++;
+                        toggle.checked = checked;
+                        toggle.silenceValidation--;
+                        toggle.disableEvents = false;
+                    }
+                    if(dialog.checkboxesHolder?.children.length ?? 0 > 0) {
+                        (dialog.checkboxesHolder?.children.item(0) as HTMLFormToggleElement).validate()
+                    }
+                    onChange()
+                })
+                dialog.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
+            }
+            
             //Generate HTML elements
             dialog.holder.appendChild(dialog.checkboxesHolder)
-            dialog.holder.appendChild(dialog.selectAllCheckbox)
+            if(!isRadio && dialog.selectAllCheckbox != null) {
+                dialog.holder.appendChild(dialog.selectAllCheckbox)
+            }
             if (dialog.settings.checkboxSelectValues != undefined) {
                 for (const [key, val] of dialog.settings.checkboxSelectValues) {
                     const input = new HTMLFormToggleElement()
@@ -423,7 +437,7 @@ export class FormDialogManager {
         }
 
         //Allow select
-        dialog.AllowSelect(dialog.settings.allowSelect ?? false);
+        dialog.AllowSelect(dialog.settings.allowSelect ?? (dialog.style == FormDialogStyle.CheckBoxSelect || dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select));
 
         //Button box holder
         const buttonBoxHolder = document.createElement("div")

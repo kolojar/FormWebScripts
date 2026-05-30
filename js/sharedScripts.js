@@ -73,8 +73,8 @@ export function ContainsText(text, searched, isCaseSensitive, seachWords) {
         return false;
     }
     //Case sensitive
-    text = isCaseSensitive ? text : text.toLocaleLowerCase();
-    searched = isCaseSensitive ? searched : searched.toLocaleLowerCase();
+    text = isCaseSensitive ? text : text.toLowerCase();
+    searched = isCaseSensitive ? searched : searched.toLowerCase();
     //Split to words
     const words = seachWords ? searched.split(" ") : [searched];
     //Do checks
@@ -89,5 +89,12 @@ export function ContainsText(text, searched, isCaseSensitive, seachWords) {
         }
     }
     return validChecks > 0;
+}
+export function DiffArrays(array, compareTo) {
+    const arraySet = new Set(array);
+    const added = compareTo.filter(x => !arraySet.has(x));
+    const compareToSet = new Set(compareTo);
+    const removed = array.filter(x => !compareToSet.has(x));
+    return [added, removed];
 }
 //# sourceMappingURL=sharedScripts.js.map
