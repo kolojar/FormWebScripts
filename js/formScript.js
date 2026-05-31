@@ -184,7 +184,7 @@ export class HTMLFormToggleElement extends HTMLElement {
             }
         }
         const indeterminate = this.indeterminate;
-        this.originalChecked = this.getAttribute("original-value") == "true";
+        this.originalChecked = this.getAttribute("original-checked") == "true";
         this.checked = this.hasAttribute("checked");
         this.isRadio = (this.getAttribute("type") == "radio" || this.hasAttribute("is-radio"));
         this.indeterminate = indeterminate;

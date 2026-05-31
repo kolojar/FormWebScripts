@@ -78,6 +78,18 @@ export type FormDialogSettings<T> = {
      * Placeholder for entry
      */
     placeholder?: string
+    /**
+     * Preset value for entry
+     */
+    presetValue?: string | boolean | FileList | null
+    /**
+     * Minimum value for number entry
+     */
+    min?: string
+    /**
+     * Maximum value for number entry
+     */
+    max?: string
 }
 
 export class FormDialog<T> {
@@ -282,6 +294,9 @@ export class FormDialogManager {
         if (dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select) {
             //Setup entry
             dialog.inputElement = new HTMLFormInputElement("", null)
+            dialog.inputElement.min = dialog.settings.min ?? "";
+            dialog.inputElement.max = dialog.settings.max ?? "";
+            dialog.inputElement.value = dialog.settings.presetValue ?? null;
             dialog.inputElement.placeholder = dialog.settings.placeholder as string
             dialog.inputElement.addEventListener("mousedown", (ev: MouseEvent) => {
                 ev.stopImmediatePropagation()

@@ -142,7 +142,7 @@ export class FormDialogManager {
         }
     }
     RenderDialog(dialog) {
-        var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
         //Check if dialog is valid
         if (dialog == null || dialog == undefined) {
             return false;
@@ -204,6 +204,9 @@ export class FormDialogManager {
         if (dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select) {
             //Setup entry
             dialog.inputElement = new HTMLFormInputElement("", null);
+            dialog.inputElement.min = (_c = dialog.settings.min) !== null && _c !== void 0 ? _c : "";
+            dialog.inputElement.max = (_d = dialog.settings.max) !== null && _d !== void 0 ? _d : "";
+            dialog.inputElement.value = (_e = dialog.settings.presetValue) !== null && _e !== void 0 ? _e : null;
             dialog.inputElement.placeholder = dialog.settings.placeholder;
             dialog.inputElement.addEventListener("mousedown", (ev) => {
                 ev.stopImmediatePropagation();
@@ -367,7 +370,7 @@ export class FormDialogManager {
                         onChange();
                     });
                     input.silenceValidation++;
-                    input.checked = (_c = val.checked) !== null && _c !== void 0 ? _c : false;
+                    input.checked = (_f = val.checked) !== null && _f !== void 0 ? _f : false;
                     input.silenceValidation--;
                     dialog.checkboxesHolder.appendChild(input);
                 }
@@ -381,7 +384,7 @@ export class FormDialogManager {
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled");
         }
         //Allow select
-        dialog.AllowSelect((_d = dialog.settings.allowSelect) !== null && _d !== void 0 ? _d : (dialog.style == FormDialogStyle.CheckBoxSelect || dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select));
+        dialog.AllowSelect((_g = dialog.settings.allowSelect) !== null && _g !== void 0 ? _g : (dialog.style == FormDialogStyle.CheckBoxSelect || dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select));
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
         buttonBoxHolder.classList.add("formButtonBoxHolder");
@@ -475,19 +478,19 @@ export class FormDialogManager {
                 }
                 const button = document.createElement("button");
                 button.classList.add("formButton");
-                if (((_e = dialog.buttons[i]) === null || _e === void 0 ? void 0 : _e.color) == "ok") {
+                if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "ok") {
                     button.classList.add("formOkColor");
                 }
-                else if (((_f = dialog.buttons[i]) === null || _f === void 0 ? void 0 : _f.color) == "warn") {
+                else if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.color) == "warn") {
                     button.classList.add("formWarnColor");
                 }
-                else if (((_g = dialog.buttons[i]) === null || _g === void 0 ? void 0 : _g.color) == "info") {
+                else if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.color) == "info") {
                     button.classList.add("formInfoColor");
                 }
-                else if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "error") {
+                else if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.color) == "error") {
                     button.classList.add("formErrorColor");
                 }
-                else if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.color) == "black") {
+                else if (((_m = dialog.buttons[i]) === null || _m === void 0 ? void 0 : _m.color) == "black") {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = async () => {
@@ -499,13 +502,13 @@ export class FormDialogManager {
                         dialog.onCloseEvent(i, (_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick);
                     }
                 };
-                if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.location) == "left") {
+                if (((_o = dialog.buttons[i]) === null || _o === void 0 ? void 0 : _o.location) == "left") {
                     buttonBoxLeft.appendChild(button);
                 }
-                else if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.location) == "center") {
+                else if (((_p = dialog.buttons[i]) === null || _p === void 0 ? void 0 : _p.location) == "center") {
                     buttonBoxCenter.appendChild(button);
                 }
-                else if (((_m = dialog.buttons[i]) === null || _m === void 0 ? void 0 : _m.location) == "right") {
+                else if (((_q = dialog.buttons[i]) === null || _q === void 0 ? void 0 : _q.location) == "right") {
                     buttonBoxRight.appendChild(button);
                 }
                 const text = dialog.buttons[i].text;
