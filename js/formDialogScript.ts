@@ -862,3 +862,5 @@ export class FormDialogManager {
         })
     }
 }
+
+export const GlobalDialogManager = new FormDialogManager();

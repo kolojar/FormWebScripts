@@ -135,11 +135,17 @@ html.darkMode input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
 }
 
-td,
-th,
 table {
     /*Join table borders*/
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    position: sticky;
+    z-index: 1;
+    top: -6px;
+    background-color: var(--background-color);
 }
 
 table {
@@ -200,6 +206,11 @@ fieldset {
 
 .styledTable td {
     border: solid var(--color) 2px;
+}
+
+.styledTable tr:nth-child(odd) {
+    /*TODO: ADD STRIPPED TABLE SUPPORT*/
+    background-color: var(--background-color);
 }
 
 .styledTableNoWrap td,

@@ -802,4 +802,5 @@ export class FormDialogManager {
         });
     }
 }
+export const GlobalDialogManager = new FormDialogManager();
 //# sourceMappingURL=formDialogScript.js.map
