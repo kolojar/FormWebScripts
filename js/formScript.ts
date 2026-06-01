@@ -870,10 +870,11 @@ export class HTMLFormInputElement extends HTMLElement {
 
         //Check for validity
         if (this.type == "checkbox" || this.type == "radio") {
-            const [_, validOk] = this.inputCheckbox.validate()
+            const [changedLocal, validOk] = this.inputCheckbox.validate()
             if (!validOk) {
                 isValid = false;
             }
+            changed = changedLocal;
         } else if (this.type == "textarea") {
             if (!this.textArea.checkValidity()) {
                 isValid = false;
@@ -926,7 +927,7 @@ export class HTMLFormInputElement extends HTMLElement {
             return this.input.files;
         }
 
-        const raw = (this.type == "checkbox" || this.type == "radio") ? this.inputCheckbox.value : this.valueRaw
+        const raw = (this.type == "checkbox" || this.type == "radio") ? this.inputCheckbox.checked : this.valueRaw
         //Check if is in select options
         if (this.options.has(raw.toString())) {
             return this.options.get(raw.toString())
@@ -989,6 +990,8 @@ export class HTMLFormInputElement extends HTMLElement {
     public set valueRaw(value: string) {
         if (this.type == "textarea") {
             this.textArea.value = value
+        } else if (this.type == "checkbox" || this.type == "radio") {
+            this.inputCheckbox.checked = value == "true";
         } else {
             this.input.value = value
         }
@@ -1024,6 +1027,9 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     public set originalValue(originalValue: string) {
+        if (this.type == "checkbox" || this.type == "radio") {
+            this.inputCheckbox.originalChecked = originalValue == "true";
+        }
         this.setAttribute("original-value", originalValue)
         this.validate()
     }
