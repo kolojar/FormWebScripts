@@ -81,7 +81,7 @@ export function ContainsText(text: string, searched: string, isCaseSensitive: bo
     if(searched.length == 0) {
         return true;
     } else if(text.length == 0) {
-        return false;
+        return true;
     }
     
     //Case sensitive

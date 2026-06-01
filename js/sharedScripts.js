@@ -70,7 +70,7 @@ export function ContainsText(text, searched, isCaseSensitive, seachWords) {
         return true;
     }
     else if (text.length == 0) {
-        return false;
+        return true;
     }
     //Case sensitive
     text = isCaseSensitive ? text : text.toLowerCase();

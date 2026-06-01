@@ -569,7 +569,7 @@ export class HTMLFormInputElement extends HTMLElement {
         //console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.optionsLocal) {
             //console.log(value, contains);
-            if (ContainsText(this.valueRaw.toString(), value[0], this.isCaseSensitiveList, true)) {
+            if (ContainsText(value[0], this.valueRaw.toString(), this.isCaseSensitiveList, true)) {
                 const optionDiv = document.createElement("div");
                 const option = document.createElement("p");
                 option.innerText = value[0];
