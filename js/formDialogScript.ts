@@ -459,6 +459,7 @@ export class FormDialogManager {
                 }
 
             }
+            dialog.checkboxesHolder.style.minWidth = dialog.inputElement.getBoundingClientRect().width + "px"; 
             dialog.checkboxesHolder.style.width = (bestWidth - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled")
         }
