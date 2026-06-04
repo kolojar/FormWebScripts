@@ -370,7 +370,7 @@ export class FormDialogManager {
 
             //On change            
             const onChange = () => {
-                if(isRadio) {return}
+                if (isRadio) { return }
                 const children = dialog.checkboxesHolder?.children as HTMLCollection;
                 let checked = 0;
                 let childenCount = 0;
@@ -412,17 +412,17 @@ export class FormDialogManager {
                         toggle.silenceValidation--;
                         toggle.disableEvents = false;
                     }
-                    if(dialog.checkboxesHolder?.children.length ?? 0 > 0) {
+                    if (dialog.checkboxesHolder?.children.length ?? 0 > 0) {
                         (dialog.checkboxesHolder?.children.item(0) as HTMLFormToggleElement).validate()
                     }
                     onChange()
                 })
                 dialog.selectAllCheckbox.label = GlobalLanguageManager.Translate("dialog.selectAll")
             }
-            
+
             //Generate HTML elements
             dialog.holder.appendChild(dialog.checkboxesHolder)
-            if(!isRadio && dialog.selectAllCheckbox != null) {
+            if (!isRadio && dialog.selectAllCheckbox != null) {
                 dialog.holder.appendChild(dialog.selectAllCheckbox)
             }
             if (dialog.settings.checkboxSelectValues != undefined) {
@@ -444,10 +444,22 @@ export class FormDialogManager {
             onChange()
 
             //Calculate max width
-            const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
-            if (lastChild != null) {
-                dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
+            let bestWidth = 0;
+            let currentLeft = NaN;
+            for (let i = dialog.checkboxesHolder.children.length - 1; i >= 0; i--) {
+                const child = dialog.checkboxesHolder.children.item(i) as HTMLElement;
+                const left =  child.getBoundingClientRect().left
+                let width = left + child.getBoundingClientRect().width
+                if (!isNaN(currentLeft) && currentLeft != left) {
+                    break;
+                }
+                currentLeft = left;
+                if (width > bestWidth) {
+                    bestWidth = width;
+                }
+
             }
+            dialog.checkboxesHolder.style.width = (bestWidth - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled")
         }
 

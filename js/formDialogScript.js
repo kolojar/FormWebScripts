@@ -377,10 +377,21 @@ export class FormDialogManager {
             }
             onChange();
             //Calculate max width
-            const lastChild = dialog.checkboxesHolder.children.item(dialog.checkboxesHolder.children.length - 1);
-            if (lastChild != null) {
-                dialog.checkboxesHolder.style.width = ((lastChild.getBoundingClientRect().right + lastChild.getBoundingClientRect().width) - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
+            let bestWidth = 0;
+            let currentLeft = NaN;
+            for (let i = dialog.checkboxesHolder.children.length - 1; i >= 0; i--) {
+                const child = dialog.checkboxesHolder.children.item(i);
+                const left = child.getBoundingClientRect().left;
+                let width = left + child.getBoundingClientRect().width;
+                if (!isNaN(currentLeft) && currentLeft != left) {
+                    break;
+                }
+                currentLeft = left;
+                if (width > bestWidth) {
+                    bestWidth = width;
+                }
             }
+            dialog.checkboxesHolder.style.width = (bestWidth - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled");
         }
         //Allow select
