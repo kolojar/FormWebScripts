@@ -115,9 +115,5 @@
  - Tag name: footer
  - Keeps all child elements on bottom
 
-# TableStyle.css
- - Import: tableStyle.css
- - Applies some basic styling to tables
-
 # TODO:
-- Fix DIALOG on edges - condensed text
+- Documentation

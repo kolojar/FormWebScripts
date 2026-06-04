@@ -1,4 +1,4 @@
-//Do not forget to add formStyle.css and tableStyle.css
+//Do not forget to add formStyle.css
 
 import { LanguageManager } from "./languageManager.js";
 import { ContainsText, GeneratePassword } from "./sharedScripts.js";

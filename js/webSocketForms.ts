@@ -2,7 +2,7 @@ import { FormDialog, FormDialogButton, FormDialogManager, FormDialogStyle } from
 import { GlobalLanguageManager, RemoveWaitStatusForms, SendToast, SetWaitStatusForms } from "./formScript.js"
 import { WebSocketConnection, WebSocketConnectionMessageType } from "./serverComunication.js"
 
-//Do not forget to add formStyle.css and tableStyle.css
+//Do not forget to add formStyle.css
 
 /*
 Automatically connects to websocket and configures it with toasts and autoconnect, type is URL parameter
