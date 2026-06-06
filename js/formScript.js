@@ -433,6 +433,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.usingJSList = false;
         this.areOptionsVisible = false;
         this.setIconFromCode = 0;
+        this.selectedListItemWithKeyboard = -1;
         //this.internals = this.attachInternals();
         this.onEnterPressClickElementId = onEnterPressClickElementId;
         this.typ = "text";
@@ -496,12 +497,33 @@ export class HTMLFormInputElement extends HTMLElement {
             this.validate();
         });
         this.addEventListener("keydown", (ev) => {
-            var _a;
+            var _a, _b, _c, _d;
             if (this.onEnterPressClickElementId == "") {
                 return;
             }
+            if (this.type != "textarea") {
+                if (this.selectedListItemWithKeyboard != -1) {
+                    (_a = this.listHolder.children.item(this.selectedListItemWithKeyboard)) === null || _a === void 0 ? void 0 : _a.classList.remove("hover");
+                }
+                if (ev.key == "ArrowUp" && !isNaN(this.selectedListItemWithKeyboard)) {
+                    if (this.selectedListItemWithKeyboard >= 0) {
+                        this.selectedListItemWithKeyboard--;
+                    }
+                }
+                if (ev.key == "ArrowDown" && !isNaN(this.selectedListItemWithKeyboard)) {
+                    if (this.selectedListItemWithKeyboard < this.listHolder.children.length - 1) {
+                        this.selectedListItemWithKeyboard++;
+                    }
+                }
+                if (ev.key == "Enter" && !isNaN(this.selectedListItemWithKeyboard)) {
+                    (_b = this.listHolder.children.item(this.selectedListItemWithKeyboard)) === null || _b === void 0 ? void 0 : _b.dispatchEvent(new Event("click"));
+                }
+                if (this.selectedListItemWithKeyboard != -1 && !isNaN(this.selectedListItemWithKeyboard)) {
+                    (_c = this.listHolder.children.item(this.selectedListItemWithKeyboard)) === null || _c === void 0 ? void 0 : _c.classList.add("hover");
+                }
+            }
             if (ev.key == "Enter") {
-                (_a = document.getElementById(this.onEnterPressClickElementId)) === null || _a === void 0 ? void 0 : _a.dispatchEvent(new Event("click"));
+                (_d = document.getElementById(this.onEnterPressClickElementId)) === null || _d === void 0 ? void 0 : _d.dispatchEvent(new Event("click"));
             }
         });
         this.addEventListener("click", () => {
@@ -553,6 +575,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.renderList();
     }
     renderList() {
+        this.selectedListItemWithKeyboard = -1;
         //console.log("Render list");
         //console.log(this.options);
         if (this.options.size == 0 || !this.areOptionsVisible) {
@@ -573,7 +596,7 @@ export class HTMLFormInputElement extends HTMLElement {
                 const optionDiv = document.createElement("div");
                 const option = document.createElement("p");
                 option.innerText = value[0];
-                optionDiv.addEventListener("mousedown", () => {
+                optionDiv.addEventListener("click", () => {
                     //console.log("Clicked on: " + value);
                     this.valueRaw = value[0];
                     this.areOptionsVisible = false;
@@ -582,6 +605,16 @@ export class HTMLFormInputElement extends HTMLElement {
                     //this.renderList()
                     //console.log(this.listHolder.style.display);
                 });
+                const clearMouse = () => {
+                    var _a;
+                    if (this.selectedListItemWithKeyboard != -1) {
+                        (_a = this.listHolder.children.item(this.selectedListItemWithKeyboard)) === null || _a === void 0 ? void 0 : _a.classList.remove("hover");
+                    }
+                    this.selectedListItemWithKeyboard = -1;
+                };
+                optionDiv.addEventListener("mouseenter", () => { clearMouse(); this.selectedListItemWithKeyboard = NaN; });
+                optionDiv.addEventListener("mouseleave", () => { clearMouse(); });
+                optionDiv.addEventListener("mousemove", () => { clearMouse(); this.selectedListItemWithKeyboard = NaN; });
                 optionDiv.appendChild(option);
                 this.listHolder.appendChild(optionDiv);
             }

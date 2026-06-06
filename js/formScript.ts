@@ -55,7 +55,7 @@ export class HTMLFormBoxElement extends HTMLElement {
      */
     SetStatusMessage(blink: boolean, message: string, cleanAfterMs: number = 0) {
         //Set message
-        const messageID = GeneratePassword(8,false,false)
+        const messageID = GeneratePassword(8, false, false)
         this.messageID = messageID
         this.querySelectorAll("form-status-message").forEach(element => {
             let status = element as HTMLParagraphElement //TODO: FIX
@@ -326,7 +326,7 @@ export class HTMLFormToggleElement extends HTMLElement {
                     if (min != null) {
                         const minNum = parseInt(min)
                         if (minNum > checked.length) {
-                            if(this.silenceValidation == 0) {
+                            if (this.silenceValidation == 0) {
                                 SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString()), "error")
                             }
                             valid = false;
@@ -340,7 +340,7 @@ export class HTMLFormToggleElement extends HTMLElement {
                             }
                         }
                         if (maxNum < checked.length) {
-                            if(this.silenceValidation == 0) {
+                            if (this.silenceValidation == 0) {
                                 SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString()), "error")
                             }
                             valid = false;
@@ -400,7 +400,7 @@ export class HTMLFormToggleElement extends HTMLElement {
 
     public set name(name: string) {
         this.input.name = name
-        this.setAttribute("name",name)
+        this.setAttribute("name", name)
     }
 
     public get isRadio(): boolean {
@@ -476,6 +476,7 @@ export class HTMLFormInputElement extends HTMLElement {
     private optionsTimestamp: Date
     private realtimeSearchTimeout: number
     private setIconFromCode: number = 0;
+    private selectedListItemWithKeyboard: number = -1
 
     constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null, listId: string = "", strictList: boolean = false, doChangeCheck: boolean = false, originalValue: string = "", changeBorderClass: string = "formWarnBorderColor", invalidBorderClass: string = "formErrorBorderColor") {
         super()
@@ -549,6 +550,27 @@ export class HTMLFormInputElement extends HTMLElement {
             if (this.onEnterPressClickElementId == "") {
                 return
             }
+            if (this.type != "textarea") {
+                if (this.selectedListItemWithKeyboard != -1) {
+                    this.listHolder.children.item(this.selectedListItemWithKeyboard)?.classList.remove("hover");
+                }
+                if (ev.key == "ArrowUp" && !isNaN(this.selectedListItemWithKeyboard)) {
+                    if (this.selectedListItemWithKeyboard >= 0) {
+                        this.selectedListItemWithKeyboard--;
+                    }
+                }
+                if (ev.key == "ArrowDown" && !isNaN(this.selectedListItemWithKeyboard)) {
+                    if (this.selectedListItemWithKeyboard < this.listHolder.children.length - 1) {
+                        this.selectedListItemWithKeyboard++;
+                    }
+                }
+                if (ev.key == "Enter" && !isNaN(this.selectedListItemWithKeyboard)) {
+                    this.listHolder.children.item(this.selectedListItemWithKeyboard)?.dispatchEvent(new Event("click"));
+                }
+                if (this.selectedListItemWithKeyboard != -1  && !isNaN(this.selectedListItemWithKeyboard)) {
+                    this.listHolder.children.item(this.selectedListItemWithKeyboard)?.classList.add("hover");
+                }
+            }
             if (ev.key == "Enter") {
                 document.getElementById(this.onEnterPressClickElementId)?.dispatchEvent(new Event("click"))
             }
@@ -603,6 +625,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 
     renderList() {
+        this.selectedListItemWithKeyboard = -1;
         //console.log("Render list");
         //console.log(this.options);
         if (this.options.size == 0 || !this.areOptionsVisible) {
@@ -621,11 +644,11 @@ export class HTMLFormInputElement extends HTMLElement {
         //console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.optionsLocal) {
             //console.log(value, contains);
-            if (ContainsText(value[0],this.valueRaw.toString(), this.isCaseSensitiveList, true)) {
+            if (ContainsText(value[0], this.valueRaw.toString(), this.isCaseSensitiveList, true)) {
                 const optionDiv = document.createElement("div")
                 const option = document.createElement("p")
                 option.innerText = value[0]
-                optionDiv.addEventListener("mousedown", () => {
+                optionDiv.addEventListener("click", () => {
                     //console.log("Clicked on: " + value);
                     this.valueRaw = value[0]
                     this.areOptionsVisible = false
@@ -634,6 +657,15 @@ export class HTMLFormInputElement extends HTMLElement {
                     //this.renderList()
                     //console.log(this.listHolder.style.display);
                 })
+                const clearMouse = () => {
+                    if (this.selectedListItemWithKeyboard != -1) {
+                        this.listHolder.children.item(this.selectedListItemWithKeyboard)?.classList.remove("hover");
+                    }
+                    this.selectedListItemWithKeyboard = -1;
+                }
+                optionDiv.addEventListener("mouseenter", () => { clearMouse(); this.selectedListItemWithKeyboard = NaN; });
+                optionDiv.addEventListener("mouseleave", () => { clearMouse() });
+                optionDiv.addEventListener("mousemove", () => { clearMouse(); this.selectedListItemWithKeyboard = NaN; });
                 optionDiv.appendChild(option)
                 this.listHolder.appendChild(optionDiv)
             }

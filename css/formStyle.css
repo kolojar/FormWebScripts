@@ -362,7 +362,7 @@ form-input>.listHolder>div {
     background-color: var(--background-color-next-layer);
 }
 
-form-input>.listHolder>div:hover {
+form-input>.listHolder>div:hover, form-input>.listHolder>.hover {
     background-color: gray;
 }
 
