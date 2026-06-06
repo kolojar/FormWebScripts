@@ -605,6 +605,15 @@ export class HTMLFormInputElement extends HTMLElement {
                     //this.renderList()
                     //console.log(this.listHolder.style.display);
                 });
+                optionDiv.addEventListener("mousedown", () => {
+                    //console.log("Clicked on: " + value);
+                    this.valueRaw = value[0];
+                    this.areOptionsVisible = false;
+                    this.listHolder.style.display = "none";
+                    this.validate();
+                    //this.renderList()
+                    //console.log(this.listHolder.style.display);
+                });
                 const clearMouse = () => {
                     var _a;
                     if (this.selectedListItemWithKeyboard != -1) {
