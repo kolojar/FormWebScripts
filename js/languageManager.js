@@ -84,7 +84,7 @@ export class LanguageManager {
         //Listen for language changes
         window.addEventListener("storage", (ev) => {
             if (ev.key == "formLanguage" && ev.newValue != this.language) {
-                console.log("Language change detected.");
+                console.log("Language change detected. " + ev.newValue + " -> " + this.language);
                 this.ChangeLanguage(ev.newValue);
             }
         });
@@ -130,10 +130,15 @@ export class LanguageManager {
         }
         //Set language
         this.language = language;
-        localStorage.setItem("formLanguage", language);
+        let isDiff = false;
+        if (language != localStorage.getItem("formLanguage")) {
+            isDiff = true;
+            console.log("Diff: ", language, localStorage.getItem("formLanguage"));
+            localStorage.setItem("formLanguage", language);
+        }
         //Do first translation
         this.TranslateElements();
-        if (!silent) {
+        if (!silent && isDiff) {
             alert("Language changed, it is recomended do reload the site.");
         }
         this.isReady = true;
