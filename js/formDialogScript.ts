@@ -341,10 +341,13 @@ export class FormDialogManager {
             }*/
             dialog.inputElement.type = "search-realtime";
             dialog.inputElement.addEventListener("search", () => {
-                for (const element of dialog.checkboxesHolder?.children as HTMLCollection) {
+                if(dialog.checkboxesHolder == null) {return}
+                dialog.checkboxesHolder.style.display = "none";
+                for (const element of dialog.checkboxesHolder.children) {
                     const toggle = (element as HTMLFormToggleElement)
                     toggle.style.display = ContainsText(toggle.label, dialog.inputElement?.value, false, true) ? "" : "none";
                 }
+                dialog.checkboxesHolder.style.display = "";
                 onChange()
             })
             dialog.holder.appendChild(dialog.inputElement as HTMLFormInputElement)

@@ -269,11 +269,16 @@ export class FormDialogManager {
             }*/
             dialog.inputElement.type = "search-realtime";
             dialog.inputElement.addEventListener("search", () => {
-                var _c, _d;
-                for (const element of (_c = dialog.checkboxesHolder) === null || _c === void 0 ? void 0 : _c.children) {
-                    const toggle = element;
-                    toggle.style.display = ContainsText(toggle.label, (_d = dialog.inputElement) === null || _d === void 0 ? void 0 : _d.value, false, true) ? "" : "none";
+                var _c;
+                if (dialog.checkboxesHolder == null) {
+                    return;
                 }
+                dialog.checkboxesHolder.style.display = "none";
+                for (const element of dialog.checkboxesHolder.children) {
+                    const toggle = element;
+                    toggle.style.display = ContainsText(toggle.label, (_c = dialog.inputElement) === null || _c === void 0 ? void 0 : _c.value, false, true) ? "" : "none";
+                }
+                dialog.checkboxesHolder.style.display = "";
                 onChange();
             });
             dialog.holder.appendChild(dialog.inputElement);
