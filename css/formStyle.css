@@ -354,15 +354,21 @@ form-input>.listHolder {
     border-radius: 4px;
     margin: 2px;
     border: none;
+    contain: strict;
 }
 
 form-input>.listHolder>div {
     width: 100%;
     cursor: pointer;
     background-color: var(--background-color-next-layer);
+    content-visibility: auto;
+    contain-intrinsic-height: 40px;
+    will-change: transform;
+    transform: translateZ(0);
 }
 
-form-input>.listHolder>div:hover, form-input>.listHolder>.hover {
+form-input>.listHolder>div:hover,
+form-input>.listHolder>.hover {
     background-color: gray;
 }
 
@@ -672,8 +678,8 @@ body[form-box-holder] {
 .formDialog>div {
     display: flex;
     flex-direction: column;
-     max-width: 90dvw;
-     overflow: auto;
+    max-width: 90dvw;
+    overflow: auto;
 }
 
 .formDialog>div>div {
