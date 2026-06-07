@@ -289,6 +289,7 @@ export class HTMLFormToggleElement extends HTMLElement {
     validate() {
         const limiter = document.querySelector('[form-toggle-limiter="' + this.name + '"]');
         let valid = true;
+        let validationMessage = "";
         if (limiter != null) {
             if (!limiter.hasAttribute("form-toggle-limiter-disabled")) {
                 const min = limiter.getAttribute("min");
@@ -312,8 +313,9 @@ export class HTMLFormToggleElement extends HTMLElement {
                     if (min != null) {
                         const minNum = parseInt(min);
                         if (minNum > checked.length) {
+                            validationMessage = GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString());
                             if (this.silenceValidation == 0) {
-                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.min", "formToggle.min: {x}").replace("{x}", min.toString()), "error");
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), validationMessage, "error");
                             }
                             valid = false;
                         }
@@ -326,8 +328,9 @@ export class HTMLFormToggleElement extends HTMLElement {
                             }
                         }
                         if (maxNum < checked.length) {
+                            validationMessage = GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString());
                             if (this.silenceValidation == 0) {
-                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString()), "error");
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), validationMessage, "error");
                             }
                             valid = false;
                         }
@@ -341,7 +344,7 @@ export class HTMLFormToggleElement extends HTMLElement {
                 }
             }
         }
-        return [this.originalChecked != this.checked, valid];
+        return [this.originalChecked != this.checked, valid, this.label + " - " + this.labelBefore + ": " + validationMessage];
     }
     get originalChecked() {
         return this.getAttribute("original-checked") == "true";
@@ -857,6 +860,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.setAttribute("value", this.valueRaw.toString());
         //Check for changes
         let changed = false;
+        let validationMessage = "";
         if (this.value != this.originalValue && this.valueRaw != this.originalValue) {
             changed = true;
         }
@@ -872,14 +876,16 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         //Check for validity
         if (this.type == "checkbox" || this.type == "radio") {
-            const [changedLocal, validOk] = this.inputCheckbox.validate();
+            const [changedLocal, validOk, validationMessageLocal] = this.inputCheckbox.validate();
             if (!validOk) {
                 isValid = false;
+                validationMessage = validationMessageLocal;
             }
             changed = changedLocal;
         }
         else if (this.type == "textarea") {
             if (!this.textArea.checkValidity()) {
+                validationMessage = this.label + ": " + this.textArea.validationMessage;
                 isValid = false;
                 //this.internals.setValidity(this.textArea.validity,this.textArea.validationMessage,this.textArea)
             }
@@ -887,6 +893,7 @@ export class HTMLFormInputElement extends HTMLElement {
         else {
             if (!this.input.checkValidity()) {
                 isValid = false;
+                validationMessage = this.label + ": " + this.input.validationMessage;
                 //this.internals.setValidity(this.input.validity,this.input.validationMessage,this.input)
             }
         }
@@ -905,8 +912,9 @@ export class HTMLFormInputElement extends HTMLElement {
         else {
             this.holder.classList.add(this.invalidBorderClass);
         }
+        validationMessage = validationMessage.replace("::", ":");
         this.dispatchEvent(new Event("validation-done"));
-        return [changed, isValid];
+        return [changed, isValid, validationMessage];
     }
     get valueRaw() {
         if (this.type == "textarea") {

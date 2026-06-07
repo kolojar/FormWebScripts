@@ -90,7 +90,7 @@ export class LanguageManager {
         //Listen for language changes
         window.addEventListener("storage", (ev: StorageEvent) => {
             if (ev.key == "formLanguage" && ev.newValue != this.language) {
-                console.log("Language change detected. " + ev.newValue + " -> " + this.language);
+                console.log("Language change detected. " + ev.newValue + " → " + this.language);
                 this.ChangeLanguage(ev.newValue as string)
             }
         })

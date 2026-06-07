@@ -425,14 +425,14 @@ export class FormDialogManager {
                 return Promise.resolve(true);
             }
             if (dialog.style == FormDialogStyle.Select && !isCancel) {
-                const [_, valid] = await dialog.inputElement.validate();
+                const [_a, valid, _b] = await dialog.inputElement.validate();
                 if (!valid) {
                     SendToast(dialog.title, "Pole obsahuje neplatnou hodnotu.", "error");
                     return Promise.resolve(false);
                 }
             }
             if (dialog.style == FormDialogStyle.CheckBoxSelect && !isCancel && ((_c = dialog.checkboxesHolder) === null || _c === void 0 ? void 0 : _c.children.length) != 0) {
-                const [_, valid] = await ((_d = dialog.checkboxesHolder) === null || _d === void 0 ? void 0 : _d.children.item(0)).validate();
+                const [_a, valid, _b] = await ((_d = dialog.checkboxesHolder) === null || _d === void 0 ? void 0 : _d.children.item(0)).validate();
                 if (!valid) {
                     return Promise.resolve(false);
                 }

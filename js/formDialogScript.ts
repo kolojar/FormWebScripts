@@ -496,14 +496,14 @@ export class FormDialogManager {
                 return Promise.resolve(true)
             }
             if (dialog.style == FormDialogStyle.Select && !isCancel) {
-                const [_, valid] = await (dialog.inputElement as HTMLFormInputElement).validate()
+                const [_a, valid,_b] = await (dialog.inputElement as HTMLFormInputElement).validate()
                 if (!valid) {
                     SendToast(dialog.title, "Pole obsahuje neplatnou hodnotu.", "error")
                     return Promise.resolve(false)
                 }
             }
             if (dialog.style == FormDialogStyle.CheckBoxSelect && !isCancel && dialog.checkboxesHolder?.children.length != 0) {
-                const [_, valid] = await (dialog.checkboxesHolder?.children.item(0) as HTMLFormToggleElement).validate()
+                const [_a, valid,_b] = await (dialog.checkboxesHolder?.children.item(0) as HTMLFormToggleElement).validate()
                 if (!valid) {
                     return Promise.resolve(false)
                 }
