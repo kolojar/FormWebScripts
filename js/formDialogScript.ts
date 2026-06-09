@@ -67,6 +67,10 @@ export type FormDialogSettings<T> = {
      */
     selectValues?: Map<string, T>
     /**
+     * Keys of select values to be always shown
+     */
+    alwaysShownOptions?: string[]
+    /**
      * Values for checkbox selection, key is display value, value contains {value = returned value, checked = if checkbox is checked from start}
      */
     checkboxSelectValues?: Map<string, FormDialogCheckboxSelectData<T>>
@@ -308,6 +312,9 @@ export class FormDialogManager {
                 dialog.inputElement.isStrictList = true
                 if (dialog.settings.selectValues != undefined) {
                     dialog.inputElement.setOptions(dialog.settings.selectValues)
+                }
+                if(dialog.settings.alwaysShownOptions != undefined) {
+                    dialog.inputElement.alwaysShownOptions = dialog.settings.alwaysShownOptions;
                 }
             }
             let image = ""

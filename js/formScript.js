@@ -447,6 +447,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.optionsLocal = new Map();
         this.optionsReverse = new Map();
         this.optionsTimestamp = new Date(0);
+        this.alwaysShownOptionsLocal = new Map();
         this.listId = listId;
         this.isCaseSensitiveList = false;
         this.realtimeSearchTimeout = -1;
@@ -595,7 +596,7 @@ export class HTMLFormInputElement extends HTMLElement {
         //console.log("isCaseSensitive", this.isCaseSensitiveList);
         for (const value of this.optionsLocal) {
             //console.log(value, contains);
-            if (ContainsText(value[0], this.valueRaw.toString(), this.isCaseSensitiveList, true)) {
+            if (this.alwaysShownOptionsLocal.has(value[0]) || ContainsText(value[0], this.valueRaw.toString(), this.isCaseSensitiveList, true)) {
                 const optionDiv = document.createElement("div");
                 const option = document.createElement("p");
                 option.innerText = value[0];
@@ -1124,6 +1125,15 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         }
         this.removeAttribute("list");
+        this.renderList();
+    }
+    get alwaysShownOptions() {
+        return [...this.alwaysShownOptionsLocal.keys()];
+    }
+    set alwaysShownOptions(keys) {
+        for (const key of keys) {
+            this.alwaysShownOptionsLocal.set(key, true);
+        }
         this.renderList();
     }
     get isCaseSensitiveList() {

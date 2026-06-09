@@ -220,6 +220,9 @@ export class FormDialogManager {
                 if (dialog.settings.selectValues != undefined) {
                     dialog.inputElement.setOptions(dialog.settings.selectValues);
                 }
+                if (dialog.settings.alwaysShownOptions != undefined) {
+                    dialog.inputElement.alwaysShownOptions = dialog.settings.alwaysShownOptions;
+                }
             }
             let image = "";
             switch (dialog.settings.entryType) {
