@@ -354,15 +354,12 @@ form-input>.listHolder {
     border-radius: 4px;
     margin: 2px;
     border: none;
-    contain: strict;
 }
 
 form-input>.listHolder>div {
     width: 100%;
     cursor: pointer;
     background-color: var(--background-color-next-layer);
-    content-visibility: auto;
-    contain-intrinsic-height: 40px;
     will-change: transform;
     transform: translateZ(0);
 }
