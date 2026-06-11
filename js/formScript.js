@@ -437,6 +437,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.areOptionsVisible = false;
         this.setIconFromCode = 0;
         this.selectedListItemWithKeyboard = -1;
+        this.allowNullFile = false;
         //this.internals = this.attachInternals();
         this.onEnterPressClickElementId = onEnterPressClickElementId;
         this.typ = "text";
@@ -484,12 +485,11 @@ export class HTMLFormInputElement extends HTMLElement {
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus");
             }
-            try {
-                this.input.showPicker();
-            }
-            catch (error) {
-                console.warn("Ignoring error: " + error);
-            }
+            //try {
+            //    this.input.showPicker();
+            //} catch (error) {
+            //    console.warn("Ignoring error: " + error);
+            //}
         });
         this.addEventListener("focusout", () => {
             //console.log("Focus out");
@@ -827,6 +827,9 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == 'multiple') {
             this.multiple = this.hasAttribute("multiple");
         }
+        else if (name == 'allow-empty-file') {
+            this.allowNullFile = this.hasAttribute("allow-empty-file");
+        }
     }
     get disabled() {
         return this.hasAttribute("disabled");
@@ -858,6 +861,7 @@ export class HTMLFormInputElement extends HTMLElement {
         return this.internals.reportValidity();
     }*/
     async validate() {
+        var _a;
         this.setAttribute("value", this.valueRaw.toString());
         //Check for changes
         let changed = false;
@@ -893,8 +897,10 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         else {
             if (!this.input.checkValidity()) {
-                isValid = false;
-                validationMessage = this.label + ": " + this.input.validationMessage;
+                if (!(this.type == "file" && ((_a = this.input.files) === null || _a === void 0 ? void 0 : _a.length) == 0 && this.allowNullFile)) {
+                    isValid = false;
+                    validationMessage = this.label + ": " + this.input.validationMessage;
+                }
                 //this.internals.setValidity(this.input.validity,this.input.validationMessage,this.input)
             }
         }
@@ -1200,7 +1206,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 }
 HTMLFormInputElement.formAssociated = true;
-HTMLFormInputElement.observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value', 'minlength', 'maxlength', 'multiple'];
+HTMLFormInputElement.observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value', 'minlength', 'maxlength', 'multiple', 'allow-empty-file'];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";

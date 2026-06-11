@@ -344,7 +344,7 @@ export class HTMLFormToggleElement extends HTMLElement {
                         if (maxNum < checked.length) {
                             validationMessage = GlobalLanguageManager.Translate("formToggle.max", "formToggle.max: {x}").replace("{x}", maxNum.toString())
                             if (this.silenceValidation == 0) {
-                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"),validationMessage, "error")
+                                SendToast(GlobalLanguageManager.Translate("formInput.invalidValue"), validationMessage, "error")
                             }
                             valid = false;
                         }
@@ -471,7 +471,7 @@ export class HTMLFormInputElement extends HTMLElement {
     private doChangeCheck: boolean
     readonly changeBorderClass: string = "formWarnBorderColor"
     readonly invalidBorderClass: string = "formErrorBorderColor"
-    private alwaysShownOptionsLocal: Map<string,boolean>
+    private alwaysShownOptionsLocal: Map<string, boolean>
     private optionsLocal: Map<string, any>
     private optionsReverse: Map<any, string>
     readonly listHolder: HTMLDivElement
@@ -481,6 +481,7 @@ export class HTMLFormInputElement extends HTMLElement {
     private realtimeSearchTimeout: number
     private setIconFromCode: number = 0;
     private selectedListItemWithKeyboard: number = -1
+    private allowNullFile: boolean = false;
 
     constructor(onEnterPressClickElementId: string, validationFunction: HTMLFormInputValidationFunc | null, listId: string = "", strictList: boolean = false, doChangeCheck: boolean = false, originalValue: string = "", changeBorderClass: string = "formWarnBorderColor", invalidBorderClass: string = "formErrorBorderColor") {
         super()
@@ -536,11 +537,11 @@ export class HTMLFormInputElement extends HTMLElement {
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus")
             }
-            try {
-                this.input.showPicker();
-            } catch (error) {
-                console.warn("Ignoring error: " + error);
-            }
+            //try {
+            //    this.input.showPicker();
+            //} catch (error) {
+            //    console.warn("Ignoring error: " + error);
+            //}
         })
         this.addEventListener("focusout", () => {
             //console.log("Focus out");
@@ -572,7 +573,7 @@ export class HTMLFormInputElement extends HTMLElement {
                 if (ev.key == "Enter" && !isNaN(this.selectedListItemWithKeyboard)) {
                     this.listHolder.children.item(this.selectedListItemWithKeyboard)?.dispatchEvent(new Event("click"));
                 }
-                if (this.selectedListItemWithKeyboard != -1  && !isNaN(this.selectedListItemWithKeyboard)) {
+                if (this.selectedListItemWithKeyboard != -1 && !isNaN(this.selectedListItemWithKeyboard)) {
                     this.listHolder.children.item(this.selectedListItemWithKeyboard)?.classList.add("hover");
                 }
             }
@@ -819,7 +820,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.disabled = this.hasAttribute("disabled")
     }
 
-    static observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value', 'minlength', 'maxlength', 'multiple']
+    static observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value', 'minlength', 'maxlength', 'multiple', 'allow-empty-file']
     attributeChangedCallback(name: string, oldValue: any, newValue: any) {
         //console.log(name, oldValue, newValue);
         if (oldValue == newValue) {
@@ -862,6 +863,8 @@ export class HTMLFormInputElement extends HTMLElement {
             this.maxLength = newValue
         } else if (name == 'multiple') {
             this.multiple = this.hasAttribute("multiple")
+        } else if (name == 'allow-empty-file') {
+            this.allowNullFile = this.hasAttribute("allow-empty-file")
         }
     }
 
@@ -917,7 +920,7 @@ export class HTMLFormInputElement extends HTMLElement {
 
         //Check for validity
         if (this.type == "checkbox" || this.type == "radio") {
-            const [changedLocal, validOk,validationMessageLocal] = this.inputCheckbox.validate()
+            const [changedLocal, validOk, validationMessageLocal] = this.inputCheckbox.validate()
             if (!validOk) {
                 isValid = false;
                 validationMessage = validationMessageLocal;
@@ -931,8 +934,10 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         } else {
             if (!this.input.checkValidity()) {
-                isValid = false;
-                validationMessage = this.label + ": " + this.input.validationMessage;
+                if (!(this.type == "file" && this.input.files?.length == 0 && this.allowNullFile)) {
+                    isValid = false;
+                    validationMessage = this.label + ": " + this.input.validationMessage;
+                }
                 //this.internals.setValidity(this.input.validity,this.input.validationMessage,this.input)
             }
         }
@@ -950,7 +955,7 @@ export class HTMLFormInputElement extends HTMLElement {
         } else {
             this.holder.classList.add(this.invalidBorderClass)
         }
-        validationMessage = validationMessage.replace("::",":");
+        validationMessage = validationMessage.replace("::", ":");
         this.dispatchEvent(new Event("validation-done"))
         return [changed, isValid, validationMessage]
     }
@@ -1180,7 +1185,7 @@ export class HTMLFormInputElement extends HTMLElement {
 
     public set alwaysShownOptions(keys: string[]) {
         for (const key of keys) {
-            this.alwaysShownOptionsLocal.set(key,true);
+            this.alwaysShownOptionsLocal.set(key, true);
         }
         this.renderList();
     }
