@@ -608,6 +608,7 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.usingJSList) {
             return
         }
+this.alwaysShownOptionsLocal.clear()
         this.optionsLocal.clear()
         this.optionsReverse.clear()
 
@@ -624,6 +625,7 @@ export class HTMLFormInputElement extends HTMLElement {
             if (child.tagName == "OPTION") {
                 const optionChild = child as HTMLOptionElement
                 this.options.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, optionChild.value)
+this.alwaysShownOptionsLocal.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value,true);
                 this.optionsReverse.set(optionChild.value, optionChild.label.length != 0 ? optionChild.label : optionChild.value)
             }
         }
