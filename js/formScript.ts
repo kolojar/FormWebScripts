@@ -631,7 +631,7 @@ export class HTMLFormInputElement extends HTMLElement {
 			if (child.tagName == "OPTION") {
 				const optionChild = child as HTMLOptionElement;
 				this.options.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, optionChild.value);
-				if (optionChild.hasAttribute("always-shown")) {
+				if (optionChild.hasAttribute("always-shown") || optionChild.hasAttribute("always-show")) {
 					this.alwaysShownOptionsLocal.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, true);
 				}
 				this.optionsReverse.set(optionChild.value, optionChild.label.length != 0 ? optionChild.label : optionChild.value);
