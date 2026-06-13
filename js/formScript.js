@@ -8,7 +8,7 @@ Disables element and all subelements without attribute disableRecursiveDisable
 export function RecursiveDisabler(target, disabled) {
     for (let index = 0; index < target.children.length; index++) {
         const element = target.children[index];
-        if ((target instanceof HTMLFormInputElement)) {
+        if (target instanceof HTMLFormInputElement) {
             target.disabled = disabled;
         }
         else {
@@ -52,7 +52,7 @@ export class HTMLFormBoxElement extends HTMLElement {
         //Set message
         const messageID = GeneratePassword(8, false, false);
         this.messageID = messageID;
-        this.querySelectorAll("form-status-message").forEach(element => {
+        this.querySelectorAll("form-status-message").forEach((element) => {
             let status = element; //TODO: FIX
             status.innerText = message;
             //Set blinking
@@ -100,7 +100,7 @@ export class HTMLFormBoxElement extends HTMLElement {
  * @param message Message
  */
 export function SetWaitStatusForms(message) {
-    document.querySelectorAll("form-box").forEach(form => {
+    document.querySelectorAll("form-box").forEach((form) => {
         form.SetWaitStatusMessage(message);
     });
 }
@@ -108,7 +108,7 @@ export function SetWaitStatusForms(message) {
  * Removes wait status from wall forms in document
  */
 export function RemoveWaitStatusForms() {
-    document.querySelectorAll("form-box").forEach(form => {
+    document.querySelectorAll("form-box").forEach((form) => {
         form.RemoveWaitStatusMessage();
     });
 }
@@ -186,7 +186,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         const indeterminate = this.indeterminate;
         this.originalChecked = this.getAttribute("original-checked") == "true";
         this.checked = this.hasAttribute("checked");
-        this.isRadio = (this.getAttribute("type") == "radio" || this.hasAttribute("is-radio"));
+        this.isRadio = this.getAttribute("type") == "radio" || this.hasAttribute("is-radio");
         this.indeterminate = indeterminate;
     }
     updateSwitch() {
@@ -423,7 +423,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         }
     }
 }
-HTMLFormToggleElement.observedAttributes = ['label-before', 'label', 'original-checked', 'checked', 'name', 'is-radio', 'value', 'indeterminate'];
+HTMLFormToggleElement.observedAttributes = ["label-before", "label", "original-checked", "checked", "name", "is-radio", "value", "indeterminate"];
 /**
  * HTMLFormInputElement element defition.
  * Sends event validation-done on complete validation.
@@ -558,6 +558,7 @@ export class HTMLFormInputElement extends HTMLElement {
         if (this.usingJSList) {
             return;
         }
+        this.alwaysShownOptionsLocal.clear();
         this.optionsLocal.clear();
         this.optionsReverse.clear();
         //Updates hint list under the selection
@@ -573,6 +574,9 @@ export class HTMLFormInputElement extends HTMLElement {
             if (child.tagName == "OPTION") {
                 const optionChild = child;
                 this.options.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, optionChild.value);
+                if (optionChild.hasAttribute("always-shown")) {
+                    this.alwaysShownOptionsLocal.set(optionChild.label.length != 0 ? optionChild.label : optionChild.value, true);
+                }
                 this.optionsReverse.set(optionChild.value, optionChild.label.length != 0 ? optionChild.label : optionChild.value);
             }
         }
@@ -625,9 +629,17 @@ export class HTMLFormInputElement extends HTMLElement {
                     }
                     this.selectedListItemWithKeyboard = -1;
                 };
-                optionDiv.addEventListener("mouseenter", () => { clearMouse(); this.selectedListItemWithKeyboard = NaN; });
-                optionDiv.addEventListener("mouseleave", () => { clearMouse(); });
-                optionDiv.addEventListener("mousemove", () => { clearMouse(); this.selectedListItemWithKeyboard = NaN; });
+                optionDiv.addEventListener("mouseenter", () => {
+                    clearMouse();
+                    this.selectedListItemWithKeyboard = NaN;
+                });
+                optionDiv.addEventListener("mouseleave", () => {
+                    clearMouse();
+                });
+                optionDiv.addEventListener("mousemove", () => {
+                    clearMouse();
+                    this.selectedListItemWithKeyboard = NaN;
+                });
                 optionDiv.appendChild(option);
                 this.listHolder.appendChild(optionDiv);
             }
@@ -744,7 +756,7 @@ export class HTMLFormInputElement extends HTMLElement {
         //    this.setValue(this.getAttribute("value"))
         //}
         // if (this.hasAttribute("onEnterPressClickElementId")) {
-        //    this.onEnterPressClickElementId = this.getAttribute("onEnterPressClickElementId")        
+        //    this.onEnterPressClickElementId = this.getAttribute("onEnterPressClickElementId")
         //}
         // if (this.hasAttribute("list")) {
         //    this.setListId(this.getAttribute("list"))
@@ -797,37 +809,37 @@ export class HTMLFormInputElement extends HTMLElement {
         else if (name == "is-case-sensitive-list") {
             this.isCaseSensitiveList = this.hasAttribute("is-case-sensitive-list");
         }
-        else if (name == 'original-value') {
+        else if (name == "original-value") {
             this.originalValue = newValue;
         }
-        else if (name == 'label') {
+        else if (name == "label") {
             this.label = newValue;
         }
-        else if (name == 'min') {
+        else if (name == "min") {
             this.min = newValue;
         }
-        else if (name == 'max') {
+        else if (name == "max") {
             this.max = newValue;
         }
-        else if (name == 'step') {
+        else if (name == "step") {
             this.step = newValue;
         }
-        else if (name == 'raw-value') {
+        else if (name == "raw-value") {
             this.valueRaw = newValue;
         }
-        else if (name == 'name') {
+        else if (name == "name") {
             this.name = newValue;
         }
-        else if (name == 'minlength') {
+        else if (name == "minlength") {
             this.minLength = newValue;
         }
-        else if (name == 'maxlength') {
+        else if (name == "maxlength") {
             this.maxLength = newValue;
         }
-        else if (name == 'multiple') {
+        else if (name == "multiple") {
             this.multiple = this.hasAttribute("multiple");
         }
-        else if (name == 'allow-empty-file') {
+        else if (name == "allow-empty-file") {
             this.allowNullFile = this.hasAttribute("allow-empty-file");
         }
     }
@@ -947,7 +959,7 @@ export class HTMLFormInputElement extends HTMLElement {
             }
             return this.input.files;
         }
-        const raw = (this.type == "checkbox" || this.type == "radio") ? this.inputCheckbox.checked : this.valueRaw;
+        const raw = this.type == "checkbox" || this.type == "radio" ? this.inputCheckbox.checked : this.valueRaw;
         //Check if is in select options
         if (this.options.has(raw.toString())) {
             return this.options.get(raw.toString());
@@ -1206,7 +1218,7 @@ export class HTMLFormInputElement extends HTMLElement {
     }
 }
 HTMLFormInputElement.formAssociated = true;
-HTMLFormInputElement.observedAttributes = ['disabled', 'label', 'type', 'name', 'value', 'on-enter-press-click-element-id', 'list', 'placeholder', 'icon', 'is-strict-list', 'is-case-sensitive-list', 'original-value', 'min', 'max', 'step', 'raw-value', 'minlength', 'maxlength', 'multiple', 'allow-empty-file'];
+HTMLFormInputElement.observedAttributes = ["disabled", "label", "type", "name", "value", "on-enter-press-click-element-id", "list", "placeholder", "icon", "is-strict-list", "is-case-sensitive-list", "original-value", "min", "max", "step", "raw-value", "minlength", "maxlength", "multiple", "allow-empty-file"];
 export function GenerateRandomColor() {
     const colorLetters = "0123456789ABCDEF";
     let color = "#";
@@ -1260,7 +1272,7 @@ export function SendToast(title, message, type, timeout = -7) {
     toastCounter++;
     let toastId = toastCounter;
     if (timeout < 0) {
-        timeout = Math.ceil((title.length + message.length) / (-timeout));
+        timeout = Math.ceil((title.length + message.length) / -timeout);
     }
     timeout = Math.max(timeout, 10);
     //Get target color
@@ -1431,8 +1443,8 @@ export class DraggableElement {
         }
     }
     /**
-    * Enables dragging from selected element(s)
-    */
+     * Enables dragging from selected element(s)
+     */
     EnableDrag() {
         if (!this.dragDisabled) {
             return;
@@ -1507,9 +1519,9 @@ export class DraggableElement {
             }
         };
         /**
-        * Stops moving element based on mouse position
-        * @param event Mouse event
-        */
+         * Stops moving element based on mouse position
+         * @param event Mouse event
+         */
         this.dragEndEvent = (event) => {
             //End drag
             this.isDragging = false;
@@ -1547,8 +1559,8 @@ export class DraggableElement {
                 this.lastDragX = event.touches[0].clientX;
                 this.lastDragY = event.touches[0].clientY;
             }
-            this.movedElement.style.left = (this.movedElement.offsetLeft - posX) + "px";
-            this.movedElement.style.top = (this.movedElement.offsetTop - posY) + "px";
+            this.movedElement.style.left = this.movedElement.offsetLeft - posX + "px";
+            this.movedElement.style.top = this.movedElement.offsetTop - posY + "px";
         };
         this.movedElement = movedElement;
         this.moveAtBody = moveAtBody;
@@ -1647,16 +1659,16 @@ async function SetupFormIcons() {
     //Setup observer
     const formIconObserver = new MutationObserver((mutationsList) => {
         for (const mutation of mutationsList) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'form-icon') {
-                const target = (mutation.target);
+            if (mutation.type === "attributes" && mutation.attributeName === "form-icon") {
+                const target = mutation.target;
                 update(target);
             }
         }
     });
     formIconObserver.observe(document.body, {
         attributes: true,
-        attributeFilter: ['form-icon'],
-        subtree: true
+        attributeFilter: ["form-icon"],
+        subtree: true,
     });
     //Setup existing
     const elements = document.querySelectorAll("[form-icon]");
@@ -1676,7 +1688,7 @@ async function SetupFormIcons() {
  * @returns Path for img src
  */
 function GetFormIconPath(path) {
-    //Get real path  
+    //Get real path
     if (path == undefined) {
         return "";
     }
