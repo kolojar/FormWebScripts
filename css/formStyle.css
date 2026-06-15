@@ -11,7 +11,11 @@
     --table-header-color: rgb(0, 200, 0);
     --table-highlight-color: rgb(255, 180, 0);
     --link-color: rgb(26, 98, 232);
-    --form-background: linear-gradient(to bottom right, #0099ff 0%, #000066 85%);
+    --form-background: linear-gradient(
+        to bottom right,
+        #0099ff 0%,
+        #000066 85%
+    );
 }
 
 html.darkMode {
@@ -21,7 +25,6 @@ html.darkMode {
     --background-color-next-layer: #333;
     --link-color: cornflowerblue;
 }
-
 
 /*HTML Overwrites*/
 * {
@@ -161,12 +164,10 @@ h6 {
     margin: 0px;
 }
 
-
 fieldset {
     min-width: 0;
     width: auto;
 }
-
 
 /*Custom class = styledTable*/
 .styledTable {
@@ -201,7 +202,7 @@ fieldset {
 
 .styledTable th:last-child {
     border-right: solid var(--color) 2px;
-    border-left: solid var(--color) 2px
+    border-left: solid var(--color) 2px;
 }
 
 .styledTable td {
@@ -227,7 +228,7 @@ fieldset {
     padding: 4px;
 }
 
-*[form-icon]>* {
+*[form-icon] > * {
     vertical-align: middle;
     height: 32px;
     padding-left: 4px;
@@ -288,7 +289,6 @@ button:disabled {
     margin: 2px;
 }
 
-
 /*Custom object = form-input*/
 form-input {
     min-height: 1.2lh;
@@ -297,7 +297,7 @@ form-input {
     width: auto;
 }
 
-form-input>div {
+form-input > div {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
@@ -306,18 +306,18 @@ form-input>div {
     border: 1px solid var(--color);
 }
 
-form-input>div>img {
+form-input > div > img {
     height: 20px;
     margin: 2px 0.25rem;
     display: inline;
 }
 
 html.darkMode form-input img {
-    filter: invert(1)
+    filter: invert(1);
 }
 
-form-input>div>input,
-form-input>div>select {
+form-input > div > input,
+form-input > div > select {
     border: none;
     margin: 0.25rem;
     display: inline-block;
@@ -328,7 +328,7 @@ form-input>div>select {
     color: var(--color);
 }
 
-form-input>div>textarea {
+form-input > div > textarea {
     border: none;
     margin: 4px;
     display: inline-block;
@@ -340,7 +340,7 @@ form-input>div>textarea {
     color: var(--color);
 }
 
-form-input>.listHolder {
+form-input > .listHolder {
     position: relative;
     top: 0px;
     left: 0px;
@@ -356,7 +356,7 @@ form-input>.listHolder {
     border: none;
 }
 
-form-input>.listHolder>div {
+form-input > .listHolder > div {
     width: 100%;
     cursor: pointer;
     background-color: var(--background-color-next-layer);
@@ -364,26 +364,26 @@ form-input>.listHolder>div {
     transform: translateZ(0);
 }
 
-form-input>.listHolder>div:hover,
-form-input>.listHolder>.hover {
+form-input > .listHolder > div:hover,
+form-input > .listHolder > .hover {
     background-color: gray;
 }
 
-form-input>div>p {
+form-input > div > p {
     margin-top: 8px;
     margin-left: 4px;
 }
 
-form-input>div>input[type="color"] {
+form-input > div > input[type="color"] {
     margin-bottom: 8px;
-    height: 26px
+    height: 26px;
 }
 
-form-input>div>input:focus {
+form-input > div > input:focus {
     outline: none;
 }
 
-form-input>div>textarea:focus {
+form-input > div > textarea:focus {
     outline: none;
 }
 
@@ -391,12 +391,12 @@ form-input>div>textarea:focus {
     border-color: var(--color-next-layer);
 }
 
-
 /*Custom object = form-toggle*/
 form-toggle .labelBefore {
     display: inline;
     position: relative;
     margin-right: 4px;
+    vertical-align: bottom;
 }
 
 form-toggle {
@@ -429,8 +429,8 @@ form-toggle .toggle .slider {
     right: 0;
     bottom: 0;
     border-radius: 20px;
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
     background-color: var(--toggle-off);
 }
 
@@ -444,8 +444,8 @@ form-toggle .toggle .slider:before {
     left: 4px;
     transform: translate(0%, -50%);
     background-color: var(--background-color);
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
 }
 
 form-toggle .formSwitchChecked .slider {
@@ -491,7 +491,8 @@ form-toggle[indeterminate][is-radio] * .slider:before {
 }
 
 form-toggle .labelAfter {
-    margin-left: 4px
+    margin-left: 4px;
+    vertical-align: bottom;
 }
 
 /*form-toggle:disabled, form-toggle[disabled], form-toggle:disabled *, form-toggle[disabled] * {
@@ -507,7 +508,6 @@ form-row {
 form-row p:first-child {
     margin-top: 0px;
 }
-
 
 /*Custom class = formToast*/
 .formToastHolder {
@@ -604,7 +604,6 @@ form-row p:first-child {
     }
 }
 
-
 /*Custom element = form-box*/
 form-box {
     background-color: var(--background-color);
@@ -648,7 +647,6 @@ body[form-box-holder] {
     margin-bottom: 20px;
 }
 
-
 /*Custom class = formDialog*/
 .formDialog {
     background-color: var(--background-color);
@@ -672,14 +670,14 @@ body[form-box-holder] {
     /*white-space: ;*/
 }
 
-.formDialog>div {
+.formDialog > div {
     display: flex;
     flex-direction: column;
     max-width: 90dvw;
     overflow: auto;
 }
 
-.formDialog>div>div {
+.formDialog > div > div {
     margin-left: 4px;
     margin-right: 4px;
 }
@@ -723,7 +721,7 @@ body[form-box-holder] {
     margin: 4px;
 }
 
-.formDialog .checkboxHolder>* {
+.formDialog .checkboxHolder > * {
     display: inline;
     width: fit-content;
 }
@@ -743,14 +741,13 @@ body[form-box-holder] {
     gap: 0px;
 }
 
-.formButtonBox>:last-child {
+.formButtonBox > :last-child {
     margin-right: 0px;
 }
 
-.formButtonBox>:first-child {
+.formButtonBox > :first-child {
     margin-left: 0px;
 }
-
 
 .formJustifyRight {
     justify-content: right;
@@ -772,18 +769,21 @@ body[form-box-holder] {
     text-align: center;
 }
 
-
 /*Custom class = formCollapsable*/
 .formCollapsable {
     display: grid;
     grid-template-rows: 1fr;
     opacity: 1;
-    transition: grid-template-rows 0.4s ease, opacity 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+    transition:
+        grid-template-rows 0.4s ease,
+        opacity 0.5s ease,
+        padding 0.5s ease,
+        margin 0.5s ease;
     visibility: visible;
     pointer-events: auto;
 }
 
-.formCollapsable>* {
+.formCollapsable > * {
     overflow: hidden;
 }
 
@@ -797,7 +797,6 @@ body[form-box-holder] {
     pointer-events: none;
     visibility: collapse;
 }
-
 
 /*Classes*/
 .allowSelect,
@@ -853,7 +852,7 @@ body[form-box-holder] {
     }
 
     50% {
-        opacity: 0.0;
+        opacity: 0;
     }
 
     100% {
@@ -926,7 +925,6 @@ body[form-box-holder] {
 .tableScrollHolder {
     overflow: scroll;
 }
-
 
 /* Classes for colors*/
 .formOkColor {
