@@ -500,6 +500,20 @@ form-toggle .labelAfter {
     filter: grayscale(100);
 }*/
 
+/*Custom element = form-status-message*/
+form-status-message {
+    text-align: center;
+    font-size: large;
+    width: auto;
+    margin: auto;
+    display: block;
+}
+
+form-status-message:disabled,
+form-status-message[disabled] {
+    cursor: wait;
+}
+
 /*Custom element = form-row*/
 form-row {
     margin: 4px;
