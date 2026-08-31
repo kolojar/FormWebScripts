@@ -898,11 +898,9 @@ export class HTMLFormInputElement extends HTMLElement {
             isValid = this.options.has(this.valueRaw.toString());
         }
         if (this.valueRaw.toString().length < this.minLength) {
-            console.log("Too small");
             isValid = false;
         }
         if (this.valueRaw.toString().length > this.maxLength) {
-            console.log("Too big");
             isValid = false;
         }
         //Check for validity
