@@ -834,6 +834,12 @@ export class HTMLFormInputElement extends HTMLElement {
 			if (this.hasAttribute(attribute)) {
 				this.attributeChangedCallback(attribute, "", this.getAttribute(attribute) as string);
 			}
+    }
+    if (!this.hasAttribute("minlength")) {
+      this.minLength = 0;
+    }
+    if (!this.hasAttribute("maxlength")) {
+      this.maxLength = -1;
 		}
 		this.disabled = this.hasAttribute("disabled");
 	}
@@ -934,6 +940,14 @@ export class HTMLFormInputElement extends HTMLElement {
 			//console.log(this.options);
 			//console.log(this.value);
 			isValid = this.options.has(this.valueRaw.toString());
+    }
+    if (this.valueRaw.toString().length < this.minLength) {
+      console.log("Too small")
+      isValid = false
+    }
+    if (this.valueRaw.toString().length > this.maxLength) {
+      console.log("Too big")
+      isValid = false
 		}
 
 		//Check for validity
@@ -1256,15 +1270,22 @@ export class HTMLFormInputElement extends HTMLElement {
 		this.validate();
 	}
 
-	public set minLength(minimum: number) {
+  public set minLength(minimum: number) {
+    if (minimum <= 0 ) {minimum = 0}
 		this.input.minLength = minimum;
 		this.setAttribute("minlength", minimum.toString());
 		this.validate();
 	}
 
-	public set maxLength(maximum: number) {
+  public set maxLength(maximum: number) {
+    if (maximum <= 0) {
+      this.input.removeAttribute('maxLength');
+      this.validate();
+       this.removeAttribute('maxlength');
+      return
+    }
 		this.input.maxLength = maximum;
-		this.setAttribute("manlength", maximum.toString());
+		this.setAttribute("maxlength", maximum.toString());
 		this.validate();
 	}
 
@@ -1272,8 +1293,8 @@ export class HTMLFormInputElement extends HTMLElement {
 		return this.input.minLength;
 	}
 
-	public get maxLength(): number {
-		return this.input.maxLength;
+  public get maxLength(): number {
+    return this.input.hasAttribute("maxLength") ? this.input.maxLength : Number.MAX_SAFE_INTEGER
 	}
 
 	public get multiple(): boolean {
