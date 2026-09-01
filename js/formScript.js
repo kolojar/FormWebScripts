@@ -1204,6 +1204,9 @@ export class HTMLFormInputElement extends HTMLElement {
     get max() {
         return this.input.max;
     }
+    get step() {
+        return this.hasAttribute("step") ? this.getAttribute("step") : "1";
+    }
     set step(step) {
         this.input.step = step;
         this.setAttribute("step", step);
@@ -1218,7 +1221,7 @@ export class HTMLFormInputElement extends HTMLElement {
         this.validate();
     }
     set maxLength(maximum) {
-        if (maximum <= 0) {
+        if (maximum <= 0 || isNaN(maximum)) {
             this.input.removeAttribute('maxLength');
             this.validate();
             this.removeAttribute('maxlength');

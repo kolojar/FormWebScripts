@@ -142,7 +142,7 @@ export class FormDialogManager {
         }
     }
     RenderDialog(dialog) {
-        var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+        var _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
         //Check if dialog is valid
         if (dialog == null || dialog == undefined) {
             return false;
@@ -204,9 +204,16 @@ export class FormDialogManager {
         if (dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select) {
             //Setup entry
             dialog.inputElement = new HTMLFormInputElement("", null);
-            dialog.inputElement.min = (_c = dialog.settings.min) !== null && _c !== void 0 ? _c : "";
-            dialog.inputElement.max = (_d = dialog.settings.max) !== null && _d !== void 0 ? _d : "";
-            dialog.inputElement.value = (_e = dialog.settings.presetValue) !== null && _e !== void 0 ? _e : null;
+            if (dialog.settings.useMinMaxAsLen == true) {
+                dialog.inputElement.minLength = parseInt((_c = dialog.settings.min) !== null && _c !== void 0 ? _c : "0");
+                dialog.inputElement.maxLength = parseInt((_d = dialog.settings.max) !== null && _d !== void 0 ? _d : "-1");
+            }
+            else {
+                dialog.inputElement.min = (_e = dialog.settings.min) !== null && _e !== void 0 ? _e : "";
+                dialog.inputElement.max = (_f = dialog.settings.max) !== null && _f !== void 0 ? _f : "";
+            }
+            dialog.inputElement.step = (_g = dialog.settings.step) !== null && _g !== void 0 ? _g : "1";
+            dialog.inputElement.value = (_h = dialog.settings.presetValue) !== null && _h !== void 0 ? _h : null;
             dialog.inputElement.placeholder = dialog.settings.placeholder;
             dialog.inputElement.addEventListener("mousedown", (ev) => {
                 ev.stopImmediatePropagation();
@@ -268,8 +275,8 @@ export class FormDialogManager {
             //Setup search
             dialog.inputElement = new HTMLFormInputElement("", null);
             /*if (dialog.settings.selectValues != undefined) {
-                dialog.inputElement.setOptions([...dialog.settings.selectValues.keys()])
-            }*/
+                      dialog.inputElement.setOptions([...dialog.settings.selectValues.keys()])
+                  }*/
             dialog.inputElement.type = "search-realtime";
             dialog.inputElement.addEventListener("search", () => {
                 var _c;
@@ -302,7 +309,7 @@ export class FormDialogManager {
             if (isRadio) {
                 dialog.checkboxesHolder.removeAttribute("max");
             }
-            //On change            
+            //On change
             const onChange = () => {
                 var _c;
                 if (isRadio) {
@@ -378,7 +385,7 @@ export class FormDialogManager {
                         onChange();
                     });
                     input.silenceValidation++;
-                    input.checked = (_f = val.checked) !== null && _f !== void 0 ? _f : false;
+                    input.checked = (_j = val.checked) !== null && _j !== void 0 ? _j : false;
                     input.silenceValidation--;
                     dialog.checkboxesHolder.appendChild(input);
                 }
@@ -400,11 +407,11 @@ export class FormDialogManager {
                 }
             }
             dialog.checkboxesHolder.style.minWidth = dialog.inputElement.getBoundingClientRect().width + "px";
-            dialog.checkboxesHolder.style.width = (bestWidth - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20) + "px";
+            dialog.checkboxesHolder.style.width = bestWidth - dialog.checkboxesHolder.getBoundingClientRect().left + dialog.checkboxesHolder.scrollLeft + 20 + "px";
             dialog.checkboxesHolder.removeAttribute("form-toggle-disabled");
         }
         //Allow select
-        dialog.AllowSelect((_g = dialog.settings.allowSelect) !== null && _g !== void 0 ? _g : (dialog.style == FormDialogStyle.CheckBoxSelect || dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select));
+        dialog.AllowSelect((_k = dialog.settings.allowSelect) !== null && _k !== void 0 ? _k : (dialog.style == FormDialogStyle.CheckBoxSelect || dialog.style == FormDialogStyle.Entry || dialog.style == FormDialogStyle.Select));
         //Button box holder
         const buttonBoxHolder = document.createElement("div");
         buttonBoxHolder.classList.add("formButtonBoxHolder");
@@ -450,7 +457,7 @@ export class FormDialogManager {
                     if (dialog.settings.blockOpenOver) {
                         this.blockOpenOver = false;
                     }
-                    this.opened = this.opened.filter(item => item != dialog);
+                    this.opened = this.opened.filter((item) => item != dialog);
                     //Open next dialog
                     let tryOpen = true;
                     while (tryOpen) {
@@ -464,7 +471,7 @@ export class FormDialogManager {
             return Promise.resolve(true);
         };
         //ESC key press
-        dialog.element.addEventListener('cancel', async (event) => {
+        dialog.element.addEventListener("cancel", async (event) => {
             var _c, _d, _e;
             event.preventDefault();
             if (dialog.style == FormDialogStyle.Wait) {
@@ -473,7 +480,7 @@ export class FormDialogManager {
                 (_e = dialog.element) === null || _e === void 0 ? void 0 : _e.showModal();
                 return;
             }
-            if (!await closeDialog(true)) {
+            if (!(await closeDialog(true))) {
                 return;
             }
             if (dialog.onCloseEvent != null) {
@@ -481,9 +488,9 @@ export class FormDialogManager {
             }
         });
         //Close using close function
-        dialog.element.addEventListener('force-cancel', async (event) => {
+        dialog.element.addEventListener("force-cancel", async (event) => {
             event.preventDefault();
-            if (!await closeDialog(true)) {
+            if (!(await closeDialog(true))) {
                 return;
             }
             if (dialog.onCloseEvent != null) {
@@ -498,37 +505,37 @@ export class FormDialogManager {
                 }
                 const button = document.createElement("button");
                 button.classList.add("formButton");
-                if (((_h = dialog.buttons[i]) === null || _h === void 0 ? void 0 : _h.color) == "ok") {
+                if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.color) == "ok") {
                     button.classList.add("formOkColor");
                 }
-                else if (((_j = dialog.buttons[i]) === null || _j === void 0 ? void 0 : _j.color) == "warn") {
+                else if (((_m = dialog.buttons[i]) === null || _m === void 0 ? void 0 : _m.color) == "warn") {
                     button.classList.add("formWarnColor");
                 }
-                else if (((_k = dialog.buttons[i]) === null || _k === void 0 ? void 0 : _k.color) == "info") {
+                else if (((_o = dialog.buttons[i]) === null || _o === void 0 ? void 0 : _o.color) == "info") {
                     button.classList.add("formInfoColor");
                 }
-                else if (((_l = dialog.buttons[i]) === null || _l === void 0 ? void 0 : _l.color) == "error") {
+                else if (((_p = dialog.buttons[i]) === null || _p === void 0 ? void 0 : _p.color) == "error") {
                     button.classList.add("formErrorColor");
                 }
-                else if (((_m = dialog.buttons[i]) === null || _m === void 0 ? void 0 : _m.color) == "black") {
+                else if (((_q = dialog.buttons[i]) === null || _q === void 0 ? void 0 : _q.color) == "black") {
                     button.classList.add("formBlackColor");
                 }
                 button.onclick = async () => {
                     var _c;
-                    if (!await closeDialog(dialog.buttons[i].isCancel)) {
+                    if (!(await closeDialog(dialog.buttons[i].isCancel))) {
                         return;
                     }
                     if (dialog.onCloseEvent != null) {
                         dialog.onCloseEvent(i, (_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick);
                     }
                 };
-                if (((_o = dialog.buttons[i]) === null || _o === void 0 ? void 0 : _o.location) == "left") {
+                if (((_r = dialog.buttons[i]) === null || _r === void 0 ? void 0 : _r.location) == "left") {
                     buttonBoxLeft.appendChild(button);
                 }
-                else if (((_p = dialog.buttons[i]) === null || _p === void 0 ? void 0 : _p.location) == "center") {
+                else if (((_s = dialog.buttons[i]) === null || _s === void 0 ? void 0 : _s.location) == "center") {
                     buttonBoxCenter.appendChild(button);
                 }
-                else if (((_q = dialog.buttons[i]) === null || _q === void 0 ? void 0 : _q.location) == "right") {
+                else if (((_t = dialog.buttons[i]) === null || _t === void 0 ? void 0 : _t.location) == "right") {
                     buttonBoxRight.appendChild(button);
                 }
                 const text = dialog.buttons[i].text;
@@ -575,10 +582,7 @@ export class FormDialogManager {
                 }
                 onCloseEvent(value);
             }
-        }, [
-            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
-            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
-        ], settings);
+        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue), new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], settings);
         return dialog;
     }
     /**
@@ -597,9 +601,7 @@ export class FormDialogManager {
             if (onCloseEvent != null) {
                 onCloseEvent();
             }
-        }, [
-            new FormDialogButton("center", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)
-        ], settings);
+        }, [new FormDialogButton("center", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], settings);
     }
     /**
      * Opens confirm (asking for user yes or no)
@@ -618,8 +620,12 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnNo", "No"); }, false, true),
-            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnYes", "Yes"); }, true)
+            new FormDialogButton("left", "error", () => {
+                return GlobalLanguageManager.Translate("dialog.btnNo", "No");
+            }, false, true),
+            new FormDialogButton("right", "ok", () => {
+                return GlobalLanguageManager.Translate("dialog.btnYes", "Yes");
+            }, true),
         ], settings);
     }
     /**
@@ -647,8 +653,12 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"); }, cancelValue, true),
-            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnOK", "OK"); }, null)
+            new FormDialogButton("left", "error", () => {
+                return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel");
+            }, cancelValue, true),
+            new FormDialogButton("right", "ok", () => {
+                return GlobalLanguageManager.Translate("dialog.btnOK", "OK");
+            }, null),
         ], settings);
         return dialog;
     }
@@ -675,7 +685,11 @@ export class FormDialogManager {
                 }
             }
         }, [
-            allowCancel ? new FormDialogButton("center", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"); }, false, true) : undefined
+            allowCancel
+                ? new FormDialogButton("center", "error", () => {
+                    return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel");
+                }, false, true)
+                : undefined,
         ], settings);
         return dialog;
     }
@@ -717,8 +731,12 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", () => { return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"); }, cancelValue, true),
-            new FormDialogButton("right", "ok", () => { return GlobalLanguageManager.Translate("dialog.btnOK", "OK"); }, null)
+            new FormDialogButton("left", "error", () => {
+                return GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel");
+            }, cancelValue, true),
+            new FormDialogButton("right", "ok", () => {
+                return GlobalLanguageManager.Translate("dialog.btnOK", "OK");
+            }, null),
         ], settings);
         return dialog;
     }
@@ -738,8 +756,10 @@ export class FormDialogManager {
      * @returns Result value
      */
     ShowPromptAsync(title, content, cancelValue, entryType = "text", settings = {}) {
-        return new Promise(resolve => {
-            if (this.ShowPrompt(title, content, cancelValue, (value) => { resolve(value); }, entryType, settings) == null) {
+        return new Promise((resolve) => {
+            if (this.ShowPrompt(title, content, cancelValue, (value) => {
+                resolve(value);
+            }, entryType, settings) == null) {
                 resolve(null);
             }
         });
@@ -756,26 +776,30 @@ export class FormDialogManager {
      * @returns True or null on failure
      */
     ShowAlertAsync(title, content, settings = {}) {
-        return new Promise(resolve => {
-            if (this.ShowAlert(title, content, () => { resolve(true); }, settings) == null) {
+        return new Promise((resolve) => {
+            if (this.ShowAlert(title, content, () => {
+                resolve(true);
+            }, settings) == null) {
                 resolve(null);
             }
         });
     }
     /**
-    * Opens confirm (asking for user yes or no)
-    * @param title Title of dialog
-    * @param content Content HTML of information
-    * @param onCloseEvent Event fired on close
-    * @param settings More settings, not required:
-    * @argument settings.openOverOthers If dialog can open over others
-    * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
-    * @argument settings.allowSelect Allow selection of text in dialog
-    * @returns True or false or null on failure
-    */
+     * Opens confirm (asking for user yes or no)
+     * @param title Title of dialog
+     * @param content Content HTML of information
+     * @param onCloseEvent Event fired on close
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns True or false or null on failure
+     */
     ShowConfirmAsync(title, content, settings = {}) {
-        return new Promise(resolve => {
-            if (this.ShowConfirm(title, content, (value) => { resolve(value); }, settings) == null) {
+        return new Promise((resolve) => {
+            if (this.ShowConfirm(title, content, (value) => {
+                resolve(value);
+            }, settings) == null) {
                 resolve(null);
             }
         });
@@ -795,8 +819,10 @@ export class FormDialogManager {
      * @returns Returns selected value or null on failure
      */
     ShowSelectAsync(title, content, cancelValue, selectValues, settings = {}) {
-        return new Promise(resolve => {
-            if (this.ShowSelect(title, content, cancelValue, (value) => { resolve(value); }, selectValues, settings) == null) {
+        return new Promise((resolve) => {
+            if (this.ShowSelect(title, content, cancelValue, (value) => {
+                resolve(value);
+            }, selectValues, settings) == null) {
                 resolve(null);
             }
         });
@@ -818,8 +844,10 @@ export class FormDialogManager {
      * @returns Array of values, one (cancel) value or null on failure
      */
     ShowCheckboxSelectAsync(title, content, cancelValue, checkboxSelectValues, settings = {}) {
-        return new Promise(resolve => {
-            if (this.ShowCheckboxSelect(title, content, cancelValue, (value) => { resolve(value); }, checkboxSelectValues, settings) == null) {
+        return new Promise((resolve) => {
+            if (this.ShowCheckboxSelect(title, content, cancelValue, (value) => {
+                resolve(value);
+            }, checkboxSelectValues, settings) == null) {
                 resolve(null);
             }
         });
