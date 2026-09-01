@@ -439,7 +439,7 @@ export class HTMLFormToggleElement extends HTMLElement {
 		} else if (this.value == "on") {
 			this.checked = true;
 		}
-		this.input.value = value;
+    this.input.value = value;
 	}
 
 	public get indeterminate(): boolean {
@@ -543,11 +543,11 @@ export class HTMLFormInputElement extends HTMLElement {
 			if (!this.classList.contains("formInputFocus")) {
 				this.classList.add("formInputFocus");
 			}
-			//try {
-			//    this.input.showPicker();
-			//} catch (error) {
-			//    console.warn("Ignoring error: " + error);
-			//}
+			try {
+			    this.input.focus();
+			} catch (error) {
+			    console.warn("Ignoring error: " + error);
+			}
 		});
 		this.addEventListener("focusout", () => {
 			//console.log("Focus out");
@@ -981,7 +981,8 @@ export class HTMLFormInputElement extends HTMLElement {
 			}
 		}
 		if (isValid) {
-			this.holder.classList.remove(this.invalidBorderClass);
+      this.holder.classList.remove(this.invalidBorderClass);
+			this.dispatchEvent(new Event("change"))
 		} else {
 			this.holder.classList.add(this.invalidBorderClass);
 		}
@@ -1073,7 +1074,8 @@ export class HTMLFormInputElement extends HTMLElement {
 		}
 	}
 
-	public set valueRaw(value: string) {
+  public set valueRaw(value: string) {
+    //const doChange = value != this.valueRaw
 		if (this.type == "textarea") {
 			this.textArea.value = value;
 		} else if (this.type == "checkbox" || this.type == "radio") {
@@ -1081,7 +1083,7 @@ export class HTMLFormInputElement extends HTMLElement {
 		} else {
 			this.input.value = value;
 		}
-		this.setAttribute("value", value);
+    this.setAttribute("value", value);
 	}
 
 	public get type(): HTMLFormInputType {

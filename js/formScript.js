@@ -485,11 +485,12 @@ export class HTMLFormInputElement extends HTMLElement {
             if (!this.classList.contains("formInputFocus")) {
                 this.classList.add("formInputFocus");
             }
-            //try {
-            //    this.input.showPicker();
-            //} catch (error) {
-            //    console.warn("Ignoring error: " + error);
-            //}
+            try {
+                this.input.focus();
+            }
+            catch (error) {
+                console.warn("Ignoring error: " + error);
+            }
         });
         this.addEventListener("focusout", () => {
             //console.log("Focus out");
@@ -939,6 +940,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         if (isValid) {
             this.holder.classList.remove(this.invalidBorderClass);
+            this.dispatchEvent(new Event("change"));
         }
         else {
             this.holder.classList.add(this.invalidBorderClass);
@@ -1031,6 +1033,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
     }
     set valueRaw(value) {
+        //const doChange = value != this.valueRaw
         if (this.type == "textarea") {
             this.textArea.value = value;
         }
