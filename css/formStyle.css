@@ -171,7 +171,10 @@ fieldset {
 
 /*Custom class = styledTable*/
 .styledTable {
-    border: solid var(--color) 3px;
+    border-left: solid var(--color) 3px;
+    border-top: solid var(--color) 3px;
+     border-right: solid var(--color) 1px;
+     border-bottom: solid var(--color) 1px;
     white-space-collapse: preserve-spaces;
 }
 
@@ -193,20 +196,16 @@ fieldset {
 
 .styledTable th {
     background-color: var(--table-header-color);
-    border-top: solid var(--color) 2px;
-    border-left: solid var(--color) 2px;
+    border-right: solid var(--color) 2px;
+     border-bottom: solid var(--color) 3px;
     text-align: center;
     font-weight: bold;
     color: black;
 }
 
-.styledTable th:last-child {
-    border-right: solid var(--color) 2px;
-    border-left: solid var(--color) 2px;
-}
-
 .styledTable td {
-    border: solid var(--color) 2px;
+    border-right: solid var(--color) 2px;
+    border-bottom: solid var(--color) 2px;
 }
 
 .styledTable tr:nth-child(odd) {
