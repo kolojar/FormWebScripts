@@ -4,6 +4,7 @@
     --color-next-layer: #333;
     --color: #1a1a1a;
     --background-color-next-layer: #ccc;
+    --background-color-stripped-table: #e2e5e8;
     --form-ok-color: #02aa42;
     --form-warn-color: #dba401;
     --form-error-color: #cf0000;
@@ -23,6 +24,7 @@ html.darkMode {
     --color-next-layer: #ccc;
     --background-color: #1a1a1a;
     --background-color-next-layer: #333;
+    --background-color-stripped-table: #3c3c3c;
     --link-color: cornflowerblue;
 }
 
@@ -182,6 +184,11 @@ fieldset {
     transition: 0.3s;
 }
 
+.styledTable tr:nth-child(odd) {
+    /*TODO: ADD STRIPPED TABLE SUPPORT*/
+    background-color: var(--background-color-stripped-table);
+}
+
 .styledTable tr:first-child {
     border-bottom: solid var(--color) 3px;
 }
@@ -197,20 +204,26 @@ fieldset {
 .styledTable th {
     background-color: var(--table-header-color);
     border-right: solid var(--color) 2px;
-     border-bottom: solid var(--color) 3px;
+    border-bottom: solid var(--color) 3px;
     text-align: center;
     font-weight: bold;
     color: black;
 }
 
+.styledTable .form-horizontal-header {
+    border-right: solid var(--color) 3px;
+    border-bottom: solid var(--color) 2px;
+    text-align: right;
+}
+
+.styledTable .form-topleft-header {
+    border-right: solid var(--color) 3px;
+    border-bottom: solid var(--color) 3px;
+}
+
 .styledTable td {
     border-right: solid var(--color) 2px;
     border-bottom: solid var(--color) 2px;
-}
-
-.styledTable tr:nth-child(odd) {
-    /*TODO: ADD STRIPPED TABLE SUPPORT*/
-    background-color: var(--background-color);
 }
 
 .styledTableNoWrap td,
@@ -936,7 +949,7 @@ body[form-box-holder] {
 }
 
 .tableScrollHolder {
-    overflow: scroll;
+    overflow: auto;
 }
 
 /* Classes for colors*/
