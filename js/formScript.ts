@@ -1314,7 +1314,7 @@ export class HTMLFormInputElement extends HTMLElement {
    * @param datetime Converted from object to local time
    */
   public SetDateTimeLocal(datetime: Date) {
-    this.value = FormatDateForDateTimeLocalInput(datetime)
+    this.value =  FormatDateForDateTimeLocalInput(datetime)
     this.validate()
   }
 }
