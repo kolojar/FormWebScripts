@@ -1,6 +1,6 @@
 //Do not forget to add formStyle.css
 import { LanguageManager } from "./languageManager.js";
-import { ContainsText, GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, FormatDateForDateTimeLocalInput, GeneratePassword } from "./sharedScripts.js";
 export const GlobalLanguageManager = new LanguageManager();
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
@@ -1242,6 +1242,14 @@ export class HTMLFormInputElement extends HTMLElement {
     }
     set multiple(multiple) {
         this.multiple = multiple;
+    }
+    /**
+     * Sets date and time in valid format for input
+     * @param datetime Converted from object to local time
+     */
+    SetDateTimeLocal(datetime) {
+        this.value = FormatDateForDateTimeLocalInput(datetime);
+        this.validate();
     }
 }
 HTMLFormInputElement.formAssociated = true;

@@ -97,4 +97,19 @@ export function DiffArrays(array, compareTo) {
     const removed = array.filter(x => !compareToSet.has(x));
     return [added, removed];
 }
+export function ConvertDateTimeToLocal(date) {
+    date.setTime(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+    return date;
+}
+export function FormatDateForDateTimeLocalInput(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+export function ConvertDateTimeToUTC_SQL(date) {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+}
 //# sourceMappingURL=sharedScripts.js.map

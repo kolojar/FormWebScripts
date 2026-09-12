@@ -340,6 +340,10 @@ form-input > div > select {
     color: var(--color);
 }
 
+form-input > div > input[type="search"]::-webkit-search-cancel-button {
+    display: none;
+}
+
 form-input > div > textarea {
     border: none;
     margin: 4px;

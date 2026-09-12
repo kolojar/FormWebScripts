@@ -83,7 +83,7 @@ export function ContainsText(text: string, searched: string, isCaseSensitive: bo
     } else if(text.length == 0) {
         return true;
     }
-    
+
     //Case sensitive
     text = isCaseSensitive ? text : text.toLowerCase();
     searched = isCaseSensitive ? searched : searched.toLowerCase();
@@ -109,4 +109,22 @@ export function DiffArrays<T>(array: T[], compareTo: T[]): [added: T[],removed: 
     const compareToSet = new Set(compareTo)
     const removed = array.filter(x => !compareToSet.has(x));
     return [added,removed]
+}
+
+export function ConvertDateTimeToLocal(date: Date): Date {
+  date.setTime(date.getTime() - date.getTimezoneOffset() * 60 * 1000)
+  return date;
+}
+
+export function FormatDateForDateTimeLocalInput(date: Date): string {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+export function ConvertDateTimeToUTC_SQL(date: Date): string {
+  return date.toISOString().slice(0, 19).replace('T', ' ');
 }

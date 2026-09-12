@@ -1,7 +1,7 @@
 //Do not forget to add formStyle.css
 
 import { LanguageManager } from "./languageManager.js";
-import { ContainsText, GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, ConvertDateTimeToLocal, FormatDateForDateTimeLocalInput, GeneratePassword } from "./sharedScripts.js";
 export const GlobalLanguageManager = new LanguageManager();
 
 /*
@@ -1307,7 +1307,16 @@ export class HTMLFormInputElement extends HTMLElement {
 
 	public set multiple(multiple: boolean) {
 		this.multiple = multiple;
-	}
+  }
+
+  /**
+   * Sets date and time in valid format for input
+   * @param datetime Converted from object to local time
+   */
+  public SetDateTimeLocal(datetime: Date) {
+    this.value = FormatDateForDateTimeLocalInput(datetime)
+    this.validate()
+  }
 }
 
 export function GenerateRandomColor(): string {
