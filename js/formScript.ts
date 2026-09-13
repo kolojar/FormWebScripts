@@ -187,10 +187,10 @@ export class HTMLFormToggleElement extends HTMLElement {
 				return;
 			}
 			if (ev.code === "Space") {
-				//console.log("Click");
-				//this.checked = !this.checked
-				//this.input.dispatchEvent(new Event("change"))
-				//this.dispatchEvent(new Event("change"))
+				console.log("Click");
+				this.checked = !this.checked
+				this.input.dispatchEvent(new Event("change"))
+				this.dispatchEvent(new Event("change"))
 			}
 		});
 		//this.addEventListener("change", () => {
