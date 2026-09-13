@@ -189,16 +189,28 @@ fieldset {
     background-color: var(--background-color-stripped-table);
 }
 
+.styledTable .trHighlight {
+    background-color: var(--table-highlight-color);
+}
+
+.styledTable tr:nth-child(odd).trHighlight {
+    background-color: var(--table-highlight-color);
+}
+
 .styledTable tr:first-child {
     border-bottom: solid var(--color) 3px;
 }
 
-.styledTable tr:hover {
+/* Hover rule for standard rows */
+.styledTable tr:hover,
+.styledTable tr:nth-child(odd):hover {
     background-color: var(--background-color-next-layer);
 }
 
-.styledTable .trHighlight {
-    background-color: var(--table-highlight-color);
+/* Fix: Explicit hover rule for highlighted rows */
+.styledTable tr.trHighlight:hover,
+.styledTable tr:nth-child(odd).trHighlight:hover {
+    background-color: var(--background-color-next-layer);
 }
 
 .styledTable th {
