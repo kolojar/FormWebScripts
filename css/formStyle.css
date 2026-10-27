@@ -73,35 +73,6 @@ body {
     height: 100dvh;
 }
 
-header,
-footer {
-    flex-shrink: 0;
-    padding-left: 4px;
-    padding-right: 4px;
-    overflow: auto;
-    max-height: 25dvh;
-}
-
-header {
-    margin-top: 0px;
-    padding-top: 1px;
-    padding-bottom: 0px;
-}
-
-footer {
-    margin-bottom: 0px;
-    padding-bottom: 1px;
-    padding-top: 1px;
-    max-height: 25dvh;
-}
-
-main {
-    flex: 1;
-    overflow: auto;
-    /*scrollbar-gutter: stable;*/
-    padding: 4px;
-}
-
 a {
     color: var(--link-color);
     transition: color 0.3s ease;
@@ -169,6 +140,62 @@ h6 {
 fieldset {
     min-width: 0;
     width: auto;
+}
+
+/* Header and Footer */
+header,
+footer {
+    flex-shrink: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    overflow: auto;
+    max-height: 25dvh;
+}
+
+header {
+    margin-top: 0px;
+    padding-top: 1px;
+    padding-bottom: 0px;
+}
+
+header:has(>.form-header-logo) {
+    display: flex;
+    gap: 0px;
+    overflow: hidden;
+    padding: 0px;
+}
+header:has(>.form-header-logo)> :not(.form-header-logo){
+    overflow: auto;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+footer {
+    margin-bottom: 0px;
+    padding-bottom: 1px;
+    padding-top: 1px;
+    max-height: 25dvh;
+}
+
+main {
+    flex: 1;
+    overflow: auto;
+    /*scrollbar-gutter: stable;*/
+    padding: 4px;
+}
+
+.form-header-logo {
+    position: sticky;
+    background-color: var(--background-color);
+    box-shadow: 2px 2px 2px black;
+    padding: 10px;
+    margin: 4px;
+    margin-left: 8px;
+    border-radius: 4px;
+    align-self: center;
+
 }
 
 /*Custom class = styledTable*/
