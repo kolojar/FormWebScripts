@@ -128,3 +128,7 @@ export function FormatDateForDateTimeLocalInput(date: Date): string {
 export function ConvertDateTimeToUTC_SQL(date: Date): string {
   return date.toISOString().slice(0, 19).replace('T', ' ');
 }
+
+export function validateEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}

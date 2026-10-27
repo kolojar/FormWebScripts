@@ -112,4 +112,7 @@ export function FormatDateForDateTimeLocalInput(date) {
 export function ConvertDateTimeToUTC_SQL(date) {
     return date.toISOString().slice(0, 19).replace('T', ' ');
 }
+export function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
 //# sourceMappingURL=sharedScripts.js.map

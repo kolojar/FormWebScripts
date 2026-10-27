@@ -1,7 +1,7 @@
 //Do not forget to add formStyle.css
 
 import { LanguageManager } from "./languageManager.js";
-import { ContainsText, ConvertDateTimeToLocal, FormatDateForDateTimeLocalInput, GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, ConvertDateTimeToLocal, FormatDateForDateTimeLocalInput, GeneratePassword, validateEmail as validateEmail } from "./sharedScripts.js";
 export const GlobalLanguageManager = new LanguageManager();
 
 /*
@@ -962,9 +962,14 @@ export class HTMLFormInputElement extends HTMLElement {
 				isValid = false;
 				//this.internals.setValidity(this.textArea.validity,this.textArea.validationMessage,this.textArea)
 			}
-		} else {
-			if (!this.input.checkValidity()) {
-				if (!(this.type == "file" && this.input.files?.length == 0 && this.allowNullFile)) {
+    } else {
+      if (this.type == "email") {
+        if (!validateEmail(this.value)) {
+          isValid = false
+        }
+      }
+      if (!this.input.checkValidity()) {
+        if (!(this.type == "file" && this.input.files?.length == 0 && this.allowNullFile)) {
 					isValid = false;
 					validationMessage = this.label + ": " + this.input.validationMessage;
 				}
@@ -988,7 +993,7 @@ export class HTMLFormInputElement extends HTMLElement {
 		}
 		validationMessage = validationMessage.replace("::", ":");
 		this.dispatchEvent(new Event("validation-done"));
-		return [changed, isValid, validationMessage];
+    return new Promise((resolve, _) => { resolve([changed, isValid, validationMessage])});
 	}
 
 	public get valueRaw(): string | boolean {

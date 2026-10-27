@@ -1,6 +1,6 @@
 //Do not forget to add formStyle.css
 import { LanguageManager } from "./languageManager.js";
-import { ContainsText, FormatDateForDateTimeLocalInput, GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, FormatDateForDateTimeLocalInput, GeneratePassword, validateEmail as validateEmail } from "./sharedScripts.js";
 export const GlobalLanguageManager = new LanguageManager();
 /*
 Disables element and all subelements without attribute disableRecursiveDisable
@@ -921,6 +921,11 @@ export class HTMLFormInputElement extends HTMLElement {
             }
         }
         else {
+            if (this.type == "email") {
+                if (!validateEmail(this.value)) {
+                    isValid = false;
+                }
+            }
             if (!this.input.checkValidity()) {
                 if (!(this.type == "file" && ((_a = this.input.files) === null || _a === void 0 ? void 0 : _a.length) == 0 && this.allowNullFile)) {
                     isValid = false;
@@ -947,7 +952,7 @@ export class HTMLFormInputElement extends HTMLElement {
         }
         validationMessage = validationMessage.replace("::", ":");
         this.dispatchEvent(new Event("validation-done"));
-        return [changed, isValid, validationMessage];
+        return new Promise((resolve, _) => { resolve([changed, isValid, validationMessage]); });
     }
     get valueRaw() {
         if (this.type == "textarea") {
