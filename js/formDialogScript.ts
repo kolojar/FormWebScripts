@@ -1,4 +1,6 @@
-import { DraggableElement, GlobalLanguageManager, HTMLFormInputElement, HTMLFormInputType, HTMLFormToggleElement, MakeElementDraggable, SendToast } from "./formScript.js";
+import { HTMLFormInputElement, HTMLFormInputType } from "./formInput.js";
+import { DraggableElement, GlobalLanguageManager, MakeElementDraggable, SendToast } from "./formScript.js";
+import { HTMLFormToggleElement } from "./formToggle.js";
 import { ContainsText, GeneratePassword, KeyValuePair } from "./sharedScripts.js";
 
 export enum FormDialogStyle {

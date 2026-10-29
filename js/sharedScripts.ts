@@ -129,6 +129,15 @@ export function ConvertDateTimeToUTC_SQL(date: Date): string {
   return date.toISOString().slice(0, 19).replace('T', ' ');
 }
 
-export function validateEmail(email: string) {
+export function ValidateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+export function GenerateRandomColor(): string {
+	const colorLetters = "0123456789ABCDEF";
+	let color = "#";
+	for (let i = 0; i < 6; i++) {
+		color += colorLetters[Math.floor(Math.random() * 16)];
+	}
+	return color;
 }

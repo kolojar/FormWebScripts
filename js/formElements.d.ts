@@ -1,4 +1,6 @@
-import { HTMLFormBoxElement, HTMLFormBoxStatusMessageElement, HTMLFormInputElement, HTMLFormToggleElement } from "./formScript";
+import { HTMLFormInputElement } from "./formInput";
+import { HTMLFormBoxElement, HTMLFormBoxStatusMessageElement } from "./formScript";
+import { HTMLFormToggleElement } from "./formToggle";
 
 declare global {
     interface HTMLElementTagNameMap {

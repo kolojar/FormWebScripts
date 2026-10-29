@@ -112,7 +112,15 @@ export function FormatDateForDateTimeLocalInput(date) {
 export function ConvertDateTimeToUTC_SQL(date) {
     return date.toISOString().slice(0, 19).replace('T', ' ');
 }
-export function validateEmail(email) {
+export function ValidateEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+export function GenerateRandomColor() {
+    const colorLetters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+        color += colorLetters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
 //# sourceMappingURL=sharedScripts.js.map

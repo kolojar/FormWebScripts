@@ -1,4 +1,6 @@
-import { GlobalLanguageManager, HTMLFormInputElement, HTMLFormToggleElement, MakeElementDraggable, SendToast } from "./formScript.js";
+import { HTMLFormInputElement } from "./formInput.js";
+import { GlobalLanguageManager, MakeElementDraggable, SendToast } from "./formScript.js";
+import { HTMLFormToggleElement } from "./formToggle.js";
 import { ContainsText, GeneratePassword } from "./sharedScripts.js";
 export var FormDialogStyle;
 (function (FormDialogStyle) {
