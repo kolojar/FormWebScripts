@@ -635,12 +635,12 @@ export class FormDialogManager {
                 onCloseEvent(value);
             }
         }, [
-            new FormDialogButton("left", "error", () => {
+            new FormDialogButton(settings.switchYesNoButtons == true ? "right" : "left", settings.switchYesNoButtons == true ? "ok" : "error", () => {
                 return GlobalLanguageManager.Translate("dialog.btnNo", "No");
             }, false, true),
-            new FormDialogButton("right", "ok", () => {
+            new FormDialogButton(settings.switchYesNoButtons == true ? "left" : "right", settings.switchYesNoButtons == true ? "error" : "ok", () => {
                 return GlobalLanguageManager.Translate("dialog.btnYes", "Yes");
-            }, true),
+            }, true)
         ], settings);
     }
     /**

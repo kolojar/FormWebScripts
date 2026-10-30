@@ -105,6 +105,11 @@ export type FormDialogSettings<T> = {
    * Shoud use min and max values as len limits
    */
   useMinMaxAsLen?: boolean;
+
+  /**
+   * Should yes button be red and on left and no green and on right
+   */
+  switchYesNoButtons?: boolean
 };
 
 export class FormDialog<T> {
@@ -771,22 +776,22 @@ export class FormDialogManager {
       },
       [
         new FormDialogButton(
-          "left",
-          "error",
+          settings.switchYesNoButtons == true ? "right" : "left",
+          settings.switchYesNoButtons == true ? "ok" : "error",
           () => {
             return GlobalLanguageManager.Translate("dialog.btnNo", "No");
           },
           false,
           true,
         ),
-        new FormDialogButton(
-          "right",
-          "ok",
-          () => {
-            return GlobalLanguageManager.Translate("dialog.btnYes", "Yes");
-          },
-          true,
-        ),
+         new FormDialogButton(
+           settings.switchYesNoButtons == true ? "left" : "right",
+            settings.switchYesNoButtons == true ? "error" : "ok",
+           () => {
+             return GlobalLanguageManager.Translate("dialog.btnYes", "Yes");
+           },
+           true,
+         )
       ],
       settings,
     );
