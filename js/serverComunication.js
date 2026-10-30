@@ -191,15 +191,19 @@ export function SendPOSTMessageToServer(url, message, responceFunc) {
 Sends POST request to server
 */
 export function SendPOSTDataToServer(url, data, responceFunc) {
-    console.log("Sending request...");
+    SendRequestDataToServer(url, "POST", data, responceFunc);
+}
+/*
+Sends request to server
+*/
+export function SendRequestDataToServer(url, method, data = null, responceFunc) {
     //Create request
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
+    xhr.open(method, url);
     //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
         const responce = xhr.responseText;
-        console.log(responce);
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
             if (responceFunc != null) {
@@ -225,12 +229,18 @@ export async function SendPOSTMessageToServerAsync(url, message) {
     });
 }
 /*
+Sends request to server async
+*/
+export async function SendRequestDataToServerAsync(url, method, data = null) {
+    return new Promise(resolve => {
+        SendRequestDataToServer(url, method, data, (ok, responce) => { resolve([ok, responce]); });
+    });
+}
+/*
 Sends POST request to server async
 */
 export async function SendPOSTDataToServerAsync(url, data) {
-    return new Promise(resolve => {
-        SendPOSTDataToServer(url, data, (ok, responce) => { resolve([ok, responce]); });
-    });
+    return SendRequestDataToServerAsync(url, "POST", data);
 }
 //export function UnpackStandard(message: string): [string, any] {
 //    if (message == null) {

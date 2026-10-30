@@ -358,6 +358,10 @@ export class FormDialogManager {
           image = "!filter";
           break;
         }
+        case "search": {
+          image = "!filter";
+          break;
+        }
         default: {
           image = "textfields32.svg";
           break;
@@ -385,6 +389,7 @@ export class FormDialogManager {
                 dialog.inputElement.setOptions([...dialog.settings.selectValues.keys()])
             }*/
       dialog.inputElement.type = "search-realtime";
+      dialog.inputElement.icon = "!filter";
       dialog.inputElement.addEventListener("search", () => {
         if (dialog.checkboxesHolder == null) {
           return;
@@ -657,8 +662,17 @@ export class FormDialogManager {
         }
       }
     }
+
     //Open dialog
+    if (dialog.style == FormDialogStyle.CheckBoxSelect) {
+      (dialog.inputElement as HTMLFormInputElement).input.readOnly = true;
+    }
     dialog.element.showModal();
+    if (dialog.style == FormDialogStyle.CheckBoxSelect) {
+      setTimeout(() => {
+        (dialog.inputElement as HTMLFormInputElement).input.readOnly = false;
+      }, 1);
+    }
     dialog.element.scroll({ top: 0, behavior: "instant" });
     return true;
   }

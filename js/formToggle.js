@@ -15,6 +15,7 @@ export class HTMLFormToggleElement extends HTMLElement {
         this.labelBeforeElement = document.createElement("label");
         this.holder = document.createElement("label");
         this.input = document.createElement("input");
+        this.input.readOnly = true;
         this.slider = document.createElement("span");
         this.labelAfterElement = document.createElement("label");
         //Add classes

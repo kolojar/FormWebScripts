@@ -214,17 +214,21 @@ export function SendPOSTMessageToServer(url: string, message: string, responceFu
 Sends POST request to server
 */
 export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: XHRServerResponceFunc | null) {
-    console.log("Sending request...");
+  SendRequestDataToServer(url,"POST",data,responceFunc)
+}
 
+/*
+Sends request to server
+*/
+export function SendRequestDataToServer(url: string, method: string, data: FormData|null = null, responceFunc: XHRServerResponceFunc | null) {
     //Create request
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
+    xhr.open(method, url);
     //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
 
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
         const responce = xhr.responseText
-        console.log(responce);
         if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 201)) {
             //console.log(JSON.parse(xhr.responseText));
             if (responceFunc != null) {
@@ -245,19 +249,26 @@ export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: 
 /*
 Sends POST request to server async
 */
-export async function SendPOSTMessageToServerAsync(url: string, message: string): Promise<[ok: boolean,responce: string]> { 
+export async function SendPOSTMessageToServerAsync(url: string, message: string): Promise<[ok: boolean,responce: string]> {
     return new Promise<[boolean,string]>(resolve => {
         SendPOSTMessageToServer(url,message,(ok,responce) => {resolve([ok,responce])})
     })
 }
 
 /*
+Sends request to server async
+*/
+export async function SendRequestDataToServerAsync(url: string,method: string, data: FormData|null = null): Promise<[ok: boolean,responce: string]> {
+    return new Promise<[boolean,string]>(resolve => {
+        SendRequestDataToServer(url,method,data,(ok,responce) => {resolve([ok,responce])})
+    })
+}
+
+/*
 Sends POST request to server async
 */
-export async function SendPOSTDataToServerAsync(url: string, data: FormData): Promise<[ok: boolean,responce: string]> { 
-    return new Promise<[boolean,string]>(resolve => {
-        SendPOSTDataToServer(url,data,(ok,responce) => {resolve([ok,responce])})
-    })
+export async function SendPOSTDataToServerAsync(url: string, data: FormData): Promise<[ok: boolean,responce: string]> {
+    return SendRequestDataToServerAsync(url,"POST",data)
 }
 
 //export function UnpackStandard(message: string): [string, any] {
