@@ -123,4 +123,7 @@ export function GenerateRandomColor() {
     }
     return color;
 }
+export function Sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 //# sourceMappingURL=sharedScripts.js.map

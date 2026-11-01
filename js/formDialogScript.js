@@ -198,7 +198,7 @@ export class FormDialogManager {
         //Content
         const content = document.createElement("div");
         if (dialog.style == FormDialogStyle.Wait || dialog.style == FormDialogStyle.Progress) {
-            content.classList.add("puslatingEffectFull");
+            //content.classList.add("puslatingEffectFull");
         }
         content.innerHTML = dialog.content;
         dialog.holder.appendChild(content);

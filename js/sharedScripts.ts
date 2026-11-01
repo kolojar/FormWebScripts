@@ -141,3 +141,7 @@ export function GenerateRandomColor(): string {
 	}
 	return color;
 }
+
+export function Sleep(ms: number): Promise<unknown> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
