@@ -823,7 +823,7 @@ export class HTMLFormInputElement extends HTMLElement {
         return this.input.multiple;
     }
     set multiple(multiple) {
-        this.multiple = multiple;
+        this.input.multiple = multiple;
     }
     /**
      * Sets date and time in valid format for input

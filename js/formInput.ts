@@ -858,7 +858,7 @@ export class HTMLFormInputElement extends HTMLElement {
 	}
 
 	public set multiple(multiple: boolean) {
-		this.multiple = multiple;
+		this.input.multiple = multiple;
   }
 
   /**
