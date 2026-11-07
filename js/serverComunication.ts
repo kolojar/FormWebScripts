@@ -268,17 +268,17 @@ export async function SendPOSTMessageToServerAsync(url: string, message: string)
 /*
 Sends request to server async
 */
-export async function SendRequestDataToServerAsync(url: string,method: string, data: FormData|null = null): Promise<[ok: boolean,responce: string]> {
+export async function SendRequestDataToServerAsync(url: string,method: string, data: FormData|null = null,progressFunc: XHRServerProgressFunc | null = null): Promise<[ok: boolean,responce: string]> {
     return new Promise<[boolean,string]>(resolve => {
-        SendRequestDataToServer(url,method,data,(ok,responce) => {resolve([ok,responce])})
+        SendRequestDataToServer(url,method,data,(ok,responce) => {resolve([ok,responce])},progressFunc)
     })
 }
 
 /*
 Sends POST request to server async
 */
-export async function SendPOSTDataToServerAsync(url: string, data: FormData): Promise<[ok: boolean,responce: string]> {
-    return SendRequestDataToServerAsync(url,"POST",data)
+export async function SendPOSTDataToServerAsync(url: string, data: FormData,progressFunc: XHRServerProgressFunc | null = null): Promise<[ok: boolean,responce: string]> {
+    return SendRequestDataToServerAsync(url,"POST",data,progressFunc)
 }
 
 //export function UnpackStandard(message: string): [string, any] {
