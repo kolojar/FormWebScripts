@@ -178,6 +178,8 @@ export class WebSocketConnection {
 
 export type XHRServerResponceFunc = (ok: boolean, message: string) => void
 
+export type XHRServerProgressFunc = (percent: number, loaded: number, total: number) => void
+
 /*
 Sends POST request to server
 */
@@ -213,18 +215,26 @@ export function SendPOSTMessageToServer(url: string, message: string, responceFu
 /*
 Sends POST request to server
 */
-export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: XHRServerResponceFunc | null) {
-  SendRequestDataToServer(url,"POST",data,responceFunc)
+export function SendPOSTDataToServer(url: string, data: FormData, responceFunc: XHRServerResponceFunc | null, progressFunc: XHRServerProgressFunc | null = null) {
+  SendRequestDataToServer(url,"POST",data,responceFunc,progressFunc)
 }
 
 /*
 Sends request to server
 */
-export function SendRequestDataToServer(url: string, method: string, data: FormData|null = null, responceFunc: XHRServerResponceFunc | null) {
+export function SendRequestDataToServer(url: string, method: string, data: FormData|null = null, responceFunc: XHRServerResponceFunc | null,  progressFunc: XHRServerProgressFunc | null = null) {
     //Create request
     const xhr = new XMLHttpRequest();
     xhr.open(method, url);
     //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
+  if (progressFunc != null) {
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        progressFunc(percent, event.loaded, event.total);
+      }
+    };
+  }
 
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {

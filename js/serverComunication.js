@@ -190,17 +190,25 @@ export function SendPOSTMessageToServer(url, message, responceFunc) {
 /*
 Sends POST request to server
 */
-export function SendPOSTDataToServer(url, data, responceFunc) {
-    SendRequestDataToServer(url, "POST", data, responceFunc);
+export function SendPOSTDataToServer(url, data, responceFunc, progressFunc = null) {
+    SendRequestDataToServer(url, "POST", data, responceFunc, progressFunc);
 }
 /*
 Sends request to server
 */
-export function SendRequestDataToServer(url, method, data = null, responceFunc) {
+export function SendRequestDataToServer(url, method, data = null, responceFunc, progressFunc = null) {
     //Create request
     const xhr = new XMLHttpRequest();
     xhr.open(method, url);
     //xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
+    if (progressFunc != null) {
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                progressFunc(percent, event.loaded, event.total);
+            }
+        };
+    }
     //Get responce (lots of time none)
     xhr.addEventListener("load", () => {
         const responce = xhr.responseText;
