@@ -220,6 +220,9 @@ export class FormDialogManager {
             dialog.inputElement.addEventListener("mousedown", (ev) => {
                 ev.stopImmediatePropagation();
             });
+            if (dialog.settings.inputFieldId != null) {
+                dialog.inputElement.id = dialog.settings.inputFieldId;
+            }
             if (dialog.style == FormDialogStyle.Entry) {
                 dialog.inputElement.type = dialog.settings.entryType;
             }

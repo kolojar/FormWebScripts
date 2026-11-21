@@ -110,6 +110,11 @@ export type FormDialogSettings<T> = {
    * Should yes button be red and on left and no green and on right
    */
   switchYesNoButtons?: boolean
+
+  /**
+   * Input field will get specific ID
+   */
+  inputFieldId?: string
 };
 
 export class FormDialog<T> {
@@ -333,6 +338,9 @@ export class FormDialogManager {
       dialog.inputElement.addEventListener("mousedown", (ev: MouseEvent) => {
         ev.stopImmediatePropagation();
       });
+      if (dialog.settings.inputFieldId != null) {
+        dialog.inputElement.id = dialog.settings.inputFieldId
+      }
       if (dialog.style == FormDialogStyle.Entry) {
         dialog.inputElement.type = dialog.settings.entryType as HTMLFormInputType;
       } else {
