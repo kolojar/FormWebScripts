@@ -149,3 +149,14 @@ export function Sleep(ms: number): Promise<unknown> {
 export function IsCallable<T>(value: T | (() => T) | (() => Promise<T>)): value is (() => T) | (() => Promise<T>) {
   return typeof value === "function";
 }
+
+export function FormatDateTimeStringsToLocalDatetime(className: string) {
+  //Get all elements
+  for (const element of document.getElementsByClassName(className)) {
+    const date = new Date(element.innerHTML);
+    console.log(element.innerHTML, date)
+    if (!Number.isNaN(date.getTime())) {
+      element.innerHTML = date.toLocaleString()
+    }
+  }
+}

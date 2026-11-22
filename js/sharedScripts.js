@@ -129,4 +129,14 @@ export function Sleep(ms) {
 export function IsCallable(value) {
     return typeof value === "function";
 }
+export function FormatDateTimeStringsToLocalDatetime(className) {
+    //Get all elements
+    for (const element of document.getElementsByClassName(className)) {
+        const date = new Date(element.innerHTML);
+        console.log(element.innerHTML, date);
+        if (!Number.isNaN(date.getTime())) {
+            element.innerHTML = date.toLocaleString();
+        }
+    }
+}
 //# sourceMappingURL=sharedScripts.js.map

@@ -447,10 +447,10 @@ export class FormDialogManager {
             if (dialog == null || dialog == undefined) {
                 return Promise.resolve(true);
             }
-            if (dialog.style == FormDialogStyle.Select && !isCancel) {
+            if ((dialog.style == FormDialogStyle.Select || dialog.style == FormDialogStyle.Entry) && !isCancel) {
                 const [_a, valid, _b] = await dialog.inputElement.validate();
                 if (!valid) {
-                    SendToast(dialog.title, "Pole obsahuje neplatnou hodnotu.", "error");
+                    SendToast(dialog.title, GlobalLanguageManager.Translate("formInput.invalidValue", "Invalid value."), "error");
                     return Promise.resolve(false);
                 }
             }
