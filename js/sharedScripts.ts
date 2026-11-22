@@ -145,3 +145,7 @@ export function GenerateRandomColor(): string {
 export function Sleep(ms: number): Promise<unknown> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+export function IsCallable<T>(value: T | (() => T) | (() => Promise<T>)): value is (() => T) | (() => Promise<T>) {
+  return typeof value === "function";
+}

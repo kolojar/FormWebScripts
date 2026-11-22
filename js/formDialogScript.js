@@ -1,7 +1,7 @@
 import { HTMLFormInputElement } from "./formInput.js";
 import { GlobalLanguageManager, MakeElementDraggable, SendToast } from "./formScript.js";
 import { HTMLFormToggleElement } from "./formToggle.js";
-import { ContainsText, GeneratePassword } from "./sharedScripts.js";
+import { ContainsText, GeneratePassword, IsCallable } from "./sharedScripts.js";
 export var FormDialogStyle;
 (function (FormDialogStyle) {
     FormDialogStyle[FormDialogStyle["Normal"] = 0] = "Normal";
@@ -15,13 +15,15 @@ export var FormDialogStyle;
  * Class for button in dialog
  */
 export class FormDialogButton {
-    constructor(location, color, text, valueOnClick, isCancel = false) {
+    constructor(location, color, text, valueOnClick, isCancel = false, doClose = true) {
         this.isCancel = false;
+        this.doClose = true;
         this.location = location;
         this.color = color;
         this.valueOnClick = valueOnClick;
         this.text = text;
         this.isCancel = isCancel;
+        this.doClose = doClose;
     }
 }
 export class FormDialog {
@@ -66,7 +68,7 @@ export class FormDialog {
  */
 class FormDialogTemplate {
     constructor(title, content, escapeCloseValue, style, onCloseEvent, buttons, settings = {}) {
-        var _c, _d, _e, _f, _g;
+        var _c, _d, _e, _f, _g, _h;
         this.element = null;
         this.holder = null;
         this.titleElement = null;
@@ -87,8 +89,9 @@ class FormDialogTemplate {
         this.settings.entryType = (_c = this.settings.entryType) !== null && _c !== void 0 ? _c : "text";
         this.settings.progressLines = (_d = this.settings.progressLines) !== null && _d !== void 0 ? _d : 0;
         this.settings.blockOpenOver = (_e = this.settings.blockOpenOver) !== null && _e !== void 0 ? _e : true;
-        this.settings.openOverOthers = (_f = this.settings.openOverOthers) !== null && _f !== void 0 ? _f : true;
-        this.settings.placeholder = (_g = this.settings.placeholder) !== null && _g !== void 0 ? _g : "";
+        this.settings.forceOpenOver = (_f = this.settings.forceOpenOver) !== null && _f !== void 0 ? _f : false;
+        this.settings.openOverOthers = (_g = this.settings.openOverOthers) !== null && _g !== void 0 ? _g : true;
+        this.settings.placeholder = (_h = this.settings.placeholder) !== null && _h !== void 0 ? _h : "";
         this.draggableElement = null;
         this.progressLines = [];
     }
@@ -157,12 +160,12 @@ export class FormDialogManager {
             return false;
         }
         //Sort out invalid openings
-        if (this.blockOpenOver) {
+        if (this.blockOpenOver && dialog.settings.forceOpenOver != true) {
             this.dialogs.push(dialog);
             console.log("Dialog waiting - blocked open over");
             return true;
         }
-        if (this.opened.length > 0 && !dialog.settings.openOverOthers) {
+        if (this.opened.length > 0 && !dialog.settings.openOverOthers && dialog.settings.forceOpenOver != true) {
             this.dialogs.push(dialog);
             console.log("Dialog waiting - other opened");
             return true;
@@ -532,11 +535,26 @@ export class FormDialogManager {
                 }
                 button.onclick = async () => {
                     var _c;
-                    if (!(await closeDialog(dialog.buttons[i].isCancel))) {
+                    if (dialog.buttons[i].doClose && !(await closeDialog(dialog.buttons[i].isCancel))) {
                         return;
                     }
                     if (dialog.onCloseEvent != null) {
-                        dialog.onCloseEvent(i, (_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick);
+                        let valueOnClick = (_c = dialog.buttons[i]) === null || _c === void 0 ? void 0 : _c.valueOnClick;
+                        let value;
+                        if (IsCallable(valueOnClick)) {
+                            value = await valueOnClick();
+                        }
+                        else {
+                            value = valueOnClick;
+                        }
+                        if (dialog.buttons[i].doClose) {
+                            dialog.onCloseEvent(i, value);
+                        }
+                        else {
+                            if (dialog.style == FormDialogStyle.Entry) {
+                                dialog.inputElement.value = value;
+                            }
+                        }
                     }
                 };
                 if (((_r = dialog.buttons[i]) === null || _r === void 0 ? void 0 : _r.location) == "left") {
@@ -594,13 +612,14 @@ export class FormDialogManager {
         settings.entryType = entryType;
         const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.Entry, (btn, value) => {
             if (!onCloseEvent != null) {
-                if (btn == 1) {
-                    onCloseEvent(dialog === null || dialog === void 0 ? void 0 : dialog.GetInputValue());
-                    return;
-                }
                 onCloseEvent(value);
             }
-        }, [new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue), new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), null)], settings);
+        }, [
+            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), () => {
+                return dialog === null || dialog === void 0 ? void 0 : dialog.GetInputValue();
+            }),
+        ], settings);
         return dialog;
     }
     /**
@@ -643,7 +662,7 @@ export class FormDialogManager {
             }, false, true),
             new FormDialogButton(settings.switchYesNoButtons == true ? "left" : "right", settings.switchYesNoButtons == true ? "error" : "ok", () => {
                 return GlobalLanguageManager.Translate("dialog.btnYes", "Yes");
-            }, true)
+            }, true),
         ], settings);
     }
     /**
@@ -664,10 +683,6 @@ export class FormDialogManager {
         settings.selectValues = selectValues;
         const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.Select, (btn, value) => {
             if (!onCloseEvent != null) {
-                if (btn == 1) {
-                    onCloseEvent(dialog === null || dialog === void 0 ? void 0 : dialog.GetInputValue());
-                    return;
-                }
                 onCloseEvent(value);
             }
         }, [
@@ -676,7 +691,9 @@ export class FormDialogManager {
             }, cancelValue, true),
             new FormDialogButton("right", "ok", () => {
                 return GlobalLanguageManager.Translate("dialog.btnOK", "OK");
-            }, null),
+            }, () => {
+                return dialog === null || dialog === void 0 ? void 0 : dialog.GetInputValue();
+            }),
         ], settings);
         return dialog;
     }
@@ -730,22 +747,7 @@ export class FormDialogManager {
     ShowCheckboxSelect(title, content, cancelValue, onCloseEvent, checkboxSelectValues, settings = {}) {
         settings.checkboxSelectValues = checkboxSelectValues;
         const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.CheckBoxSelect, (btn, value) => {
-            var _c;
             if (!onCloseEvent != null) {
-                if (btn == 1) {
-                    const children = dialog === null || dialog === void 0 ? void 0 : dialog.GetCheckboxHolderChildren();
-                    if (children != undefined) {
-                        const values = [];
-                        for (const element of children) {
-                            const toggle = element;
-                            if (toggle.checked) {
-                                values.push((_c = checkboxSelectValues.get(toggle.value)) === null || _c === void 0 ? void 0 : _c.value);
-                            }
-                        }
-                        onCloseEvent(values);
-                        return;
-                    }
-                }
                 onCloseEvent(value);
             }
         }, [
@@ -754,7 +756,20 @@ export class FormDialogManager {
             }, cancelValue, true),
             new FormDialogButton("right", "ok", () => {
                 return GlobalLanguageManager.Translate("dialog.btnOK", "OK");
-            }, null),
+            }, () => {
+                var _c;
+                const children = dialog === null || dialog === void 0 ? void 0 : dialog.GetCheckboxHolderChildren();
+                const values = [];
+                if (children != undefined) {
+                    for (const element of children) {
+                        const toggle = element;
+                        if (toggle.checked) {
+                            values.push((_c = checkboxSelectValues.get(toggle.value)) === null || _c === void 0 ? void 0 : _c.value);
+                        }
+                    }
+                }
+                return values;
+            }),
         ], settings);
         return dialog;
     }
@@ -866,6 +881,116 @@ export class FormDialogManager {
             if (this.ShowCheckboxSelect(title, content, cancelValue, (value) => {
                 resolve(value);
             }, checkboxSelectValues, settings) == null) {
+                resolve(null);
+            }
+        });
+    }
+    /**
+     * Opens radio select (allowing selecting one using radio), build over ShowCheckboxSelect
+     * @param title Title of dialog
+     * @param content Content HTML before select field
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param checkboxSelectValues Values for selection, key is display value, value is returned, overwrites settings.checkboxSelectValues
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry (searchbar)
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Dialog or null
+     */
+    ShowRadioSelect(title, content, cancelValue, onCloseEvent, checkboxSelectValues, settings = {}) {
+        settings.checkboxSelectMinCount = 1;
+        settings.checkboxSelectMaxCount = 1;
+        return this.ShowCheckboxSelect(title, content, cancelValue, (values) => {
+            if (onCloseEvent != null) {
+                if (Array.isArray(values)) {
+                    onCloseEvent(values[0]);
+                }
+                else {
+                    onCloseEvent(values);
+                }
+            }
+        }, checkboxSelectValues, settings);
+    }
+    /**
+     * Opens radio select (allowing selecting one using radio), build over ShowCheckboxSelect
+     * @param title Title of dialog
+     * @param content Content HTML before select field
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param checkboxSelectValues Values for selection, key is display value, value is returned, overwrites settings.checkboxSelectValues
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry (searchbar)
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @returns Selected value, one (cancel) value or null on failure
+     */
+    ShowRadioSelectAsync(title, content, cancelValue, checkboxSelectValues, settings = {}) {
+        return new Promise((resolve) => {
+            if (this.ShowRadioSelect(title, content, cancelValue, (value) => {
+                resolve(value);
+            }, checkboxSelectValues, settings) == null) {
+                resolve(null);
+            }
+        });
+    }
+    /**
+     * Shows new password prompt
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @argument settings.selectValues Hinting values for entry, key is display value, value is returned
+     * @returns Dialog or null
+     */
+    ShowNewPasswordPrompt(title, content, cancelValue, onCloseEvent, settings = {}) {
+        settings.entryType = "password";
+        const dialog = this.ShowDialog(title, content, cancelValue, FormDialogStyle.Entry, (btn, value) => {
+            if (!onCloseEvent != null) {
+                onCloseEvent(value);
+            }
+        }, [
+            new FormDialogButton("left", "error", GlobalLanguageManager.Translate("dialog.btnCancel", "Cancel"), cancelValue),
+            new FormDialogButton("right", "ok", GlobalLanguageManager.Translate("dialog.btnOK", "OK"), () => {
+                return dialog === null || dialog === void 0 ? void 0 : dialog.GetInputValue();
+            }),
+            new FormDialogButton("center", "info", GlobalLanguageManager.Translate("dialog.btnGeneratePassword", "Generate password"), async () => {
+                //Show len dialog
+                const len = await GlobalDialogManager.ShowPromptAsync(GlobalLanguageManager.Translate("dialog.textGetPasswordLen", "Get password length"), GlobalLanguageManager.Translate("dialog.textGetPasswordLen", "Enter password length"), null, "number", { openOverOthers: true, blockOpenOver: true, forceOpenOver: true, min: "0" });
+                if (len === null) {
+                    return "";
+                }
+                return GeneratePassword(len, true, true);
+            }, false, false),
+        ], settings);
+        return dialog;
+    }
+    /**
+     * Shows new password prompt
+     * @param title Title of dialog
+     * @param content Content HTML before entry
+     * @param cancelValue Value returned on cancel
+     * @param onCloseEvent Event fired on close
+     * @param settings More settings, not required:
+     * @argument settings.openOverOthers If dialog can open over others
+     * @argument settings.blockOpenOver If dialog blocks others dialogs from opening over this one
+     * @argument settings.placeholder Placeholder for entry
+     * @argument settings.allowSelect Allow selection of text in dialog
+     * @argument settings.selectValues Hinting values for entry, key is display value, value is returned
+     * @returns Password or null
+     */
+    ShowNewPasswordPromptAsync(title, content, cancelValue, settings = {}) {
+        return new Promise((resolve) => {
+            if (this.ShowNewPasswordPrompt(title, content, cancelValue, (value) => {
+                resolve(value);
+            }, settings) == null) {
                 resolve(null);
             }
         });

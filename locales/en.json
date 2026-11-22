@@ -15,5 +15,7 @@
     "dialog.selectAll": "Select all",
     "formToggle.min": "You have to choose at least {x} option(s).",
     "formToggle.max": "You can choose up to {x} option(s).",
-    "formInput.invalidValue": "Invalid value"
+    "formInput.invalidValue": "Invalid value",
+    "dialog.textGetPasswordLen": "Enter password length",
+    "dialog.btnGeneratePassword": "Generate password"
 }

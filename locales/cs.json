@@ -15,5 +15,7 @@
     "dialog.selectAll": "Vybrat vše",
     "formToggle.min": "Musíte vybrat minimálně {x} pole.",
     "formToggle.max": "Můžete vybrat maximálně {x} pole.",
-    "formInput.invalidValue": "Neplatná hodnota"
+    "formInput.invalidValue": "Neplatná hodnota",
+    "dialog.textGetPasswordLen": "Zadejte délku hesla",
+    "dialog.btnGeneratePassword": "Vygenerovat heslo"
 }

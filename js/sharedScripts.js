@@ -126,4 +126,7 @@ export function GenerateRandomColor() {
 export function Sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+export function IsCallable(value) {
+    return typeof value === "function";
+}
 //# sourceMappingURL=sharedScripts.js.map
